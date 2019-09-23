@@ -32,7 +32,7 @@
 &lt;ol&gt;
 &lt;li&gt;&lt;p&gt;Julia does not look like a &lt;em&gt;radically&lt;/em&gt; new programming language to me. Rather, it appears to combine many of the best and most modern aspects of language design in order to support &lt;em&gt;productive scientific programming&lt;/em&gt;. I would us like to understand the &lt;strong&gt;&lt;em&gt;main paradigms&lt;/em&gt;&lt;/strong&gt; in Julia so that we can judge where and when it would be the most effective choice for research work.&lt;/p&gt;&lt;/li&gt;
 
-&lt;li&gt;&lt;p&gt;As a component of overall productivity, I care about language &lt;strong&gt;&lt;em&gt;performance&lt;/em&gt;&lt;/strong&gt; in both interactive and parallel/distributed settings. I would like us to put &lt;a href=&#34;TODO&#34; target=&#34;_blank&#34;&gt;Julia speed claims&lt;/a&gt; to the test.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;As a component of overall productivity, I care about language &lt;strong&gt;&lt;em&gt;performance&lt;/em&gt;&lt;/strong&gt; in both interactive and parallel/distributed settings. I would like us to put &lt;a href=&#34;https://julialang.org/benchmarks/&#34; target=&#34;_blank&#34;&gt;Julia speed claims&lt;/a&gt; to the test.&lt;/p&gt;&lt;/li&gt;
 
 &lt;li&gt;&lt;p&gt;Julia is still quite new (v1.0 just shipped in 2018) and good study material is a little hard to come by. We could look at some existing open-source tools for &lt;strong&gt;&lt;em&gt;operations research and machine learning&lt;/em&gt;&lt;/strong&gt; as examples of working Julia projects, and perhaps prototype a few of our own in the process.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
