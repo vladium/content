@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tutorials and Studies | vladium</title>
+    <link>/tutorials/</link>
+      <atom:link href="/tutorials/index.xml" rel="self" type="application/rss+xml" />
+    <description>Tutorials and Studies</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© vladium 2019</copyright>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>Tutorials and Studies</title>
+      <link>/tutorials/</link>
+    </image>
+    
+    <item>
+      <title>Study Julia with me</title>
+      <link>/tutorials/study_julia_with_me/</link>
+      <pubDate>Sat, 21 Sep 2019 00:00:00 +0000</pubDate>
+      <guid>/tutorials/study_julia_with_me/</guid>
+      <description>
+
+&lt;h2 id=&#34;introduction-and-welcome&#34;&gt;Introduction and welcome&lt;/h2&gt;
+
+&lt;p&gt;Greetings! I work on stochastic optimization and simulation problems and happen to have extensive background in both &amp;ldquo;high productivity&amp;rdquo; and &amp;ldquo;high performance&amp;rdquo; programming languages. I had my first peek at Julia a few years ago. The concept was great and the new language certainly had a real, uncrowded niche to fit in: something that promised to be &lt;em&gt;both&lt;/em&gt; high productivity and high performance. But right then it was brand new and the ecosystem just didn&amp;rsquo;t feel organized or stable enough for &amp;ldquo;production use&amp;rdquo;.&lt;/p&gt;
+
+&lt;p&gt;A few years later, Julia v1.0 milestone has been achieved, there is an IDE or two, university classes are abandoning MATLAB/octave in favor of Julia, and new Julia books are coming out with increasing frequency. Now it appears to me that Julia is much more mature and ready for another, more thorough, examination. For this reason, I invite you to take part in this study group.&lt;/p&gt;
+
+&lt;h2 id=&#34;purpose&#34;&gt;Purpose&lt;/h2&gt;
+
+&lt;p&gt;What do we plan to get out of this study? A couple of things, at least:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Julia does not look like a &lt;em&gt;radically&lt;/em&gt; new programming language to me. Rather, it appears to combine many of the best and most modern aspects of language design in order to support &lt;em&gt;productive scientific programming&lt;/em&gt;. I would us like to understand the &lt;strong&gt;&lt;em&gt;main paradigms&lt;/em&gt;&lt;/strong&gt; in Julia so that we can judge where and when it would be the most effective choice for research work.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;As a component of overall productivity, I care about language &lt;strong&gt;&lt;em&gt;performance&lt;/em&gt;&lt;/strong&gt; in both interactive and parallel/distributed settings. I would like us to put &lt;a href=&#34;TODO&#34; target=&#34;_blank&#34;&gt;Julia speed claims&lt;/a&gt; to the test.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Julia is still quite new (v1.0 just shipped in 2018) and good study material is a little hard to come by. We could look at some existing open-source tools for &lt;strong&gt;&lt;em&gt;operations research and machine learning&lt;/em&gt;&lt;/strong&gt; as examples of working Julia projects, and perhaps prototype a few of our own in the process.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;study-agenda-open-to-feedback&#34;&gt;Study agenda (open to feedback)&lt;/h2&gt;
+
+&lt;p&gt;At a high level, these are the topics I&amp;rsquo;d like us to cover (not necessarily in the order shown and subject to feedback and suggestions from the group):&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;language design and capabilities: core types, generic functions/multiple dispatch, metaprogramming, parallel/distributed programming, etc.&lt;/li&gt;
+&lt;li&gt;general purpose tooling: IDE, plotting, debugging, profiling, etc.&lt;/li&gt;
+&lt;li&gt;native support and tools for OR, ML, and statistics: dataframes, built-in linear algebra, JuMP, JuML, etc.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Each week I would us like to formulate a &lt;em&gt;practical&lt;/em&gt; question or need and investigate a solution (or lack thereof) within the Julia ecosystem, at which point I will document it here. Some example questions off the top of my head are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;What&amp;rsquo;s this I hear about Julia being &amp;ldquo;fast&amp;rdquo;? How does it compare with Python or R? How about C++?&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;I have an optimization problem that needs a custom algorithm not covered by off-the-shelf solvers &amp;ndash; should I consider a (pure) Julia implementation? Conversely, I have a bog-standard LP model &amp;ndash; is there still an advantage to working with it in Julia?&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;How do I develop a Julia package, or, more generally, have workflow that&amp;rsquo;s good for research that I want to share with colleagues?&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Julia is marketed as good for parallel computing &amp;ndash; what&amp;rsquo;s the reality of this claim?&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&amp;hellip; and so on, as long as there are useful topics to explore.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;prerequisites&#34;&gt;Prerequisites&lt;/h2&gt;
+
+&lt;p&gt;I think it would be helpful to have some experience with one or two of the languages that Julia aims to (will eventually?) replace: R, Matlab, Python, and others of that ilk. Julia also borrows from JIT&amp;rsquo;ed languages like Java, so familiarity with those can only help.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

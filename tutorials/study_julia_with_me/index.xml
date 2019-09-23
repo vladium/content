@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Study Julia with me | vladium</title>
+    <link>/tutorials/study_julia_with_me/</link>
+      <atom:link href="/tutorials/study_julia_with_me/index.xml" rel="self" type="application/rss+xml" />
+    <description>Study Julia with me</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© vladium 2019</copyright><lastBuildDate>Sat, 21 Sep 2019 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>Study Julia with me</title>
+      <link>/tutorials/study_julia_with_me/</link>
+    </image>
+    
+    <item>
+      <title></title>
+      <link>/tutorials/study_julia_with_me/structure/</link>
+      <pubDate>Mon, 23 Sep 2019 00:00:00 +0000</pubDate>
+      <guid>/tutorials/study_julia_with_me/structure/</guid>
+      <description>
+
+
+&lt;div id=&#34;suggested-software-setup&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Suggested software setup&lt;/h2&gt;
+&lt;p&gt;I have been using Julia successfully on MacOS and Linux (Fedora). I would suggest starting with a &lt;a href=&#34;https://juliacomputing.com/products/juliapro&#34;&gt;JuliaPro installer&lt;/a&gt; for this study. I’ve kept a few notes about my install process:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;I’ve been using &lt;a href=&#34;https://pkg.juliacomputing.com/juliapro/1201/JuliaPro-1.2.0-1_build-51.sh&#34;&gt;v1.2&lt;/a&gt; so far, both REPL and Juno “IDE”.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;on MacOS you will need to have XCode tools installed, see the &lt;a href=&#34;https://juliacomputing.com/docs/JuliaProQuickStartGuideMac_1.2.0-1.pdf&#34;&gt;install guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;on Linux the &lt;a href=&#34;https://juliacomputing.com/docs/JuliaProQuickStartGuideLinux_1.2.0-1.pdf&#34;&gt;install guide&lt;/a&gt; mentions needing these libs (install via yum/dnf/apt-get/etc, I only needed to add xclip):&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;  xclip
+  libXScrnSaver&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;apparently, starting with v1.2 what’s included appears to have changed: to minimize the installer size the “curated list of packages” are no longer part of the download itself. They can be installed via the usual &lt;code&gt;Pgk&lt;/code&gt; commands. What’s different for “curated” packages is that the install will be configured to use Julia Computing’s github repo&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; so that only the supposedly tested versions are available. Using Julia Computing’s repo will require authenticating to get their token. Keep this in mind if you plan to play with packages outside of their supported list.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;for REPL you can use Juno’s “REPL” tab. I find that doing so gives me experince similar to that of RStudio (a good thing):&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;juno_begin.png&#34; style=&#34;width:80.0%&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;if you prefer not to rely on the IDE (which is not that great right now) and use REPL (which is very functional), you can use &lt;code&gt;julia&lt;/code&gt; binary from your JuliaPro distribution:
+&lt;ul&gt;
+&lt;li&gt;MacOS: &lt;code&gt;/Applications/JuliaPro-&amp;lt;version&amp;gt;.app/Contents/Resources/julia/Contents/Resources/julia/bin/julia&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Linux: &lt;code&gt;&amp;lt;install dir&amp;gt;/Julia/bin/julia&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;faqs-and-tips-for-fellow-julia-explorers&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;FAQs and tips for fellow Julia explorers&lt;/h2&gt;
+&lt;div id=&#34;general&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;General&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;it is recommended to keep work code in a module (which could be as simple as keeping it inside a &lt;code&gt;module MyModule ... end&lt;/code&gt; block) even for one-off stuff: onlike, say, R or Python Julia currently &lt;a href=&#34;https://hshindo.github.io/julia-doc-ja-v0.6/manual/faq.html#How-can-I-modify-the-declaration-of-a-type-in-my-session?-1&#34;&gt;does not allow rebinding names of functions and types without restarting the REPL session&lt;/a&gt;. It seems to have gone through various iterations of solutions for this workflow need, but right now re-&lt;code&gt;include()&lt;/code&gt;ing a module seems to be what’s guaranteed to work.
+&lt;ul&gt;
+&lt;li&gt;there is also &lt;a href=&#34;https://github.com/timholy/Revise.jl&#34;&gt;Revise.jl&lt;/a&gt; (which I haven’t tried yet)&lt;/li&gt;
+&lt;li&gt;see &lt;a href=&#34;https://discourse.julialang.org/t/removal-of-workspace-and-a-way-to-clear-variables/11107/8&#34;&gt;this discussion&lt;/a&gt; for more color&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;another reason for working inside a module is because code will run faster (it will be JIT’ed sooner)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;juno&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Juno&lt;/h3&gt;
+&lt;p&gt;Juno is basically a few packages inside &lt;a href=&#34;https://atom.io&#34;&gt;Atom&lt;/a&gt;. It is not quite an “IDE” at this point. &lt;a href=&#34;https://code.visualstudio.com/&#34;&gt;Visual Studio Code&lt;/a&gt; might be a reasonable alternative, but in my experiments VSC had trouble with Julia v1.2. Juno comes bundled with a &lt;code&gt;julia&lt;/code&gt; build from the same entity.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;as a result of being a collection of Atom packages, some things you might want to tweak in the UI could be dispersed over multiple places. For example:
+&lt;ul&gt;
+&lt;li&gt;“Julia Client” package:
+&lt;ul&gt;
+&lt;li&gt;you may wish to choose positioning of various tabs: Workspace, Documentation, Plots, REPL, etc&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;“tool-bar” package:
+&lt;ul&gt;
+&lt;li&gt;you might want to opt for smaller icons&lt;/li&gt;
+&lt;li&gt;“Always Open Existing”, “Auto Reveal” settings might be of interest&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;books-other-resources&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Books, other resources&lt;/h2&gt;
+&lt;p&gt;There is a constantly growing list of resources at &lt;a href=&#34;https://julialang.org/learning/&#34;&gt;https://julialang.org&lt;/a&gt;. I list below some resources that I’ve either used myself or that seemed to stand out from the rest.&lt;/p&gt;
+&lt;div id=&#34;books-about-or-based-on-julia-v1.0&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;books about or based on Julia v1.0+:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://benlauwens.github.io/ThinkJulia.jl/latest/book.html&#34;&gt;“Think Julia: How to Think Like a Computer Scientist”&lt;/a&gt; by Ben Lauwens and Allen Downey.
+&lt;ul&gt;
+&lt;li&gt;this is the only “pure computer science” Julia book in my list.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://ucidatascienceinitiative.github.io/IntroToJulia/&#34;&gt;“A Deep Introduction to Julia for Data Science and Scientific Computing”&lt;/a&gt; by Chris Rackauckas.
+&lt;ul&gt;
+&lt;li&gt;the author is very active in Julia space; this material seems very good (if you’re ok with notebooks).&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/h-Klok/StatsWithJuliaBook&#34;&gt;“Statistics with Julia: Fundamentals for Data Science, Machine Learning and Artificial Intelligence”&lt;/a&gt; by Hayden Klok and Yoni Nazarathy (&lt;a href=&#34;https://web.archive.org/web/20190902200758/https://people.smp.uq.edu.au/YoniNazarathy/julia-stats/StatisticsWithJulia.pdf&#34;&gt;2019 draft PDF free from the authors&lt;/a&gt;).
+&lt;ul&gt;
+&lt;li&gt;based on a statistics course at the University of Queensland; Julia crash course in Chapter 1 and a handy “How-to” in Appendix A.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.amazon.com/Algorithms-Optimization-Press-Mykel-Kochenderfer/dp/0262039427/&#34;&gt;“Algorithms for Optimization”&lt;/a&gt; by Mykel Kochenderfer and Tim Wheeler.
+&lt;ul&gt;
+&lt;li&gt;advanced undergrad/grad course textbook on optimization; get it if optimization is your thing; Appendix A is a decent compact Julia intro.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.chkwon.net/julia/&#34;&gt;“Julia Programming for Operations Research, 2nd ed.”&lt;/a&gt; by Changhyun Kwon.
+&lt;ul&gt;
+&lt;li&gt;another Julia crash course chapter; JuMP workship.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;reference-docs&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;reference docs:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.julialang.org/en/v1/&#34;&gt;“Julia 1.2 Documentation”&lt;/a&gt;, HTML and PDF.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://en.wikibooks.org/wiki/Introducing_Julia&#34;&gt;“Introducing Julia”&lt;/a&gt; Wikibook, a nice complement to the language manual.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;video-lectures-talks&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;video lectures, talks:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://youtu.be/8h8rQyEpiZA&#34;&gt;“Intro to Julia 1.0”&lt;/a&gt; by Jane Herriman of Julia Computing.&lt;/li&gt;
+&lt;li&gt;Videos from &lt;a href=&#34;https://www.youtube.com/user/JuliaLanguage/videos?view=0&amp;amp;sort=dd&amp;amp;flow=grid&#34;&gt;JuliaCon 2019&lt;/a&gt; – some good stuff, particularly by Julia creators.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;online-practice&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;online practice:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.juliabox.com&#34;&gt;Julia Box&lt;/a&gt; from Julia Computing has a free plan.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://exercism.io/tracks/julia&#34;&gt;Julia exercism track&lt;/a&gt; looks like a good &lt;a href=&#34;https://exercism.io/tracks/julia/exercises&#34;&gt;collection of exercises&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;Julia packages are maintained as git repos.&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

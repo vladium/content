@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>/tutorials/study_julia_with_me/</loc>
+    <lastmod>2019-09-21T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tutorials/study_julia_with_me/structure/</loc>
+    <lastmod>2019-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2019-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/vlad/</loc>
+  </url>
+  
+  <url>
+    <loc>/authors/</loc>
+  </url>
+  
+  <url>
+    <loc>/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+  </url>
+  
+  <url>
+    <loc>/publication_types/</loc>
+  </url>
+  
+  <url>
+    <loc>/publication/</loc>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+  </url>
+  
+  <url>
+    <loc>/tutorials/</loc>
+  </url>
+  
+</urlset>

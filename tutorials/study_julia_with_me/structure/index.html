@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.4.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Vlad Roubtsov">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Suggested software setup I have been using Julia successfully on MacOS and Linux (Fedora). I would suggest starting with a JuliaPro installer for this study. I’ve kept a few notes about my install process:
+ I’ve been using v1.2 so far, both REPL and Juno “IDE”.
+ on MacOS you will need to have XCode tools installed, see the install guide on Linux the install guide mentions needing these libs (install via yum/dnf/apt-get/etc, I only needed to add xclip):   xclip libXScrnSaver apparently, starting with v1.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/tutorials/study_julia_with_me/structure/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#3f51b5">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.927aeb2a835eaf9005c1499820562316.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.c95fc539390309404839f86767b13568.css">
+  
+
+  
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/tutorials/study_julia_with_me/structure/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="vladium">
+  <meta property="og:url" content="/tutorials/study_julia_with_me/structure/">
+  <meta property="og:title" content=" | vladium">
+  <meta property="og:description" content="Suggested software setup I have been using Julia successfully on MacOS and Linux (Fedora). I would suggest starting with a JuliaPro installer for this study. I’ve kept a few notes about my install process:
+ I’ve been using v1.2 so far, both REPL and Juno “IDE”.
+ on MacOS you will need to have XCode tools installed, see the install guide on Linux the install guide mentions needing these libs (install via yum/dnf/apt-get/etc, I only needed to add xclip):   xclip libXScrnSaver apparently, starting with v1."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2019-09-23T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2019-09-23T00:00:00&#43;00:00">
+  
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title> | vladium</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">vladium</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link  active" href="/tutorials/"><span>tutorials</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  
+
+<div class="container-fluid docs">
+  <div class="row flex-xl-nowrap">
+    <div class="col-12 col-md-3 col-xl-2 docs-sidebar">
+      
+
+
+
+
+
+<form class="docs-search d-flex align-items-center">
+  <button class="btn docs-toggle d-md-none p-0 mr-3" type="button" data-toggle="collapse" data-target="#docs-nav" aria-controls="docs-nav" aria-expanded="false" aria-label="Toggle section navigation">
+    <span><i class="fas fa-bars"></i></span>
+  </button>
+
+  
+  <input name="q" type="search" class="form-control" placeholder="Search..." autocomplete="off">
+  
+</form>
+
+<nav class="collapse docs-links" id="docs-nav">
+  
+  
+  <div class="docs-toc-item">
+    <a class="docs-toc-link" href="/tutorials/study_julia_with_me/">About</a>
+    <ul class="nav docs-sidenav">
+      
+      <li class="active">
+        <a href="/tutorials/study_julia_with_me/structure/">Setup, FAQ, resources</a>
+      </li>
+      
+    </ul>
+    
+
+  </div>
+  
+  
+</nav>
+
+    </div>
+
+    
+
+    <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 docs-content" role="main">
+
+      <article class="article" itemscope itemtype="http://schema.org/Article">
+
+        <div class="docs-article-container">
+          <h1 itemprop="name"></h1>
+
+          <div class="article-style" itemprop="articleBody">
+            
+
+
+<div id="suggested-software-setup" class="section level2">
+<h2>Suggested software setup</h2>
+<p>I have been using Julia successfully on MacOS and Linux (Fedora). I would suggest starting with a <a href="https://juliacomputing.com/products/juliapro">JuliaPro installer</a> for this study. I’ve kept a few notes about my install process:</p>
+<ul>
+<li><p>I’ve been using <a href="https://pkg.juliacomputing.com/juliapro/1201/JuliaPro-1.2.0-1_build-51.sh">v1.2</a> so far, both REPL and Juno “IDE”.</p>
+<ul>
+<li>on MacOS you will need to have XCode tools installed, see the <a href="https://juliacomputing.com/docs/JuliaProQuickStartGuideMac_1.2.0-1.pdf">install guide</a></li>
+<li>on Linux the <a href="https://juliacomputing.com/docs/JuliaProQuickStartGuideLinux_1.2.0-1.pdf">install guide</a> mentions needing these libs (install via yum/dnf/apt-get/etc, I only needed to add xclip):</li>
+</ul>
+<pre><code>  xclip
+  libXScrnSaver</code></pre></li>
+<li><p>apparently, starting with v1.2 what’s included appears to have changed: to minimize the installer size the “curated list of packages” are no longer part of the download itself. They can be installed via the usual <code>Pgk</code> commands. What’s different for “curated” packages is that the install will be configured to use Julia Computing’s github repo<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> so that only the supposedly tested versions are available. Using Julia Computing’s repo will require authenticating to get their token. Keep this in mind if you plan to play with packages outside of their supported list.</p></li>
+<li><p>for REPL you can use Juno’s “REPL” tab. I find that doing so gives me experince similar to that of RStudio (a good thing):</p></li>
+</ul>
+<p><img src="juno_begin.png" style="width:80.0%" /></p>
+<ul>
+<li>if you prefer not to rely on the IDE (which is not that great right now) and use REPL (which is very functional), you can use <code>julia</code> binary from your JuliaPro distribution:
+<ul>
+<li>MacOS: <code>/Applications/JuliaPro-&lt;version&gt;.app/Contents/Resources/julia/Contents/Resources/julia/bin/julia</code></li>
+<li>Linux: <code>&lt;install dir&gt;/Julia/bin/julia</code></li>
+</ul></li>
+</ul>
+</div>
+<div id="faqs-and-tips-for-fellow-julia-explorers" class="section level2">
+<h2>FAQs and tips for fellow Julia explorers</h2>
+<div id="general" class="section level3">
+<h3>General</h3>
+<ul>
+<li>it is recommended to keep work code in a module (which could be as simple as keeping it inside a <code>module MyModule ... end</code> block) even for one-off stuff: onlike, say, R or Python Julia currently <a href="https://hshindo.github.io/julia-doc-ja-v0.6/manual/faq.html#How-can-I-modify-the-declaration-of-a-type-in-my-session?-1">does not allow rebinding names of functions and types without restarting the REPL session</a>. It seems to have gone through various iterations of solutions for this workflow need, but right now re-<code>include()</code>ing a module seems to be what’s guaranteed to work.
+<ul>
+<li>there is also <a href="https://github.com/timholy/Revise.jl">Revise.jl</a> (which I haven’t tried yet)</li>
+<li>see <a href="https://discourse.julialang.org/t/removal-of-workspace-and-a-way-to-clear-variables/11107/8">this discussion</a> for more color</li>
+</ul></li>
+<li>another reason for working inside a module is because code will run faster (it will be JIT’ed sooner)</li>
+</ul>
+</div>
+<div id="juno" class="section level3">
+<h3>Juno</h3>
+<p>Juno is basically a few packages inside <a href="https://atom.io">Atom</a>. It is not quite an “IDE” at this point. <a href="https://code.visualstudio.com/">Visual Studio Code</a> might be a reasonable alternative, but in my experiments VSC had trouble with Julia v1.2. Juno comes bundled with a <code>julia</code> build from the same entity.</p>
+<ul>
+<li>as a result of being a collection of Atom packages, some things you might want to tweak in the UI could be dispersed over multiple places. For example:
+<ul>
+<li>“Julia Client” package:
+<ul>
+<li>you may wish to choose positioning of various tabs: Workspace, Documentation, Plots, REPL, etc</li>
+</ul></li>
+<li>“tool-bar” package:
+<ul>
+<li>you might want to opt for smaller icons</li>
+<li>“Always Open Existing”, “Auto Reveal” settings might be of interest</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="books-other-resources" class="section level2">
+<h2>Books, other resources</h2>
+<p>There is a constantly growing list of resources at <a href="https://julialang.org/learning/">https://julialang.org</a>. I list below some resources that I’ve either used myself or that seemed to stand out from the rest.</p>
+<div id="books-about-or-based-on-julia-v1.0" class="section level4">
+<h4>books about or based on Julia v1.0+:</h4>
+<ul>
+<li><a href="https://benlauwens.github.io/ThinkJulia.jl/latest/book.html">“Think Julia: How to Think Like a Computer Scientist”</a> by Ben Lauwens and Allen Downey.
+<ul>
+<li>this is the only “pure computer science” Julia book in my list.</li>
+</ul></li>
+<li><a href="http://ucidatascienceinitiative.github.io/IntroToJulia/">“A Deep Introduction to Julia for Data Science and Scientific Computing”</a> by Chris Rackauckas.
+<ul>
+<li>the author is very active in Julia space; this material seems very good (if you’re ok with notebooks).</li>
+</ul></li>
+<li><a href="https://github.com/h-Klok/StatsWithJuliaBook">“Statistics with Julia: Fundamentals for Data Science, Machine Learning and Artificial Intelligence”</a> by Hayden Klok and Yoni Nazarathy (<a href="https://web.archive.org/web/20190902200758/https://people.smp.uq.edu.au/YoniNazarathy/julia-stats/StatisticsWithJulia.pdf">2019 draft PDF free from the authors</a>).
+<ul>
+<li>based on a statistics course at the University of Queensland; Julia crash course in Chapter 1 and a handy “How-to” in Appendix A.</li>
+</ul></li>
+<li><a href="https://www.amazon.com/Algorithms-Optimization-Press-Mykel-Kochenderfer/dp/0262039427/">“Algorithms for Optimization”</a> by Mykel Kochenderfer and Tim Wheeler.
+<ul>
+<li>advanced undergrad/grad course textbook on optimization; get it if optimization is your thing; Appendix A is a decent compact Julia intro.</li>
+</ul></li>
+<li><a href="http://www.chkwon.net/julia/">“Julia Programming for Operations Research, 2nd ed.”</a> by Changhyun Kwon.
+<ul>
+<li>another Julia crash course chapter; JuMP workship.</li>
+</ul></li>
+</ul>
+</div>
+<div id="reference-docs" class="section level4">
+<h4>reference docs:</h4>
+<ul>
+<li><a href="https://docs.julialang.org/en/v1/">“Julia 1.2 Documentation”</a>, HTML and PDF.</li>
+<li><a href="https://en.wikibooks.org/wiki/Introducing_Julia">“Introducing Julia”</a> Wikibook, a nice complement to the language manual.</li>
+</ul>
+</div>
+<div id="video-lectures-talks" class="section level4">
+<h4>video lectures, talks:</h4>
+<ul>
+<li><a href="https://youtu.be/8h8rQyEpiZA">“Intro to Julia 1.0”</a> by Jane Herriman of Julia Computing.</li>
+<li>Videos from <a href="https://www.youtube.com/user/JuliaLanguage/videos?view=0&amp;sort=dd&amp;flow=grid">JuliaCon 2019</a> – some good stuff, particularly by Julia creators.</li>
+</ul>
+</div>
+<div id="online-practice" class="section level4">
+<h4>online practice:</h4>
+<ul>
+<li><a href="https://www.juliabox.com">Julia Box</a> from Julia Computing has a free plan.</li>
+<li><a href="https://exercism.io/tracks/julia">Julia exercism track</a> looks like a good <a href="https://exercism.io/tracks/julia/exercises">collection of exercises</a></li>
+</ul>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Julia packages are maintained as git repos.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
+
+          </div>
+
+          
+
+
+
+          
+          <div class="article-widget">
+            
+<div class="post-nav">
+  
+  
+</div>
+
+          </div>
+          
+        </div>
+
+        <div class="body-footer">
+          <p>Last updated on Sep 23, 2019</p>
+
+          
+
+
+          
+
+        </div>
+
+      </article>
+
+      <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    &copy; vladium 2019  
+
+    
+  </p>
+</footer>
+
+
+    </main>
+  </div>
+</div>
+
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/cpp.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.1/anchor.min.js" integrity="sha256-pB/deHc9CGfFpJRjC43imB29Rse8tak+5eXqntO94ck=" crossorigin="anonymous"></script>
+    <script>
+      anchors.add();
+    </script>
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.16bbb3750feb7244c9bc409a5a4fe678.js"></script>
+
+    
+
+
+
+
+
+
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
