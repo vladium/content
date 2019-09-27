@@ -48,7 +48,7 @@
 &lt;div id=&#34;general&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;General&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;it is recommended to keep work code in a module (which could be as simple as keeping it inside a &lt;code&gt;module MyModule ... end&lt;/code&gt; block) even for one-off stuff: onlike, say, R or Python Julia currently &lt;a href=&#34;https://hshindo.github.io/julia-doc-ja-v0.6/manual/faq.html#How-can-I-modify-the-declaration-of-a-type-in-my-session?-1&#34;&gt;does not allow rebinding names of functions and types without restarting the REPL session&lt;/a&gt;. It seems to have gone through various iterations of solutions for this workflow need, but right now re-&lt;code&gt;include()&lt;/code&gt;ing a module seems to be what’s guaranteed to work.
+&lt;li&gt;if you’re working with custom types, it is recommended to keep work code in a module (which could be as simple as keeping it inside a &lt;code&gt;module MyModule ... end&lt;/code&gt; block) even for one-off stuff: onlike, say, R or Python Julia currently &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/faq/#How-can-I-modify-the-declaration-of-a-type-in-my-session?-1&#34;&gt;does not allow updating type definitions within a session without restarting it&lt;/a&gt;. It seems to have gone through several iterations of addressing this workflow need, but right now re-&lt;code&gt;include()&lt;/code&gt;ing a module seems to be what’s guaranteed to work.
 &lt;ul&gt;
 &lt;li&gt;there is also &lt;a href=&#34;https://github.com/timholy/Revise.jl&#34;&gt;Revise.jl&lt;/a&gt; (which I haven’t tried yet)&lt;/li&gt;
 &lt;li&gt;see &lt;a href=&#34;https://discourse.julialang.org/t/removal-of-workspace-and-a-way-to-clear-variables/11107/8&#34;&gt;this discussion&lt;/a&gt; for more color&lt;/li&gt;

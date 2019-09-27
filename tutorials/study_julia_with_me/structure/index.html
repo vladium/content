@@ -382,7 +382,7 @@
 <div id="general" class="section level3">
 <h3>General</h3>
 <ul>
-<li>it is recommended to keep work code in a module (which could be as simple as keeping it inside a <code>module MyModule ... end</code> block) even for one-off stuff: onlike, say, R or Python Julia currently <a href="https://hshindo.github.io/julia-doc-ja-v0.6/manual/faq.html#How-can-I-modify-the-declaration-of-a-type-in-my-session?-1">does not allow rebinding names of functions and types without restarting the REPL session</a>. It seems to have gone through various iterations of solutions for this workflow need, but right now re-<code>include()</code>ing a module seems to be what’s guaranteed to work.
+<li>if you’re working with custom types, it is recommended to keep work code in a module (which could be as simple as keeping it inside a <code>module MyModule ... end</code> block) even for one-off stuff: onlike, say, R or Python Julia currently <a href="https://docs.julialang.org/en/v1/manual/faq/#How-can-I-modify-the-declaration-of-a-type-in-my-session?-1">does not allow updating type definitions within a session without restarting it</a>. It seems to have gone through several iterations of addressing this workflow need, but right now re-<code>include()</code>ing a module seems to be what’s guaranteed to work.
 <ul>
 <li>there is also <a href="https://github.com/timholy/Revise.jl">Revise.jl</a> (which I haven’t tried yet)</li>
 <li>see <a href="https://discourse.julialang.org/t/removal-of-workspace-and-a-way-to-clear-variables/11107/8">this discussion</a> for more color</li>
