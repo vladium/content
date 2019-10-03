@@ -96,10 +96,6 @@
 &lt;ul&gt;
 &lt;li&gt;based on a statistics course at the University of Queensland; Julia crash course in Chapter 1 and a handy “How-to” in Appendix A.&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.amazon.com/Algorithms-Optimization-Press-Mykel-Kochenderfer/dp/0262039427/&#34;&gt;“Algorithms for Optimization”&lt;/a&gt; by Mykel Kochenderfer and Tim Wheeler.
-&lt;ul&gt;
-&lt;li&gt;advanced undergrad/grad course textbook on optimization; get it if optimization is your thing; Appendix A is a decent compact Julia intro.&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.chkwon.net/julia/&#34;&gt;“Julia Programming for Operations Research, 2nd ed.”&lt;/a&gt; by Changhyun Kwon.
 &lt;ul&gt;
 &lt;li&gt;another Julia crash course chapter; JuMP workship.&lt;/li&gt;
@@ -132,6 +128,271 @@
 &lt;hr /&gt;
 &lt;ol&gt;
 &lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;Julia packages are maintained as git repos.&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>How do you say &#34;0/1 knapsack&#34; in four languages?</title>
+      <link>/tutorials/study_julia_with_me/knapsack_benchmark/</link>
+      <pubDate>Thu, 12 Sep 2019 00:00:00 +0000</pubDate>
+      <guid>/tutorials/study_julia_with_me/knapsack_benchmark/</guid>
+      <description>
+
+
+&lt;p&gt;Every once in a while, you need to try an algorithm that’s “custom enough” that it must be coded directly in your “research language”. Perhaps the existing “high-performance” libs don’t support your desired variant or it’s too much setup work switching to another language just to prototype a quick one-off idea. This an instance of the &lt;a href=&#34;https://www.nature.com/articles/d41586-019-02310-3&#34;&gt;“two language problem”&lt;/a&gt; that’s been the reality of technical computing for decades.&lt;/p&gt;
+&lt;p&gt;Users of R, Python, and similar “high-productivity” environments know that native control flow constructs (for-loops, etc) in those languages kill performance unless they can be expressed in “vectorized” form. One big attraction of Julia to me is that it claims to fix this inconvenience. Let’s have a look.&lt;/p&gt;
+&lt;div id=&#34;preview&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Preview&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Julia, Python, Java, and C++ are compared for implementing the same iterative algorithm (knapsack solver) .&lt;/li&gt;
+&lt;li&gt;The implementation does virtually no memory allocation, so what’s being tested is the speed of looping and array access.&lt;/li&gt;
+&lt;li&gt;Julia is &lt;em&gt;fast&lt;/em&gt; (although not quite as fast as C++ or Java). Python, however, comes out looking &lt;em&gt;horribly slow&lt;/em&gt; by comparison.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;benchmark-problem&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Benchmark problem&lt;/h2&gt;
+&lt;p&gt;For a simple yet realistic test of performance let’s code a solution to the &lt;a href=&#34;https://en.wikipedia.org/wiki/Knapsack_problem#0/1_knapsack_problem&#34;&gt;0/1 knapsack&lt;/a&gt; problem. I am sure you’ve heard of it – it is a classic discrete optimization problem in its own right and shows up as a &lt;a href=&#34;https://en.wikipedia.org/wiki/List_of_knapsack_problems&#34;&gt;building block&lt;/a&gt; within many optimization algorithms.&lt;/p&gt;
+&lt;p&gt;As a reminder, the problem is to pack a knapsack of finite weight capacity with a chosen set of items of varying value so as to maximize the total packed value:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\begin{equation*}
+\begin{aligned}
+&amp;amp; \underset{x}{\text{maximize}}
+&amp;amp; &amp;amp; V = \sum_{i=1}^n v_i x_i \\
+&amp;amp; \text{subject to}
+&amp;amp; &amp;amp; \sum_{i=1}^n w_i x_i \leq W \\
+&amp;amp; &amp;amp; &amp;amp; x_i \in \{0,1\} \text{ for all } i \text{ in } \{1,\dots,n\}
+\end{aligned}
+\end{equation*}
+\]&lt;/span&gt;
+We have &lt;span class=&#34;math inline&#34;&gt;\(n\)&lt;/span&gt; items of integral&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; weights &lt;span class=&#34;math inline&#34;&gt;\(w_i &amp;gt; 0\)&lt;/span&gt; and value &lt;span class=&#34;math inline&#34;&gt;\(v_i\)&lt;/span&gt;. &lt;span class=&#34;math inline&#34;&gt;\(W\)&lt;/span&gt; is the knapsack weight capacity. Each item is either chosen or not, hence the “0/1” in the name.&lt;/p&gt;
+&lt;p&gt;Since all &lt;span class=&#34;math inline&#34;&gt;\(x_i\)&lt;/span&gt; are restricted to be binary (boolean), this is an integer linear problem with a search space size of &lt;span class=&#34;math inline&#34;&gt;\(2^n\)&lt;/span&gt;. It can be given to an MILP solver. But because of a simple nested structure the problem also has a straightforward dynamic programming (DP) solution that I can code in a few lines.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;dynamic-programming-algorithm&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Dynamic programming algorithm&lt;/h2&gt;
+&lt;p&gt;Assume the problem has been solved for all knapsack capacities up to some &lt;span class=&#34;math inline&#34;&gt;\(w\)&lt;/span&gt; while making use of only a subset of items &lt;span class=&#34;math inline&#34;&gt;\(1, \dots, j\)&lt;/span&gt;, and let &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; be the solution, i.e. the maximum achievable knapsack value. Now consider all smaller subproblems without item &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(V(w&amp;#39;, j-1)\)&lt;/span&gt; for all possible &lt;span class=&#34;math inline&#34;&gt;\(w&amp;#39;\)&lt;/span&gt;. &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(V(w&amp;#39;, j-1)\)&lt;/span&gt; are connected with a single “move” of looking at item &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; and deciding to either include it in the optimal selection for knapsack &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; or not:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;if including item &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; is a move that’s feasible (&lt;span class=&#34;math inline&#34;&gt;\(w_j \leq w\)&lt;/span&gt;) then &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; is the best of &lt;span class=&#34;math inline&#34;&gt;\(v_j + V(w&amp;#39;, j - 1)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(V(w&amp;#39;, j - 1)\)&lt;/span&gt; depending on whether the move is “optimal” (improves &lt;span class=&#34;math inline&#34;&gt;\(V\)&lt;/span&gt;) or not; in the former case &lt;span class=&#34;math inline&#34;&gt;\(w&amp;#39; = w - w_j\)&lt;/span&gt; and in the latter &lt;span class=&#34;math inline&#34;&gt;\(w&amp;#39; = w\)&lt;/span&gt;;&lt;/li&gt;
+&lt;li&gt;if including item &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; is not feasible (&lt;span class=&#34;math inline&#34;&gt;\(w_j &amp;gt; w\)&lt;/span&gt;) then &lt;span class=&#34;math inline&#34;&gt;\(V(w, j) = V(w&amp;#39;, j - 1)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(w&amp;#39; = w\)&lt;/span&gt;;&lt;/li&gt;
+&lt;li&gt;&lt;span class=&#34;math inline&#34;&gt;\(V(w, 1)\)&lt;/span&gt; is 0 or &lt;span class=&#34;math inline&#34;&gt;\(v_1\)&lt;/span&gt; depending on whether the first item fits within capacity &lt;span class=&#34;math inline&#34;&gt;\(w\)&lt;/span&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In other words, knapsack subproblems have a recurrent relationship for &lt;span class=&#34;math inline&#34;&gt;\(j &amp;gt; 1\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+  V(w, j) =
+  \left\{
+    \begin{array}{@{}ll@{}}
+      V(w , j - 1) &amp;amp; \text{if}\ w \lt w_j, \\
+      \max \big\{v_j + V(w - w_j, j - 1),V(w , j - 1)\big\} , &amp;amp; \text{otherwise} \\
+    \end{array}
+  \right.
+\]&lt;/span&gt;
+together with a boundary condition for &lt;span class=&#34;math inline&#34;&gt;\(j = 1\)&lt;/span&gt;
+&lt;span class=&#34;math display&#34;&gt;\[
+  V(w, 1) =
+  \left\{
+    \begin{array}{@{}ll@{}}
+      0 &amp;amp; \text{if}\ w \lt w_1, \\
+      v_1, &amp;amp; \text{otherwise} \\
+    \end{array}
+  \right.
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;(The above could be stated more compactly if &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; started at 0 and &lt;span class=&#34;math inline&#34;&gt;\(V(w,0)\)&lt;/span&gt; were defined as 0.)&lt;/p&gt;
+&lt;p&gt;To capture inputs into a problem instance, I will use an array of Julia &lt;code&gt;struct&lt;/code&gt;s. Although I could get away with a list or a tuple, I think a &lt;code&gt;struct&lt;/code&gt; makes for more readable example code:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;struct Item
+    value   ::Int64;
+    weight  ::Int64;
+end&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; is represented as a matrix (another first-class citizen in Julia), a non-recursive implementation would be to sweep the space of &lt;span class=&#34;math inline&#34;&gt;\(w\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; going from smaller to larger item sets:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function opt_value(W ::Int64, items ::Array{Item}) ::Int64
+    n = length(items)
+
+    # V[w,j] stores opt value achievable with capacity &amp;#39;w&amp;#39; and using items &amp;#39;1..j&amp;#39;:
+
+    V = Array{Int64}(undef, W, n) # W×n matrix with uninitialized storage
+
+    # initialize first column v[:, 1] to trivial single-item solutions:
+
+    V[:, 1] .= 0
+    V[items[1].weight:end, 1] .= items[1].value
+
+    # do a pass through remaining columns:
+
+    for j in 2 : n
+        itemⱼ = items[j]
+        for w in 1 : W
+            V_without_itemⱼ = V[w, j - 1]
+            V_allow_itemⱼ = (w &amp;lt; itemⱼ.weight
+                ? V_without_itemⱼ
+                : (itemⱼ.value + (w ≠ itemⱼ.weight ? V[w - itemⱼ.weight, j - 1] : 0)))
+            V[w, j] = max(V_allow_itemⱼ, V_without_itemⱼ)
+        end
+    end
+
+    return V[W, n]
+end&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That loop is almost a straightforward translation of my recurrence, although the body needs some extra edge condition checks. Note the familiar &lt;code&gt;?:&lt;/code&gt; syntax for ternary operator and some comforting exploitation of Julia’s support for Unicode math symbols.&lt;/p&gt;
+&lt;p&gt;This may not be the best bit of Julia code you’ll ever see, but I’ve literally just learned enough syntax for my first experiment here. One performance-related concession to Julia has already been included above by arranging to traverse &lt;span class=&#34;math inline&#34;&gt;\(V\)&lt;/span&gt; in column-major order. Yes, Julia opts for R/MATLAB/Fortran design choice here and that is not under end user control, as far as I can tell at this point. Right now, it does feel like R and yet awkwardly different from C++, which would be my production choice for this particular problem.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;an-obvious-improvement&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;An obvious improvement&lt;/h2&gt;
+&lt;p&gt;Notice also that I cheat a little and do not compute half of the solution, specifically the optimal &lt;span class=&#34;math inline&#34;&gt;\(x_i\)&lt;/span&gt;’s&lt;a href=&#34;#fn2&#34; class=&#34;footnote-ref&#34; id=&#34;fnref2&#34;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt;. This is to keep the experiment simple and focus on iterative performance only. However, since this means I don’t need to capture the optimal solution structure in &lt;span class=&#34;math inline&#34;&gt;\(V\)&lt;/span&gt; matrix, I don’t need to allocate it: it is sufficient to allocate a couple of buffers for columns &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(j-1\)&lt;/span&gt; and re-use them as needed:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function opt_value(W ::Int64, items ::Array{Item}) ::Int64
+    n = length(items)
+
+    V = zeros(Int64, W) # single column of size W, zero-initialized
+    V_prev = Array{Int64}(undef, W) # single column of size W, uninitialized storage
+
+    V[items[1].weight:end] .= items[1].value
+
+    for j in 2 : n
+        V, V_prev = V_prev, V
+        itemⱼ = items[j]
+        for w in 1 : W
+            V_without_itemⱼ = V_prev[w]
+            V_allow_itemⱼ = (w &amp;lt; itemⱼ.weight
+                ? V_without_itemⱼ
+                : (itemⱼ.value + (w ≠ itemⱼ.weight ? V_prev[w - itemⱼ.weight] : 0)))
+            V[w] = max(V_allow_itemⱼ, V_without_itemⱼ)
+        end
+    end
+
+    return V[W]
+end&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This version will now scale to quite large problem instances.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;algorithm-speed-julia-vs-python-vs-java-vs-c&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Algorithm speed: Julia vs Python vs Java vs C++&lt;/h2&gt;
+&lt;p&gt;To measure performance, I use the &lt;code&gt;@elapsed&lt;/code&gt; macro from Julia’s &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Base.@time&#34;&gt;family of &lt;code&gt;@time&lt;/code&gt; and friends&lt;/a&gt; with randomly constructed problem instances of different scale. Because Julia is JIT-based I need to be careful and do a few timing repeats after burning the very first measurement.&lt;/p&gt;
+&lt;p&gt;Actually, I’ll use the median of 5 repeats which is even more robust:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function run(repeats = 5)
+    @assert repeats &amp;gt; 1
+
+    times = zeros(Float64, repeats)
+    seed = 12345
+
+    for W in [5_000, 10_000, 20_000, 40_000, 80_000]
+        for repeat in 1 : repeats
+            spec = make_random_data(W, seed += 1)
+            times[repeat] = @elapsed opt_value(spec[1], spec[2])
+        end
+        sort!(times)
+        println(W, &amp;quot;, &amp;quot;, times[(repeats + 1) ÷ 2])
+    end
+end&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For the promised language shootout, I’ve implemented this same algorithm in three other languages: Python, Java, and C++. I event went as far as make sure that all “ports” used similar array data types and even the exact same random number generator for building the exact same random problem instances. To maintain consistency with statically typed languages (Java, C++), I ensure that value types used by the dynamic versions are 64-bit integers as much as possible – this required some minor contortions in Python.&lt;/p&gt;
+&lt;p&gt;Here’s the C++ version of &lt;code&gt;opt_value()&lt;/code&gt; (you can get all four language versions from &lt;a href=&#34;https://github.com/vladium/study_julia_with_me/tree/master/knapsack_benchmark&#34;&gt;this github repo&lt;/a&gt;, there is a single source file per language that’s trivial to compile and run):&lt;/p&gt;
+&lt;pre class=&#34;cpp&#34;&gt;&lt;code&gt;int64_t
+opt_value (int64_t const W, std::vector&amp;lt;item&amp;gt; const &amp;amp; items)
+{
+    auto const n = items.size ();
+
+    std::unique_ptr&amp;lt;int64_t []&amp;gt; const v_data { std::make_unique&amp;lt;int64_t []&amp;gt; (W) }; // &amp;quot;zeros&amp;quot;
+    std::unique_ptr&amp;lt;int64_t []&amp;gt; const v_prev_data { std::make_unique&amp;lt;int64_t []&amp;gt; (W) }; // &amp;quot;zeros&amp;quot;
+
+    int64_t * V { v_data.get () };
+    int64_t * V_prev { v_prev_data.get () };
+
+    for (int64_t w = items[0].weight; w &amp;lt;= W; ++ w)
+        V[w - 1] = items[0].value;
+
+    for (std::size_t j = 1; j &amp;lt; n; ++ j)
+    {
+        std::swap (V, V_prev);
+        item const &amp;amp; item { items [j] };
+        
+        for (int64_t w = 1; w &amp;lt;= W; ++ w)
+        {
+            auto const V_without_item_j = V_prev[w - 1];
+            auto const V_allow_item_j = (w &amp;lt; item.weight
+                ? V_without_item_j
+                : (item.value + (w != item.weight ? V_prev[w - 1 - item.weight] : 0)));
+
+            V[w - 1] = std::max(V_allow_item_j, V_without_item_j);
+         }
+    }
+
+    return V[W - 1];
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I’ve tried to keep the implementation consistent and idiomatic within each language. (It helps that my algorithm is basically a couple of nested loops without memory allocation, some arithmetic, and not much else.) All these implementations could in principle be tuned further using language-specific techniques, but that’s not my goal here.&lt;/p&gt;
+&lt;p&gt;Here is a snippet of calculation latency data for &lt;span class=&#34;math inline&#34;&gt;\(W=80000\)&lt;/span&gt;, captured on the exact same CPU:&lt;/p&gt;
+&lt;table style=&#39;width:100%;&#39;&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:center;&#34;&gt;
+lang
+&lt;/th&gt;
+&lt;th style=&#34;text-align:center;&#34;&gt;
+W
+&lt;/th&gt;
+&lt;th style=&#34;text-align:center;&#34;&gt;
+time (sec)
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+julia
+&lt;/td&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+80000
+&lt;/td&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+0.1135
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+python
+&lt;/td&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+80000
+&lt;/td&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+28.2094
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+java
+&lt;/td&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+80000
+&lt;/td&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+0.0781
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+c++
+&lt;/td&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+80000
+&lt;/td&gt;
+&lt;td style=&#34;text-align:center;&#34;&gt;
+0.0710
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Hmm. Perhaps you begin to suspect that Python is not going to win this. Here is a log-log plot of all data, for all &lt;span class=&#34;math inline&#34;&gt;\(W\)&lt;/span&gt;’s:&lt;/p&gt;
+&lt;div class=&#34;figure&#34; style=&#34;text-align: center&#34;&gt;&lt;span id=&#34;fig:fraction&#34;&gt;&lt;/span&gt;
+&lt;img src=&#34;/tutorials/study_julia_with_me/knapsack_benchmark_files/figure-html/fraction-1.png&#34; alt=&#34;Calculation time as a function of knapsack problem size. (Note that both axes use log scale.)&#34; width=&#34;75%&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 1: Calculation time as a function of knapsack problem size. (Note that both axes use log scale.)
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Julia is about 50% slower than either Java or C++. But it is Python that is the real laggard in the group: slower by &lt;strong&gt;more than 100x&lt;/strong&gt; across the entire range of tested problem sizes. Ouch!&lt;/p&gt;
+&lt;p&gt;Going back to the matrix version of the algorithm, you can see how the matrix is accessed predictably over &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; columns but somewhat randomly (in a data-depedent fashion) over &lt;span class=&#34;math inline&#34;&gt;\(w\)&lt;/span&gt; rows. There doesn’t seem to be a way to express the algorithm in linear algebra operations. This difficulty is retained in the optimized two-column-buffer version. The algorithm is short and simple but there just doesn’t seem to be a way to vectorize it so that it would be fast, say, in numpy. Massive underperformance of the Python version is the cost I pay for slow &lt;em&gt;interpretation&lt;/em&gt; of &lt;a href=&#34;https://opensource.com/article/18/4/introduction-python-bytecode&#34;&gt;Python bytecode&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;As for Julia, so far so good. I might just get used to the “no need to vectorize code to make it fast” lifestyle.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;Restricting weights to be integral is not crucial to my test here but could make the problem statement acceptable to more solver types.&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn2&#34;&gt;&lt;p&gt;Some might argue that &lt;span class=&#34;math inline&#34;&gt;\(x_i\)&lt;/span&gt;’s are in fact &lt;em&gt;more&lt;/em&gt; than half of the solution. Ok, so I cheat a lot.&lt;a href=&#34;#fnref2&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>

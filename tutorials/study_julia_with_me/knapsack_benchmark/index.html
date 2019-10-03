@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.4.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Vlad Roubtsov">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Every once in a while, you need to try an algorithm that’s “custom enough” that it must be coded directly in your “research language”. Perhaps the existing “high-performance” libs don’t support your desired variant or it’s too much setup work switching to another language just to prototype a quick one-off idea. This an instance of the “two language problem” that’s been the reality of technical computing for decades.
+Users of R, Python, and similar “high-productivity” environments know that native control flow constructs (for-loops, etc) in those languages kill performance unless they can be expressed in “vectorized” form.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/tutorials/study_julia_with_me/knapsack_benchmark/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#3f51b5">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.927aeb2a835eaf9005c1499820562316.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.c95fc539390309404839f86767b13568.css">
+  
+
+  
+  
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', 'UA-148582714-1', 'auto');
+      
+      ga('require', 'eventTracker');
+      ga('require', 'outboundLinkTracker');
+      ga('require', 'urlChangeTracker');
+      ga('send', 'pageview');
+    </script>
+    <script async src="https://www.google-analytics.com/analytics.js"></script>
+    
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/autotrack/2.4.1/autotrack.js" integrity="sha512-HUmooslVKj4m6OBu0OgzjXXr+QuFYy/k7eLI5jdeEy/F4RSgMn6XRWRGkFi5IFaFgy7uFTkegp3Z0XnJf3Jq+g==" crossorigin="anonymous"></script>
+    
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/tutorials/study_julia_with_me/knapsack_benchmark/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="vladium">
+  <meta property="og:url" content="/tutorials/study_julia_with_me/knapsack_benchmark/">
+  <meta property="og:title" content="How do you say &#34;0/1 knapsack&#34; in four languages? | vladium">
+  <meta property="og:description" content="Every once in a while, you need to try an algorithm that’s “custom enough” that it must be coded directly in your “research language”. Perhaps the existing “high-performance” libs don’t support your desired variant or it’s too much setup work switching to another language just to prototype a quick one-off idea. This an instance of the “two language problem” that’s been the reality of technical computing for decades.
+Users of R, Python, and similar “high-productivity” environments know that native control flow constructs (for-loops, etc) in those languages kill performance unless they can be expressed in “vectorized” form."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2019-09-12T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2019-09-12T00:00:00&#43;00:00">
+  
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>How do you say &#34;0/1 knapsack&#34; in four languages? | vladium</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">vladium</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link  active" href="/tutorials/"><span>tutorials</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  
+
+<div class="container-fluid docs">
+  <div class="row flex-xl-nowrap">
+    <div class="col-12 col-md-3 col-xl-2 docs-sidebar">
+      
+
+
+
+
+
+<form class="docs-search d-flex align-items-center">
+  <button class="btn docs-toggle d-md-none p-0 mr-3" type="button" data-toggle="collapse" data-target="#docs-nav" aria-controls="docs-nav" aria-expanded="false" aria-label="Toggle section navigation">
+    <span><i class="fas fa-bars"></i></span>
+  </button>
+
+  
+  <input name="q" type="search" class="form-control" placeholder="Search..." autocomplete="off">
+  
+</form>
+
+<nav class="collapse docs-links" id="docs-nav">
+  
+  
+  <div class="docs-toc-item">
+    <a class="docs-toc-link" href="/tutorials/study_julia_with_me/">About</a>
+    <ul class="nav docs-sidenav">
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/structure/">Setup, FAQ, resources</a>
+      </li>
+      
+      <li class="active">
+        <a href="/tutorials/study_julia_with_me/knapsack_benchmark/">Benchmark 1: iterative algorithm</a>
+      </li>
+      
+    </ul>
+    
+
+  </div>
+  
+  
+</nav>
+
+    </div>
+
+    
+
+    <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 docs-content" role="main">
+
+      <article class="article" itemscope itemtype="http://schema.org/Article">
+
+        <div class="docs-article-container">
+          <h1 itemprop="name">How do you say &#34;0/1 knapsack&#34; in four languages?</h1>
+
+          <div class="article-style" itemprop="articleBody">
+            
+
+
+<p>Every once in a while, you need to try an algorithm that’s “custom enough” that it must be coded directly in your “research language”. Perhaps the existing “high-performance” libs don’t support your desired variant or it’s too much setup work switching to another language just to prototype a quick one-off idea. This an instance of the <a href="https://www.nature.com/articles/d41586-019-02310-3">“two language problem”</a> that’s been the reality of technical computing for decades.</p>
+<p>Users of R, Python, and similar “high-productivity” environments know that native control flow constructs (for-loops, etc) in those languages kill performance unless they can be expressed in “vectorized” form. One big attraction of Julia to me is that it claims to fix this inconvenience. Let’s have a look.</p>
+<div id="preview" class="section level4">
+<h4>Preview</h4>
+<ul>
+<li>Julia, Python, Java, and C++ are compared for implementing the same iterative algorithm (knapsack solver) .</li>
+<li>The implementation does virtually no memory allocation, so what’s being tested is the speed of looping and array access.</li>
+<li>Julia is <em>fast</em> (although not quite as fast as C++ or Java). Python, however, comes out looking <em>horribly slow</em> by comparison.</li>
+</ul>
+</div>
+<div id="benchmark-problem" class="section level2">
+<h2>Benchmark problem</h2>
+<p>For a simple yet realistic test of performance let’s code a solution to the <a href="https://en.wikipedia.org/wiki/Knapsack_problem#0/1_knapsack_problem">0/1 knapsack</a> problem. I am sure you’ve heard of it – it is a classic discrete optimization problem in its own right and shows up as a <a href="https://en.wikipedia.org/wiki/List_of_knapsack_problems">building block</a> within many optimization algorithms.</p>
+<p>As a reminder, the problem is to pack a knapsack of finite weight capacity with a chosen set of items of varying value so as to maximize the total packed value:</p>
+<p><span class="math display">\[
+\begin{equation*}
+\begin{aligned}
+&amp; \underset{x}{\text{maximize}}
+&amp; &amp; V = \sum_{i=1}^n v_i x_i \\
+&amp; \text{subject to}
+&amp; &amp; \sum_{i=1}^n w_i x_i \leq W \\
+&amp; &amp; &amp; x_i \in \{0,1\} \text{ for all } i \text{ in } \{1,\dots,n\}
+\end{aligned}
+\end{equation*}
+\]</span>
+We have <span class="math inline">\(n\)</span> items of integral<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> weights <span class="math inline">\(w_i &gt; 0\)</span> and value <span class="math inline">\(v_i\)</span>. <span class="math inline">\(W\)</span> is the knapsack weight capacity. Each item is either chosen or not, hence the “0/1” in the name.</p>
+<p>Since all <span class="math inline">\(x_i\)</span> are restricted to be binary (boolean), this is an integer linear problem with a search space size of <span class="math inline">\(2^n\)</span>. It can be given to an MILP solver. But because of a simple nested structure the problem also has a straightforward dynamic programming (DP) solution that I can code in a few lines.</p>
+</div>
+<div id="dynamic-programming-algorithm" class="section level2">
+<h2>Dynamic programming algorithm</h2>
+<p>Assume the problem has been solved for all knapsack capacities up to some <span class="math inline">\(w\)</span> while making use of only a subset of items <span class="math inline">\(1, \dots, j\)</span>, and let <span class="math inline">\(V(w, j)\)</span> be the solution, i.e. the maximum achievable knapsack value. Now consider all smaller subproblems without item <span class="math inline">\(j\)</span>, <span class="math inline">\(V(w&#39;, j-1)\)</span> for all possible <span class="math inline">\(w&#39;\)</span>. <span class="math inline">\(V(w, j)\)</span> and <span class="math inline">\(V(w&#39;, j-1)\)</span> are connected with a single “move” of looking at item <span class="math inline">\(j\)</span> and deciding to either include it in the optimal selection for knapsack <span class="math inline">\(V(w, j)\)</span> or not:</p>
+<ul>
+<li>if including item <span class="math inline">\(j\)</span> is a move that’s feasible (<span class="math inline">\(w_j \leq w\)</span>) then <span class="math inline">\(V(w, j)\)</span> is the best of <span class="math inline">\(v_j + V(w&#39;, j - 1)\)</span> and <span class="math inline">\(V(w&#39;, j - 1)\)</span> depending on whether the move is “optimal” (improves <span class="math inline">\(V\)</span>) or not; in the former case <span class="math inline">\(w&#39; = w - w_j\)</span> and in the latter <span class="math inline">\(w&#39; = w\)</span>;</li>
+<li>if including item <span class="math inline">\(j\)</span> is not feasible (<span class="math inline">\(w_j &gt; w\)</span>) then <span class="math inline">\(V(w, j) = V(w&#39;, j - 1)\)</span> and <span class="math inline">\(w&#39; = w\)</span>;</li>
+<li><span class="math inline">\(V(w, 1)\)</span> is 0 or <span class="math inline">\(v_1\)</span> depending on whether the first item fits within capacity <span class="math inline">\(w\)</span>.</li>
+</ul>
+<p>In other words, knapsack subproblems have a recurrent relationship for <span class="math inline">\(j &gt; 1\)</span></p>
+<p><span class="math display">\[
+  V(w, j) =
+  \left\{
+    \begin{array}{@{}ll@{}}
+      V(w , j - 1) &amp; \text{if}\ w \lt w_j, \\
+      \max \big\{v_j + V(w - w_j, j - 1),V(w , j - 1)\big\} , &amp; \text{otherwise} \\
+    \end{array}
+  \right.
+\]</span>
+together with a boundary condition for <span class="math inline">\(j = 1\)</span>
+<span class="math display">\[
+  V(w, 1) =
+  \left\{
+    \begin{array}{@{}ll@{}}
+      0 &amp; \text{if}\ w \lt w_1, \\
+      v_1, &amp; \text{otherwise} \\
+    \end{array}
+  \right.
+\]</span></p>
+<p>(The above could be stated more compactly if <span class="math inline">\(j\)</span> started at 0 and <span class="math inline">\(V(w,0)\)</span> were defined as 0.)</p>
+<p>To capture inputs into a problem instance, I will use an array of Julia <code>struct</code>s. Although I could get away with a list or a tuple, I think a <code>struct</code> makes for more readable example code:</p>
+<pre class="julia"><code>struct Item
+    value   ::Int64;
+    weight  ::Int64;
+end</code></pre>
+<p>If <span class="math inline">\(V(w, j)\)</span> is represented as a matrix (another first-class citizen in Julia), a non-recursive implementation would be to sweep the space of <span class="math inline">\(w\)</span> and <span class="math inline">\(j\)</span> going from smaller to larger item sets:</p>
+<pre class="julia"><code>function opt_value(W ::Int64, items ::Array{Item}) ::Int64
+    n = length(items)
+
+    # V[w,j] stores opt value achievable with capacity &#39;w&#39; and using items &#39;1..j&#39;:
+
+    V = Array{Int64}(undef, W, n) # W×n matrix with uninitialized storage
+
+    # initialize first column v[:, 1] to trivial single-item solutions:
+
+    V[:, 1] .= 0
+    V[items[1].weight:end, 1] .= items[1].value
+
+    # do a pass through remaining columns:
+
+    for j in 2 : n
+        itemⱼ = items[j]
+        for w in 1 : W
+            V_without_itemⱼ = V[w, j - 1]
+            V_allow_itemⱼ = (w &lt; itemⱼ.weight
+                ? V_without_itemⱼ
+                : (itemⱼ.value + (w ≠ itemⱼ.weight ? V[w - itemⱼ.weight, j - 1] : 0)))
+            V[w, j] = max(V_allow_itemⱼ, V_without_itemⱼ)
+        end
+    end
+
+    return V[W, n]
+end</code></pre>
+<p>That loop is almost a straightforward translation of my recurrence, although the body needs some extra edge condition checks. Note the familiar <code>?:</code> syntax for ternary operator and some comforting exploitation of Julia’s support for Unicode math symbols.</p>
+<p>This may not be the best bit of Julia code you’ll ever see, but I’ve literally just learned enough syntax for my first experiment here. One performance-related concession to Julia has already been included above by arranging to traverse <span class="math inline">\(V\)</span> in column-major order. Yes, Julia opts for R/MATLAB/Fortran design choice here and that is not under end user control, as far as I can tell at this point. Right now, it does feel like R and yet awkwardly different from C++, which would be my production choice for this particular problem.</p>
+</div>
+<div id="an-obvious-improvement" class="section level2">
+<h2>An obvious improvement</h2>
+<p>Notice also that I cheat a little and do not compute half of the solution, specifically the optimal <span class="math inline">\(x_i\)</span>’s<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. This is to keep the experiment simple and focus on iterative performance only. However, since this means I don’t need to capture the optimal solution structure in <span class="math inline">\(V\)</span> matrix, I don’t need to allocate it: it is sufficient to allocate a couple of buffers for columns <span class="math inline">\(j\)</span> and <span class="math inline">\(j-1\)</span> and re-use them as needed:</p>
+<pre class="julia"><code>function opt_value(W ::Int64, items ::Array{Item}) ::Int64
+    n = length(items)
+
+    V = zeros(Int64, W) # single column of size W, zero-initialized
+    V_prev = Array{Int64}(undef, W) # single column of size W, uninitialized storage
+
+    V[items[1].weight:end] .= items[1].value
+
+    for j in 2 : n
+        V, V_prev = V_prev, V
+        itemⱼ = items[j]
+        for w in 1 : W
+            V_without_itemⱼ = V_prev[w]
+            V_allow_itemⱼ = (w &lt; itemⱼ.weight
+                ? V_without_itemⱼ
+                : (itemⱼ.value + (w ≠ itemⱼ.weight ? V_prev[w - itemⱼ.weight] : 0)))
+            V[w] = max(V_allow_itemⱼ, V_without_itemⱼ)
+        end
+    end
+
+    return V[W]
+end</code></pre>
+<p>This version will now scale to quite large problem instances.</p>
+</div>
+<div id="algorithm-speed-julia-vs-python-vs-java-vs-c" class="section level2">
+<h2>Algorithm speed: Julia vs Python vs Java vs C++</h2>
+<p>To measure performance, I use the <code>@elapsed</code> macro from Julia’s <a href="https://docs.julialang.org/en/v1/base/base/#Base.@time">family of <code>@time</code> and friends</a> with randomly constructed problem instances of different scale. Because Julia is JIT-based I need to be careful and do a few timing repeats after burning the very first measurement.</p>
+<p>Actually, I’ll use the median of 5 repeats which is even more robust:</p>
+<pre class="julia"><code>function run(repeats = 5)
+    @assert repeats &gt; 1
+
+    times = zeros(Float64, repeats)
+    seed = 12345
+
+    for W in [5_000, 10_000, 20_000, 40_000, 80_000]
+        for repeat in 1 : repeats
+            spec = make_random_data(W, seed += 1)
+            times[repeat] = @elapsed opt_value(spec[1], spec[2])
+        end
+        sort!(times)
+        println(W, &quot;, &quot;, times[(repeats + 1) ÷ 2])
+    end
+end</code></pre>
+<p>For the promised language shootout, I’ve implemented this same algorithm in three other languages: Python, Java, and C++. I event went as far as make sure that all “ports” used similar array data types and even the exact same random number generator for building the exact same random problem instances. To maintain consistency with statically typed languages (Java, C++), I ensure that value types used by the dynamic versions are 64-bit integers as much as possible – this required some minor contortions in Python.</p>
+<p>Here’s the C++ version of <code>opt_value()</code> (you can get all four language versions from <a href="https://github.com/vladium/study_julia_with_me/tree/master/knapsack_benchmark">this github repo</a>, there is a single source file per language that’s trivial to compile and run):</p>
+<pre class="cpp"><code>int64_t
+opt_value (int64_t const W, std::vector&lt;item&gt; const &amp; items)
+{
+    auto const n = items.size ();
+
+    std::unique_ptr&lt;int64_t []&gt; const v_data { std::make_unique&lt;int64_t []&gt; (W) }; // &quot;zeros&quot;
+    std::unique_ptr&lt;int64_t []&gt; const v_prev_data { std::make_unique&lt;int64_t []&gt; (W) }; // &quot;zeros&quot;
+
+    int64_t * V { v_data.get () };
+    int64_t * V_prev { v_prev_data.get () };
+
+    for (int64_t w = items[0].weight; w &lt;= W; ++ w)
+        V[w - 1] = items[0].value;
+
+    for (std::size_t j = 1; j &lt; n; ++ j)
+    {
+        std::swap (V, V_prev);
+        item const &amp; item { items [j] };
+        
+        for (int64_t w = 1; w &lt;= W; ++ w)
+        {
+            auto const V_without_item_j = V_prev[w - 1];
+            auto const V_allow_item_j = (w &lt; item.weight
+                ? V_without_item_j
+                : (item.value + (w != item.weight ? V_prev[w - 1 - item.weight] : 0)));
+
+            V[w - 1] = std::max(V_allow_item_j, V_without_item_j);
+         }
+    }
+
+    return V[W - 1];
+}</code></pre>
+<p>I’ve tried to keep the implementation consistent and idiomatic within each language. (It helps that my algorithm is basically a couple of nested loops without memory allocation, some arithmetic, and not much else.) All these implementations could in principle be tuned further using language-specific techniques, but that’s not my goal here.</p>
+<p>Here is a snippet of calculation latency data for <span class="math inline">\(W=80000\)</span>, captured on the exact same CPU:</p>
+<table style='width:100%;'>
+<thead>
+<tr>
+<th style="text-align:center;">
+lang
+</th>
+<th style="text-align:center;">
+W
+</th>
+<th style="text-align:center;">
+time (sec)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+julia
+</td>
+<td style="text-align:center;">
+80000
+</td>
+<td style="text-align:center;">
+0.1135
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+python
+</td>
+<td style="text-align:center;">
+80000
+</td>
+<td style="text-align:center;">
+28.2094
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+java
+</td>
+<td style="text-align:center;">
+80000
+</td>
+<td style="text-align:center;">
+0.0781
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+c++
+</td>
+<td style="text-align:center;">
+80000
+</td>
+<td style="text-align:center;">
+0.0710
+</td>
+</tr>
+</tbody>
+</table>
+<p>Hmm. Perhaps you begin to suspect that Python is not going to win this. Here is a log-log plot of all data, for all <span class="math inline">\(W\)</span>’s:</p>
+<div class="figure" style="text-align: center"><span id="fig:fraction"></span>
+<img src="/tutorials/study_julia_with_me/knapsack_benchmark_files/figure-html/fraction-1.png" alt="Calculation time as a function of knapsack problem size. (Note that both axes use log scale.)" width="75%" />
+<p class="caption">
+Figure 1: Calculation time as a function of knapsack problem size. (Note that both axes use log scale.)
+</p>
+</div>
+<p>Julia is about 50% slower than either Java or C++. But it is Python that is the real laggard in the group: slower by <strong>more than 100x</strong> across the entire range of tested problem sizes. Ouch!</p>
+<p>Going back to the matrix version of the algorithm, you can see how the matrix is accessed predictably over <span class="math inline">\(j\)</span> columns but somewhat randomly (in a data-depedent fashion) over <span class="math inline">\(w\)</span> rows. There doesn’t seem to be a way to express the algorithm in linear algebra operations. This difficulty is retained in the optimized two-column-buffer version. The algorithm is short and simple but there just doesn’t seem to be a way to vectorize it so that it would be fast, say, in numpy. Massive underperformance of the Python version is the cost I pay for slow <em>interpretation</em> of <a href="https://opensource.com/article/18/4/introduction-python-bytecode">Python bytecode</a>.</p>
+<p>As for Julia, so far so good. I might just get used to the “no need to vectorize code to make it fast” lifestyle.</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Restricting weights to be integral is not crucial to my test here but could make the problem statement acceptable to more solver types.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>Some might argue that <span class="math inline">\(x_i\)</span>’s are in fact <em>more</em> than half of the solution. Ok, so I cheat a lot.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
+
+          </div>
+
+          
+
+
+
+          
+          <div class="article-widget">
+            
+<div class="post-nav">
+  
+  
+  
+  <div class="post-nav-item">
+    <div class="meta-nav">Previous</div>
+    <a href="/tutorials/study_julia_with_me/structure/" rel="next"></a>
+  </div>
+  
+  
+</div>
+
+          </div>
+          
+        </div>
+
+        <div class="body-footer">
+          <p>Last updated on Sep 12, 2019</p>
+
+          
+
+
+          
+
+        </div>
+
+      </article>
+
+      <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    &copy; vladium 2019  
+
+    
+  </p>
+</footer>
+
+
+    </main>
+  </div>
+</div>
+
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/cpp.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.1/anchor.min.js" integrity="sha256-pB/deHc9CGfFpJRjC43imB29Rse8tak+5eXqntO94ck=" crossorigin="anonymous"></script>
+    <script>
+      anchors.add();
+    </script>
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.16bbb3750feb7244c9bc409a5a4fe678.js"></script>
+
+    
+
+
+
+
+
+
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
