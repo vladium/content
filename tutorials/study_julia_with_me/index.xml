@@ -909,7 +909,7 @@ end
 &lt;li&gt;All superclasses are abstract and all concrete classes are final.&lt;/li&gt;
 &lt;li&gt;Mutability is part of type definition, not of argument/variable/field.&lt;/li&gt;
 &lt;li&gt;Multiple dispatch is a primary paradigm (&amp;ldquo;all methods are virtual&amp;rdquo;). This design is consistent with lack of classic &amp;ldquo;objects&amp;rdquo; that forcefully bundle state with behavior.&lt;/li&gt;
-&lt;li&gt;Duck-typing also works in Julia, possibly even without any performance loss.&lt;/li&gt;
+&lt;li&gt;Duck-typing also works in Julia, perhaps even without any performance loss. But certain core Julia features necessitate some static typing.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class=&#34;footnotes&#34;&gt;
 
