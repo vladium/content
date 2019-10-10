@@ -863,7 +863,7 @@ end
 
 <p>Now, suppose that I would like to extend the set of supported &ldquo;JSON-compatible&rdquo; Julia types to also include tuples. I would like to output them as JSON arrays. All I need to do is add another overload:</p>
 
-<pre><code class="language-julia-repl">function visit(obj ::Tuple, io ::IO)
+<pre><code class="language-julia">function visit(obj ::Tuple, io ::IO)
     print(io, '[')
     for i in 1 : length(obj)
         i &gt; 1 &amp;&amp; print(io, &quot;, &quot;)
