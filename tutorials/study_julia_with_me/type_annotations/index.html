@@ -644,7 +644,7 @@ Number
 <p>The way I read the documentation, Julia type annotations can be applied to two types of <code>&lt;thing&gt;</code>s:</p>
 
 <ol>
-<li><p>[<strong>typeassert</strong>] expressions computing a value (and recall that everything in Julia is an <a href="https://en.wikipedia.org/wiki/Expression_(computer_science)" target="_blank">expression</a>):</p>
+<li><p>[<strong>typeassert</strong>] expressions computing a value (and recall that <em>everything</em> in Julia is an <a href="https://en.wikipedia.org/wiki/Expression_(computer_science)" target="_blank">expression</a>):</p>
 
 <pre><code class="language-julia">x = y ::Float64 # promises to the runtime that at this point in the execution 'y' will be a Float64
 </code></pre></li>
@@ -726,7 +726,7 @@ end
 
 <h3 id="function-arguments">Function arguments</h3>
 
-<p>If you&rsquo;re coming from languages like C++ or Java where type conversions can happen as part of argument passing, you might think that <tt>x ::Float64</tt> in <code>bar()</code> is like a local (typed) variable declaration, similar to the <a href="#tasvsconv">second case above</a>, perhaps implying a call to something like <strong>convert(Float64, x)</strong> everywhere before <code>bar()</code> is invoked. That is not the case in Julia: no conversions ever take place as part of Julia function argument passing. In fact, Julia argument type annotations are actually more like those typeasserts: <code>foo(x)</code> will <em>expect</em> <code>x</code> to be a <code>Float64</code> already.</p>
+<p>If you&rsquo;re coming from languages like C++ or Java where type conversions can happen as part of argument passing, you might think that <tt>x ::Float64</tt> in <code>bar()</code> is like a local (typed) variable declaration, similar to the <a href="#tasvsconv">second case above</a>, perhaps implying a call to something like <strong>convert(Float64, x)</strong> everywhere before <code>bar()</code> is invoked. That is not the case in Julia: no conversions ever take place as part of Julia function argument passing. In fact, Julia argument type annotations are actually more like those typeasserts: <tt>foo(x)</tt> will <em>expect</em> <tt>x</tt> to be a <code>Float64</code> already.</p>
 
 <p>There is a subtle difference from an in-place typeassert, however: with the above definition of <code>bar()</code> there will be no need to generate an implicit call to <strong>typeassert()</strong> at all because I will <em>only</em> be allowed to call it with <code>Float64</code>s. If I need <tt>sin(2π&nbsp;*&nbsp;x)</tt> for a <code>Float64</code> input <code>x</code>, no problem. For any other type<sup class="footnote-ref" id="fnref:To-simply-the-na"><a href="#fn:To-simply-the-na">5</a></sup>, say, <code>Int64</code>, I will get a flat rejection not because a method call was tried and failed during <code>Int64</code>-to-<code>Float64</code> input type conversion (<code>TypeError</code>) but because the requisite method (named &ldquo;foo&rdquo; and taking a single argument of type <code>Int64</code>) did not exist (<code>MethodError</code>). And since <code>Float64</code> is a concrete type and, again, all concrete types are <em>final</em> in Julia, the universe of possible outcomes here shrinks dramatically:</p>
 
@@ -818,6 +818,8 @@ end
 end
 </code></pre>
 
+<p>This overload will kick in for any <tt>obj</tt> that belongs to a type derived from <code>Real</code> &ndash; because that is more <em>specific</em> than <code>Any</code> and because Julia dispatch algorithm will always choose the most specific method signature to call in every situation.</p>
+
 <p>Strings are equally easy, but the method body needs to quote them<sup class="footnote-ref" id="fnref:Note-that-this-t"><a href="#fn:Note-that-this-t">7</a></sup>, so I need a new method overload:</p>
 
 <pre><code class="language-julia">function visit(obj ::AbstractString, io ::IO)
@@ -827,7 +829,7 @@ end
 end
 </code></pre>
 
-<p>Next, for objects that can contain other objects the virtual nature of <tt>visit()</tt> is critical:</p>
+<p>By this point, my design strategy should be clear: I am going to keep adding more <tt>visit()</tt> overloads with <tt>obj</tt> parameter types chosen so as to partition the type universe into subtrees that correctly isolate each supported type of expression I expect to find inside my input. Taking the next step, for objects that can contain other objects the virtual nature of <tt>visit()</tt> becomes critical:</p>
 
 <pre><code class="language-julia">function visit(obj ::AbstractArray, io ::IO)
     print(io, '[')

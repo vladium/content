@@ -663,7 +663,7 @@ Number
 &lt;p&gt;The way I read the documentation, Julia type annotations can be applied to two types of &lt;code&gt;&amp;lt;thing&amp;gt;&lt;/code&gt;s:&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;&lt;p&gt;[&lt;strong&gt;typeassert&lt;/strong&gt;] expressions computing a value (and recall that everything in Julia is an &lt;a href=&#34;https://en.wikipedia.org/wiki/Expression_(computer_science)&#34; target=&#34;_blank&#34;&gt;expression&lt;/a&gt;):&lt;/p&gt;
+&lt;li&gt;&lt;p&gt;[&lt;strong&gt;typeassert&lt;/strong&gt;] expressions computing a value (and recall that &lt;em&gt;everything&lt;/em&gt; in Julia is an &lt;a href=&#34;https://en.wikipedia.org/wiki/Expression_(computer_science)&#34; target=&#34;_blank&#34;&gt;expression&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;x = y ::Float64 # promises to the runtime that at this point in the execution &#39;y&#39; will be a Float64
 &lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
@@ -745,7 +745,7 @@ end
 
 &lt;h3 id=&#34;function-arguments&#34;&gt;Function arguments&lt;/h3&gt;
 
-&lt;p&gt;If you&amp;rsquo;re coming from languages like C++ or Java where type conversions can happen as part of argument passing, you might think that &lt;tt&gt;x ::Float64&lt;/tt&gt; in &lt;code&gt;bar()&lt;/code&gt; is like a local (typed) variable declaration, similar to the &lt;a href=&#34;#tasvsconv&#34;&gt;second case above&lt;/a&gt;, perhaps implying a call to something like &lt;strong&gt;convert(Float64, x)&lt;/strong&gt; everywhere before &lt;code&gt;bar()&lt;/code&gt; is invoked. That is not the case in Julia: no conversions ever take place as part of Julia function argument passing. In fact, Julia argument type annotations are actually more like those typeasserts: &lt;code&gt;foo(x)&lt;/code&gt; will &lt;em&gt;expect&lt;/em&gt; &lt;code&gt;x&lt;/code&gt; to be a &lt;code&gt;Float64&lt;/code&gt; already.&lt;/p&gt;
+&lt;p&gt;If you&amp;rsquo;re coming from languages like C++ or Java where type conversions can happen as part of argument passing, you might think that &lt;tt&gt;x ::Float64&lt;/tt&gt; in &lt;code&gt;bar()&lt;/code&gt; is like a local (typed) variable declaration, similar to the &lt;a href=&#34;#tasvsconv&#34;&gt;second case above&lt;/a&gt;, perhaps implying a call to something like &lt;strong&gt;convert(Float64, x)&lt;/strong&gt; everywhere before &lt;code&gt;bar()&lt;/code&gt; is invoked. That is not the case in Julia: no conversions ever take place as part of Julia function argument passing. In fact, Julia argument type annotations are actually more like those typeasserts: &lt;tt&gt;foo(x)&lt;/tt&gt; will &lt;em&gt;expect&lt;/em&gt; &lt;tt&gt;x&lt;/tt&gt; to be a &lt;code&gt;Float64&lt;/code&gt; already.&lt;/p&gt;
 
 &lt;p&gt;There is a subtle difference from an in-place typeassert, however: with the above definition of &lt;code&gt;bar()&lt;/code&gt; there will be no need to generate an implicit call to &lt;strong&gt;typeassert()&lt;/strong&gt; at all because I will &lt;em&gt;only&lt;/em&gt; be allowed to call it with &lt;code&gt;Float64&lt;/code&gt;s. If I need &lt;tt&gt;sin(2π&amp;nbsp;*&amp;nbsp;x)&lt;/tt&gt; for a &lt;code&gt;Float64&lt;/code&gt; input &lt;code&gt;x&lt;/code&gt;, no problem. For any other type&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:To-simply-the-na&#34;&gt;&lt;a href=&#34;#fn:To-simply-the-na&#34;&gt;5&lt;/a&gt;&lt;/sup&gt;, say, &lt;code&gt;Int64&lt;/code&gt;, I will get a flat rejection not because a method call was tried and failed during &lt;code&gt;Int64&lt;/code&gt;-to-&lt;code&gt;Float64&lt;/code&gt; input type conversion (&lt;code&gt;TypeError&lt;/code&gt;) but because the requisite method (named &amp;ldquo;foo&amp;rdquo; and taking a single argument of type &lt;code&gt;Int64&lt;/code&gt;) did not exist (&lt;code&gt;MethodError&lt;/code&gt;). And since &lt;code&gt;Float64&lt;/code&gt; is a concrete type and, again, all concrete types are &lt;em&gt;final&lt;/em&gt; in Julia, the universe of possible outcomes here shrinks dramatically:&lt;/p&gt;
 
@@ -837,6 +837,8 @@ end
 end
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;This overload will kick in for any &lt;tt&gt;obj&lt;/tt&gt; that belongs to a type derived from &lt;code&gt;Real&lt;/code&gt; &amp;ndash; because that is more &lt;em&gt;specific&lt;/em&gt; than &lt;code&gt;Any&lt;/code&gt; and because Julia dispatch algorithm will always choose the most specific method signature to call in every situation.&lt;/p&gt;
+
 &lt;p&gt;Strings are equally easy, but the method body needs to quote them&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:Note-that-this-t&#34;&gt;&lt;a href=&#34;#fn:Note-that-this-t&#34;&gt;7&lt;/a&gt;&lt;/sup&gt;, so I need a new method overload:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function visit(obj ::AbstractString, io ::IO)
@@ -846,7 +848,7 @@ end
 end
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Next, for objects that can contain other objects the virtual nature of &lt;tt&gt;visit()&lt;/tt&gt; is critical:&lt;/p&gt;
+&lt;p&gt;By this point, my design strategy should be clear: I am going to keep adding more &lt;tt&gt;visit()&lt;/tt&gt; overloads with &lt;tt&gt;obj&lt;/tt&gt; parameter types chosen so as to partition the type universe into subtrees that correctly isolate each supported type of expression I expect to find inside my input. Taking the next step, for objects that can contain other objects the virtual nature of &lt;tt&gt;visit()&lt;/tt&gt; becomes critical:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function visit(obj ::AbstractArray, io ::IO)
     print(io, &#39;[&#39;)
