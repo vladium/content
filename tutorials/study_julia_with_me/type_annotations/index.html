@@ -668,8 +668,8 @@ end
 <p>As a consequence, there are differences in runtime behavior and the information communicated to the system:</p>
 
 <ol>
-<li>With a <em>typeassert</em> the compiler will create code that at runtime will <em>check</em> the annotated value for type compatibility and throw a <code>TypeError</code> if the check fails &ndash; but it will <em>not</em> attempt to coerce the computed value to the annotation type in any way. Type-asserted syntax <tt>&lt;exp&gt;::T</tt> is precisely equivalent to a call, possibly inlined, to <a href="https://docs.julialang.org/en/v1/base/base/#Core.typeassert" target="_blank">typeassert(&lt;exp&gt;, T)</a>.</li>
-<li>With a <em>variable type declaration</em> any assignment <tt>&lt;lhs&gt;::T&nbsp;=&nbsp;&lt;rhs&gt;</tt> will effectively translate into <tt>&lt;lhs&gt;::T&nbsp;=&nbsp;convert(T, &lt;rhs&gt;)</tt>, i.e. contain a call, possibly inlined, to <a href="https://docs.julialang.org/en/v1/base/base/#Base.convert" target="_blank">convert(T, &lt;rhs&gt;)</a>. And at runtime, every such assignment will attempt to coerce its right hand-side value to <tt>T</tt>, possibly resulting in a value that&rsquo;s only an approximation. Should this conversion fail, an exception will be thrown:
+<li>With a <em>typeassert</em> the compiler will create code that at runtime will <em>check</em> the annotated value for type compatibility and throw a <code>TypeError</code> if the check fails &ndash; but it will <em>not</em> attempt to coerce the computed value to the annotation type in any way. Type-asserted syntax <tt>&lt;exp&gt;::T</tt> is precisely equivalent to a call, possibly inlined, to <a href="https://docs.julialang.org/en/v1/base/base/#Core.typeassert" target="_blank">typeassert(&lt;exp&gt;, T)</a> followed by making use of the <tt>&lt;exp&gt;</tt> value.</li>
+<li>With a <em>variable type declaration</em> any assignment <tt>&lt;lhs&gt;::T&nbsp;=&nbsp;&lt;rhs&gt;</tt> will effectively translate into <tt>&lt;lhs&gt;&nbsp;=&nbsp;convert(T, &lt;rhs&gt;)</tt>, i.e. contain a call, possibly inlined, to <a href="https://docs.julialang.org/en/v1/base/base/#Base.convert" target="_blank">convert(T, &lt;rhs&gt;)</a>. And at runtime, every such assignment will attempt to coerce its right hand-side value to <tt>T</tt>, possibly resulting in a value that&rsquo;s only an approximation. Should this conversion fail, an exception will be thrown:
 
 <ul>
 <li>if no such conversion exists at all, a <code>MethodError</code> is thrown;</li>
@@ -777,7 +777,7 @@ Int64 # oops, use 0.0 literal instead of 0 above
 
 <h2 id="when-are-implicit-conversions-done">When are implicit conversions done?</h2>
 
-<p>Most of the cases of implicit calls to <code>convert(...)</code> have already been mentioned. Julia <a href="https://docs.julialang.org/en/v1/manual/conversion-and-promotion/" target="_blank">documentation</a> offers this complete list:</p>
+<p>Most of the cases of implicit calls to <strong>convert(&hellip;)</strong> have already been mentioned. Julia <a href="https://docs.julialang.org/en/v1/manual/conversion-and-promotion/" target="_blank">documentation</a> offers this complete list:</p>
 
 <blockquote>
 <ul>
@@ -821,9 +821,9 @@ end
 <p>Strings are equally easy, but the method body needs to quote them<sup class="footnote-ref" id="fnref:Note-that-this-t"><a href="#fn:Note-that-this-t">7</a></sup>, so I need a new method overload:</p>
 
 <pre><code class="language-julia">function visit(obj ::AbstractString, io ::IO)
-    print(io, '\&quot;')
+    print(io, '&quot;')
     print(io, obj)
-    print(io, '\&quot;')
+    print(io, '&quot;')
 end
 </code></pre>
 

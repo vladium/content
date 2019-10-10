@@ -687,8 +687,8 @@ end
 &lt;p&gt;As a consequence, there are differences in runtime behavior and the information communicated to the system:&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;With a &lt;em&gt;typeassert&lt;/em&gt; the compiler will create code that at runtime will &lt;em&gt;check&lt;/em&gt; the annotated value for type compatibility and throw a &lt;code&gt;TypeError&lt;/code&gt; if the check fails &amp;ndash; but it will &lt;em&gt;not&lt;/em&gt; attempt to coerce the computed value to the annotation type in any way. Type-asserted syntax &lt;tt&gt;&amp;lt;exp&amp;gt;::T&lt;/tt&gt; is precisely equivalent to a call, possibly inlined, to &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Core.typeassert&#34; target=&#34;_blank&#34;&gt;typeassert(&amp;lt;exp&amp;gt;, T)&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;With a &lt;em&gt;variable type declaration&lt;/em&gt; any assignment &lt;tt&gt;&amp;lt;lhs&amp;gt;::T&amp;nbsp;=&amp;nbsp;&amp;lt;rhs&amp;gt;&lt;/tt&gt; will effectively translate into &lt;tt&gt;&amp;lt;lhs&amp;gt;::T&amp;nbsp;=&amp;nbsp;convert(T, &amp;lt;rhs&amp;gt;)&lt;/tt&gt;, i.e. contain a call, possibly inlined, to &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Base.convert&#34; target=&#34;_blank&#34;&gt;convert(T, &amp;lt;rhs&amp;gt;)&lt;/a&gt;. And at runtime, every such assignment will attempt to coerce its right hand-side value to &lt;tt&gt;T&lt;/tt&gt;, possibly resulting in a value that&amp;rsquo;s only an approximation. Should this conversion fail, an exception will be thrown:
+&lt;li&gt;With a &lt;em&gt;typeassert&lt;/em&gt; the compiler will create code that at runtime will &lt;em&gt;check&lt;/em&gt; the annotated value for type compatibility and throw a &lt;code&gt;TypeError&lt;/code&gt; if the check fails &amp;ndash; but it will &lt;em&gt;not&lt;/em&gt; attempt to coerce the computed value to the annotation type in any way. Type-asserted syntax &lt;tt&gt;&amp;lt;exp&amp;gt;::T&lt;/tt&gt; is precisely equivalent to a call, possibly inlined, to &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Core.typeassert&#34; target=&#34;_blank&#34;&gt;typeassert(&amp;lt;exp&amp;gt;, T)&lt;/a&gt; followed by making use of the &lt;tt&gt;&amp;lt;exp&amp;gt;&lt;/tt&gt; value.&lt;/li&gt;
+&lt;li&gt;With a &lt;em&gt;variable type declaration&lt;/em&gt; any assignment &lt;tt&gt;&amp;lt;lhs&amp;gt;::T&amp;nbsp;=&amp;nbsp;&amp;lt;rhs&amp;gt;&lt;/tt&gt; will effectively translate into &lt;tt&gt;&amp;lt;lhs&amp;gt;&amp;nbsp;=&amp;nbsp;convert(T, &amp;lt;rhs&amp;gt;)&lt;/tt&gt;, i.e. contain a call, possibly inlined, to &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Base.convert&#34; target=&#34;_blank&#34;&gt;convert(T, &amp;lt;rhs&amp;gt;)&lt;/a&gt;. And at runtime, every such assignment will attempt to coerce its right hand-side value to &lt;tt&gt;T&lt;/tt&gt;, possibly resulting in a value that&amp;rsquo;s only an approximation. Should this conversion fail, an exception will be thrown:
 
 &lt;ul&gt;
 &lt;li&gt;if no such conversion exists at all, a &lt;code&gt;MethodError&lt;/code&gt; is thrown;&lt;/li&gt;
@@ -796,7 +796,7 @@ Int64 # oops, use 0.0 literal instead of 0 above
 
 &lt;h2 id=&#34;when-are-implicit-conversions-done&#34;&gt;When are implicit conversions done?&lt;/h2&gt;
 
-&lt;p&gt;Most of the cases of implicit calls to &lt;code&gt;convert(...)&lt;/code&gt; have already been mentioned. Julia &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/conversion-and-promotion/&#34; target=&#34;_blank&#34;&gt;documentation&lt;/a&gt; offers this complete list:&lt;/p&gt;
+&lt;p&gt;Most of the cases of implicit calls to &lt;strong&gt;convert(&amp;hellip;)&lt;/strong&gt; have already been mentioned. Julia &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/conversion-and-promotion/&#34; target=&#34;_blank&#34;&gt;documentation&lt;/a&gt; offers this complete list:&lt;/p&gt;
 
 &lt;blockquote&gt;
 &lt;ul&gt;
@@ -840,9 +840,9 @@ end
 &lt;p&gt;Strings are equally easy, but the method body needs to quote them&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:Note-that-this-t&#34;&gt;&lt;a href=&#34;#fn:Note-that-this-t&#34;&gt;7&lt;/a&gt;&lt;/sup&gt;, so I need a new method overload:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function visit(obj ::AbstractString, io ::IO)
-    print(io, &#39;\&amp;quot;&#39;)
+    print(io, &#39;&amp;quot;&#39;)
     print(io, obj)
-    print(io, &#39;\&amp;quot;&#39;)
+    print(io, &#39;&amp;quot;&#39;)
 end
 &lt;/code&gt;&lt;/pre&gt;
 
