@@ -19,115 +19,135 @@
       <guid>/tutorials/study_julia_with_me/structure/</guid>
       <description>
 
+&lt;h2 id=&#34;suggested-software-setup&#34;&gt;Suggested software setup&lt;/h2&gt;
 
-&lt;div id=&#34;suggested-software-setup&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Suggested software setup&lt;/h2&gt;
-&lt;p&gt;I have been using Julia successfully on MacOS and Linux (Fedora). I would suggest starting with a &lt;a href=&#34;https://juliacomputing.com/products/juliapro&#34;&gt;JuliaPro installer&lt;/a&gt; for this study. I’ve kept a few notes about my install process:&lt;/p&gt;
+&lt;p&gt;I have been using Julia successfully on MacOS and Linux (Fedora). I would suggest starting with a &lt;a href=&#34;https://juliacomputing.com/products/juliapro&#34; target=&#34;_blank&#34;&gt;JuliaPro installer&lt;/a&gt; for this study. I&amp;rsquo;ve kept a few notes about my install process:&lt;/p&gt;
+
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;I’ve been using &lt;a href=&#34;https://pkg.juliacomputing.com/juliapro/1201/JuliaPro-1.2.0-1_build-51.sh&#34;&gt;v1.2&lt;/a&gt; so far, both REPL and Juno “IDE”.&lt;/p&gt;
+&lt;li&gt;&lt;p&gt;I&amp;rsquo;ve been using &lt;a href=&#34;https://pkg.juliacomputing.com/juliapro/1201/JuliaPro-1.2.0-1_build-51.sh&#34; target=&#34;_blank&#34;&gt;v1.2&lt;/a&gt; so far, both REPL and Juno &amp;ldquo;IDE&amp;rdquo;.&lt;/p&gt;
+
 &lt;ul&gt;
-&lt;li&gt;on MacOS you will need to have XCode tools installed, see the &lt;a href=&#34;https://juliacomputing.com/docs/JuliaProQuickStartGuideMac_1.2.0-1.pdf&#34;&gt;install guide&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;on Linux the &lt;a href=&#34;https://juliacomputing.com/docs/JuliaProQuickStartGuideLinux_1.2.0-1.pdf&#34;&gt;install guide&lt;/a&gt; mentions needing these libs (install via yum/dnf/apt-get/etc, I only needed to add xclip):&lt;/li&gt;
+&lt;li&gt;on MacOS you will need to have XCode tools installed, see the &lt;a href=&#34;https://juliacomputing.com/docs/JuliaProQuickStartGuideMac_1.2.0-1.pdf&#34; target=&#34;_blank&#34;&gt;install guide&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;on Linux the &lt;a href=&#34;https://juliacomputing.com/docs/JuliaProQuickStartGuideLinux_1.2.0-1.pdf&#34; target=&#34;_blank&#34;&gt;install guide&lt;/a&gt; mentions needing these libs (install via yum/dnf/apt-get/etc, I only needed to add xclip):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;xclip
+libXScrnSaver
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;apparently, starting with v1.2 what&amp;rsquo;s included appears to have changed: to minimize the installer size the &amp;ldquo;curated list of packages&amp;rdquo; are no longer part of the download itself. They can be installed via the usual &lt;code&gt;Pgk&lt;/code&gt; commands. What&amp;rsquo;s different for &amp;ldquo;curated&amp;rdquo; packages is that the install will be configured to use Julia Computing&amp;rsquo;s github repo&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:Julia-packages-a&#34;&gt;&lt;a href=&#34;#fn:Julia-packages-a&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; so that only the supposedly tested versions are available. Using Julia Computing&amp;rsquo;s repo will require authenticating to get their token. Keep this in mind if you plan to play with packages outside of their supported list.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;for REPL you can use Juno&amp;rsquo;s &amp;ldquo;REPL&amp;rdquo; tab. I find that doing so gives me experince similar to that of RStudio (a good thing):&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;  xclip
-  libXScrnSaver&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;apparently, starting with v1.2 what’s included appears to have changed: to minimize the installer size the “curated list of packages” are no longer part of the download itself. They can be installed via the usual &lt;code&gt;Pgk&lt;/code&gt; commands. What’s different for “curated” packages is that the install will be configured to use Julia Computing’s github repo&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; so that only the supposedly tested versions are available. Using Julia Computing’s repo will require authenticating to get their token. Keep this in mind if you plan to play with packages outside of their supported list.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;for REPL you can use Juno’s “REPL” tab. I find that doing so gives me experince similar to that of RStudio (a good thing):&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;juno_begin.png&#34; style=&#34;width:80.0%&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;juno_begin.png&#34; alt=&#34;&#34; /&gt;{ width=80% }&lt;/p&gt;
+
 &lt;ul&gt;
 &lt;li&gt;if you prefer not to rely on the IDE (which is not that great right now) and use REPL (which is very functional), you can use &lt;code&gt;julia&lt;/code&gt; binary from your JuliaPro distribution:
+
 &lt;ul&gt;
 &lt;li&gt;MacOS: &lt;code&gt;/Applications/JuliaPro-&amp;lt;version&amp;gt;.app/Contents/Resources/julia/Contents/Resources/julia/bin/julia&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;Linux: &lt;code&gt;&amp;lt;install dir&amp;gt;/Julia/bin/julia&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-&lt;div id=&#34;faqs-and-tips-for-fellow-julia-explorers&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;FAQs and tips for fellow Julia explorers&lt;/h2&gt;
-&lt;div id=&#34;general&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;General&lt;/h3&gt;
+
+&lt;h2 id=&#34;faqs-and-tips-for-fellow-julia-explorers&#34;&gt;FAQs and tips for fellow Julia explorers&lt;/h2&gt;
+
+&lt;h3 id=&#34;general&#34;&gt;General&lt;/h3&gt;
+
 &lt;ul&gt;
-&lt;li&gt;if you’re working with custom types, it is recommended to keep work code in a module (which could be as simple as keeping it inside a &lt;code&gt;module MyModule ... end&lt;/code&gt; block) even for one-off stuff: onlike, say, R or Python Julia currently &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/faq/#How-can-I-modify-the-declaration-of-a-type-in-my-session?-1&#34;&gt;does not allow updating type definitions within a session without restarting it&lt;/a&gt;. It seems to have gone through several iterations of addressing this workflow need, but right now re-&lt;code&gt;include()&lt;/code&gt;ing a module seems to be what’s guaranteed to work.
+&lt;li&gt;&lt;p&gt;if you&amp;rsquo;re working with custom types, it is recommended to keep work code in a module (which could be as simple as keeping it inside a &lt;code&gt;module MyModule ... end&lt;/code&gt; block) even for one-off stuff: onlike, say, R or Python Julia currently &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/faq/#How-can-I-modify-the-declaration-of-a-type-in-my-session?-1&#34; target=&#34;_blank&#34;&gt;does not allow updating type definitions within a session without restarting it&lt;/a&gt;. It seems to have gone through several iterations of addressing this workflow need, but right now re-&lt;code&gt;include()&lt;/code&gt;ing a module seems to be what&amp;rsquo;s guaranteed to work.&lt;/p&gt;
+
 &lt;ul&gt;
-&lt;li&gt;there is also &lt;a href=&#34;https://github.com/timholy/Revise.jl&#34;&gt;Revise.jl&lt;/a&gt; (which I haven’t tried yet)&lt;/li&gt;
-&lt;li&gt;see &lt;a href=&#34;https://discourse.julialang.org/t/removal-of-workspace-and-a-way-to-clear-variables/11107/8&#34;&gt;this discussion&lt;/a&gt; for more color&lt;/li&gt;
+&lt;li&gt;there is also &lt;a href=&#34;https://github.com/timholy/Revise.jl&#34; target=&#34;_blank&#34;&gt;Revise.jl&lt;/a&gt; (which I haven&amp;rsquo;t tried yet)&lt;/li&gt;
+&lt;li&gt;see &lt;a href=&#34;https://discourse.julialang.org/t/removal-of-workspace-and-a-way-to-clear-variables/11107/8&#34; target=&#34;_blank&#34;&gt;this discussion&lt;/a&gt; for more color&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;another reason for working inside a module is because code will run faster (it will be JIT’ed sooner)&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;another reason for working inside a module is because code will run faster (it will be JIT&amp;rsquo;ed sooner)&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-&lt;div id=&#34;juno&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Juno&lt;/h3&gt;
-&lt;p&gt;Juno is basically a few packages inside &lt;a href=&#34;https://atom.io&#34;&gt;Atom&lt;/a&gt;. It is not quite an “IDE” at this point. &lt;a href=&#34;https://code.visualstudio.com/&#34;&gt;Visual Studio Code&lt;/a&gt; might be a reasonable alternative, but in my experiments VSC had trouble with Julia v1.2. Juno comes bundled with a &lt;code&gt;julia&lt;/code&gt; build from the same entity.&lt;/p&gt;
+
+&lt;h3 id=&#34;juno&#34;&gt;Juno&lt;/h3&gt;
+
+&lt;p&gt;Juno is basically a few packages inside &lt;a href=&#34;https://atom.io&#34; target=&#34;_blank&#34;&gt;Atom&lt;/a&gt;. It is not quite an &amp;ldquo;IDE&amp;rdquo; at this point. &lt;a href=&#34;https://code.visualstudio.com/&#34; target=&#34;_blank&#34;&gt;Visual Studio Code&lt;/a&gt; might be a reasonable alternative, but in my experiments VSC had trouble with Julia v1.2. Juno comes bundled with a &lt;code&gt;julia&lt;/code&gt; build from the same entity.&lt;/p&gt;
+
 &lt;ul&gt;
 &lt;li&gt;as a result of being a collection of Atom packages, some things you might want to tweak in the UI could be dispersed over multiple places. For example:
+
 &lt;ul&gt;
-&lt;li&gt;“Julia Client” package:
+&lt;li&gt;&amp;ldquo;Julia Client&amp;rdquo; package:
+
 &lt;ul&gt;
 &lt;li&gt;you may wish to choose positioning of various tabs: Workspace, Documentation, Plots, REPL, etc&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;“tool-bar” package:
+&lt;li&gt;&amp;ldquo;tool-bar&amp;rdquo; package:
+
 &lt;ul&gt;
 &lt;li&gt;you might want to opt for smaller icons&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;“tree-view” package:
+&lt;li&gt;&amp;ldquo;tree-view&amp;rdquo; package:
+
 &lt;ul&gt;
-&lt;li&gt;“Always Open Existing”, “Auto Reveal” settings might be of interest&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;Always Open Existing&amp;rdquo;, &amp;ldquo;Auto Reveal&amp;rdquo; settings might be of interest&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;books-other-resources&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Books, other resources&lt;/h2&gt;
-&lt;p&gt;There is a constantly growing list of resources at &lt;a href=&#34;https://julialang.org/learning/&#34;&gt;https://julialang.org&lt;/a&gt;. I list below some resources that I’ve either used myself or that seemed to stand out from the rest.&lt;/p&gt;
-&lt;div id=&#34;books-about-or-based-on-julia-v1.0&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;books about or based on Julia v1.0+:&lt;/h4&gt;
+
+&lt;h2 id=&#34;books-other-resources&#34;&gt;Books, other resources&lt;/h2&gt;
+
+&lt;p&gt;There is a constantly growing list of resources at &lt;a href=&#34;https://julialang.org/learning/&#34; target=&#34;_blank&#34;&gt;https://julialang.org&lt;/a&gt;. I list below some resources that I&amp;rsquo;ve either used myself or that seemed to stand out from the rest.&lt;/p&gt;
+
+&lt;h4 id=&#34;books-about-or-based-on-julia-v1-0&#34;&gt;books about or based on Julia v1.0+:&lt;/h4&gt;
+
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://benlauwens.github.io/ThinkJulia.jl/latest/book.html&#34;&gt;“Think Julia: How to Think Like a Computer Scientist”&lt;/a&gt; by Ben Lauwens and Allen Downey.
+&lt;li&gt;&lt;a href=&#34;https://benlauwens.github.io/ThinkJulia.jl/latest/book.html&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;Think Julia: How to Think Like a Computer Scientist&amp;rdquo;&lt;/a&gt; by Ben Lauwens and Allen Downey.
+
 &lt;ul&gt;
-&lt;li&gt;this is the only “pure computer science” Julia book in my list.&lt;/li&gt;
+&lt;li&gt;this is the only &amp;ldquo;pure computer science&amp;rdquo; Julia book in my list.&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://ucidatascienceinitiative.github.io/IntroToJulia/&#34;&gt;“A Deep Introduction to Julia for Data Science and Scientific Computing”&lt;/a&gt; by Chris Rackauckas.
+&lt;li&gt;&lt;a href=&#34;http://ucidatascienceinitiative.github.io/IntroToJulia/&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;A Deep Introduction to Julia for Data Science and Scientific Computing&amp;rdquo;&lt;/a&gt; by Chris Rackauckas.
+
 &lt;ul&gt;
-&lt;li&gt;the author is very active in Julia space; this material seems very good (if you’re ok with notebooks).&lt;/li&gt;
+&lt;li&gt;the author is very active in Julia space; this material seems very good (if you&amp;rsquo;re ok with notebooks).&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/h-Klok/StatsWithJuliaBook&#34;&gt;“Statistics with Julia: Fundamentals for Data Science, Machine Learning and Artificial Intelligence”&lt;/a&gt; by Hayden Klok and Yoni Nazarathy (&lt;a href=&#34;https://web.archive.org/web/20190902200758/https://people.smp.uq.edu.au/YoniNazarathy/julia-stats/StatisticsWithJulia.pdf&#34;&gt;2019 draft PDF free from the authors&lt;/a&gt;).
+&lt;li&gt;&lt;a href=&#34;https://github.com/h-Klok/StatsWithJuliaBook&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;Statistics with Julia: Fundamentals for Data Science, Machine Learning and Artificial Intelligence&amp;rdquo;&lt;/a&gt; by Hayden Klok and Yoni Nazarathy (&lt;a href=&#34;https://web.archive.org/web/20190902200758/https://people.smp.uq.edu.au/YoniNazarathy/julia-stats/StatisticsWithJulia.pdf&#34; target=&#34;_blank&#34;&gt;2019 draft PDF free from the authors&lt;/a&gt;).
+
 &lt;ul&gt;
-&lt;li&gt;based on a statistics course at the University of Queensland; Julia crash course in Chapter 1 and a handy “How-to” in Appendix A.&lt;/li&gt;
+&lt;li&gt;based on a statistics course at the University of Queensland; Julia crash course in Chapter 1 and a handy &amp;ldquo;How-to&amp;rdquo; in Appendix A.&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.chkwon.net/julia/&#34;&gt;“Julia Programming for Operations Research, 2nd ed.”&lt;/a&gt; by Changhyun Kwon.
+&lt;li&gt;&lt;a href=&#34;http://www.chkwon.net/julia/&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;Julia Programming for Operations Research, 2nd ed.&amp;rdquo;&lt;/a&gt; by Changhyun Kwon.
+
 &lt;ul&gt;
 &lt;li&gt;another Julia crash course chapter; JuMP workship.&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-&lt;div id=&#34;reference-docs&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;reference docs:&lt;/h4&gt;
+
+&lt;h4 id=&#34;reference-docs&#34;&gt;reference docs:&lt;/h4&gt;
+
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://docs.julialang.org/en/v1/&#34;&gt;“Julia 1.2 Documentation”&lt;/a&gt;, HTML and PDF.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://en.wikibooks.org/wiki/Introducing_Julia&#34;&gt;“Introducing Julia”&lt;/a&gt; Wikibook, a nice complement to the language manual.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.julialang.org/en/v1/&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;Julia 1.2 Documentation&amp;rdquo;&lt;/a&gt;, HTML and PDF.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://en.wikibooks.org/wiki/Introducing_Julia&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;Introducing Julia&amp;rdquo;&lt;/a&gt; Wikibook, a nice complement to the language manual.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-&lt;div id=&#34;video-lectures-talks&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;video lectures, talks:&lt;/h4&gt;
+
+&lt;h4 id=&#34;video-lectures-talks&#34;&gt;video lectures, talks:&lt;/h4&gt;
+
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://youtu.be/8h8rQyEpiZA&#34;&gt;“Intro to Julia 1.0”&lt;/a&gt; by Jane Herriman of Julia Computing.&lt;/li&gt;
-&lt;li&gt;Videos from &lt;a href=&#34;https://www.youtube.com/user/JuliaLanguage/videos?view=0&amp;amp;sort=dd&amp;amp;flow=grid&#34;&gt;JuliaCon 2019&lt;/a&gt; – some good stuff, particularly by Julia creators.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://youtu.be/8h8rQyEpiZA&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;Intro to Julia 1.0&amp;rdquo;&lt;/a&gt; by Jane Herriman of Julia Computing.&lt;/li&gt;
+&lt;li&gt;Videos from &lt;a href=&#34;https://www.youtube.com/user/JuliaLanguage/videos?view=0&amp;amp;sort=dd&amp;amp;flow=grid&#34; target=&#34;_blank&#34;&gt;JuliaCon 2019&lt;/a&gt; &amp;ndash; some good stuff, particularly by Julia creators.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-&lt;div id=&#34;online-practice&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;online practice:&lt;/h4&gt;
+
+&lt;h4 id=&#34;online-practice&#34;&gt;online practice:&lt;/h4&gt;
+
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.juliabox.com&#34;&gt;Julia Box&lt;/a&gt; from Julia Computing has a free plan.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://exercism.io/tracks/julia&#34;&gt;Julia exercism track&lt;/a&gt; looks like a good &lt;a href=&#34;https://exercism.io/tracks/julia/exercises&#34;&gt;collection of exercises&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.juliabox.com&#34; target=&#34;_blank&#34;&gt;Julia Box&lt;/a&gt; from Julia Computing has a free plan.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://exercism.io/tracks/julia&#34; target=&#34;_blank&#34;&gt;Julia exercism track&lt;/a&gt; looks like a good &lt;a href=&#34;https://exercism.io/tracks/julia/exercises&#34; target=&#34;_blank&#34;&gt;collection of exercises&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
 &lt;div class=&#34;footnotes&#34;&gt;
+
 &lt;hr /&gt;
+
 &lt;ol&gt;
-&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;Julia packages are maintained as git repos.&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:Julia-packages-a&#34;&gt;Julia packages are maintained as git repos. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:Julia-packages-a&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
@@ -136,7 +156,7 @@
     <item>
       <title>How do you say &#34;0/1 knapsack&#34; in four languages?</title>
       <link>/tutorials/study_julia_with_me/knapsack_benchmark/</link>
-      <pubDate>Thu, 12 Sep 2019 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 02 Oct 2019 00:00:00 +0000</pubDate>
       <guid>/tutorials/study_julia_with_me/knapsack_benchmark/</guid>
       <description>
 
@@ -146,7 +166,7 @@
 &lt;div id=&#34;preview&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Preview&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Julia, Python, Java, and C++ are compared for implementing the same iterative algorithm (knapsack solver) .&lt;/li&gt;
+&lt;li&gt;Julia, Python, Java, and C++ are compared for implementing the same iterative algorithm (knapsack solver).&lt;/li&gt;
 &lt;li&gt;The implementation does virtually no memory allocation, so what’s being tested is the speed of looping and array access.&lt;/li&gt;
 &lt;li&gt;Julia is &lt;em&gt;fast&lt;/em&gt; (although not quite as fast as C++ or Java). Python, however, comes out looking &lt;em&gt;horribly slow&lt;/em&gt; by comparison.&lt;/li&gt;
 &lt;/ul&gt;
@@ -169,7 +189,7 @@
 We have &lt;span class=&#34;math inline&#34;&gt;\(n\)&lt;/span&gt; items of integral&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; weights &lt;span class=&#34;math inline&#34;&gt;\(w_i &amp;gt; 0\)&lt;/span&gt; and value &lt;span class=&#34;math inline&#34;&gt;\(v_i\)&lt;/span&gt;. &lt;span class=&#34;math inline&#34;&gt;\(W\)&lt;/span&gt; is the knapsack weight capacity. Each item is either chosen or not, hence the “0/1” in the name.&lt;/p&gt;
 &lt;p&gt;Since all &lt;span class=&#34;math inline&#34;&gt;\(x_i\)&lt;/span&gt; are restricted to be binary (boolean), this is an integer linear problem with a search space size of &lt;span class=&#34;math inline&#34;&gt;\(2^n\)&lt;/span&gt;. It can be given to an MILP solver. But because of a simple nested structure the problem also has a straightforward dynamic programming (DP) solution that I can code in a few lines.&lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&#34;dynamic-programming-algorithm&#34; class=&#34;section level2&#34;&gt;
+&lt;div id=&#34;DP&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Dynamic programming algorithm&lt;/h2&gt;
 &lt;p&gt;Assume the problem has been solved for all knapsack capacities up to some &lt;span class=&#34;math inline&#34;&gt;\(w\)&lt;/span&gt; while making use of only a subset of items &lt;span class=&#34;math inline&#34;&gt;\(1, \dots, j\)&lt;/span&gt;, and let &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; be the solution, i.e. the maximum achievable knapsack value. Now consider all smaller subproblems without item &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(V(w&amp;#39;, j-1)\)&lt;/span&gt; for all possible &lt;span class=&#34;math inline&#34;&gt;\(w&amp;#39;\)&lt;/span&gt;. &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(V(w&amp;#39;, j-1)\)&lt;/span&gt; are connected with a single “move” of looking at item &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; and deciding to either include it in the optimal selection for knapsack &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; or not:&lt;/p&gt;
 &lt;ul&gt;
@@ -200,8 +220,8 @@ together with a boundary condition for &lt;span class=&#34;math inline&#34;&gt;\
 &lt;p&gt;(The above could be stated more compactly if &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; started at 0 and &lt;span class=&#34;math inline&#34;&gt;\(V(w,0)\)&lt;/span&gt; were defined as 0.)&lt;/p&gt;
 &lt;p&gt;To capture inputs into a problem instance, I will use an array of Julia &lt;code&gt;struct&lt;/code&gt;s. Although I could get away with a list or a tuple, I think a &lt;code&gt;struct&lt;/code&gt; makes for more readable example code:&lt;/p&gt;
 &lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;struct Item
-    value   ::Int64;
-    weight  ::Int64;
+    value   ::Int64
+    weight  ::Int64
 end&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;If &lt;span class=&#34;math inline&#34;&gt;\(V(w, j)\)&lt;/span&gt; is represented as a matrix (another first-class citizen in Julia), a non-recursive implementation would be to sweep the space of &lt;span class=&#34;math inline&#34;&gt;\(w\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(j\)&lt;/span&gt; going from smaller to larger item sets:&lt;/p&gt;
 &lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function opt_value(W ::Int64, items ::Array{Item}) ::Int64
@@ -393,6 +413,514 @@ Figure 1: Calculation time as a function of knapsack problem size. (Note that bo
 &lt;ol&gt;
 &lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;Restricting weights to be integral is not crucial to my test here but could make the problem statement acceptable to more solver types.&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;li id=&#34;fn2&#34;&gt;&lt;p&gt;Some might argue that &lt;span class=&#34;math inline&#34;&gt;\(x_i\)&lt;/span&gt;’s are in fact &lt;em&gt;more&lt;/em&gt; than half of the solution. Ok, so I cheat a lot.&lt;a href=&#34;#fnref2&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Julia type annotations: what Python &#39;type hints&#39; wish they were</title>
+      <link>/tutorials/study_julia_with_me/type_annotations/</link>
+      <pubDate>Sun, 06 Oct 2019 00:00:00 +0000</pubDate>
+      <guid>/tutorials/study_julia_with_me/type_annotations/</guid>
+      <description>
+
+&lt;p&gt;Julia is unusual in that it is a dynamically typed language (meaning you don&amp;rsquo;t have to declare variable types &amp;ldquo;statically&amp;rdquo;, in program text), while at the same time supporting a rich mechanism for communicating type information to the JIT compiler and runtime. Effectively, Julia has both dynamic and static typing. When provided, static type information can have non-trivial impact on Julia code behavior, both in terms of functionality and performance.&lt;/p&gt;
+
+&lt;p&gt;This distinctive typing seems to be one of the defining features of Julia. To keep tutorials to a reasonable length, I cover basics here and delay further case studies (parameterized types, overloading, multiple dispatch) until the next one.&lt;/p&gt;
+
+&lt;h4 id=&#34;preview&#34;&gt;Preview&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A quick tour of Julia type taxonomy.&lt;/li&gt;
+&lt;li&gt;Drill into &lt;em&gt;type annotations&lt;/em&gt; and understand their impact on: code documentation, correctness, performance.&lt;/li&gt;
+&lt;li&gt;Julia functions are always &amp;ldquo;virtual&amp;rdquo;. Julia supports &lt;em&gt;functional OOP&lt;/em&gt; as a &lt;strong&gt;&lt;em&gt;paradigm&lt;/em&gt;&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;types-and-inheritance&#34;&gt;Types and inheritance&lt;/h1&gt;
+
+&lt;p&gt;Everything in Julia that is a value also has a type and the types are first-class objects (think &lt;code&gt;T.class&lt;/code&gt; in Java or &lt;code&gt;T.__type__&lt;/code&gt; in Python). Subtyping relationships are set up and queried with the &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Core.:%3C:&#34; target=&#34;_blank&#34;&gt;&amp;lt;: subtype operator&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; typeof(1)
+Int64
+
+julia&amp;gt; supertype(typeof(1))
+Signed
+
+julia&amp;gt; typeof(1) &amp;lt;: supertype(typeof(2))
+true
+
+julia&amp;gt; Int64 &amp;lt;: Signed
+true
+
+julia&amp;gt; Int64 &amp;gt;: Signed # there is also a &#39;supertype operator&#39;, used trivially here but more useful for parameterized types
+false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Types known to a given runtime session form a tree (a directed graph, actually) rooted at &lt;code&gt;Any&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;speaking-of-type-trees&#34;&gt;Speaking of [type] trees&lt;/h3&gt;
+
+&lt;p&gt;I found it handy to explore subtrees within this graph of types using the following helper function. It builds on &lt;code&gt;subtypes()&lt;/code&gt; from &lt;a href=&#34;https://github.com/JuliaStdlibs/InteractiveUtils.jl&#34; target=&#34;_blank&#34;&gt;InteractiveUtils.jl&lt;/a&gt;, which would be already imported and availalbe if you&amp;rsquo;re in REPL but may need an &lt;code&gt;import&lt;/code&gt; in a script:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;import InteractiveUtils
+
+function subtypetree(T, depth = 0) # you might also want to add &#39;max_depth&#39;...
+    println(&#39;\t&#39; ^ depth, T)
+    for t in InteractiveUtils.subtypes(T)
+        subtypetree(t, depth + 1)
+    end
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;arithmetic-types&#34;&gt;Arithmetic types&lt;/h2&gt;
+
+&lt;p&gt;There is a collection of (ahem) typical types for arithmetic:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Int8&lt;/code&gt;, &amp;hellip;, &lt;code&gt;Int64&lt;/code&gt;, &lt;code&gt;Int128&lt;/code&gt;, plus unsigned variants,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Float16&lt;/code&gt;, &lt;code&gt;Float32&lt;/code&gt;, &lt;code&gt;Float64&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BigInt&lt;/code&gt; and &lt;code&gt;BigFloat&lt;/code&gt;,&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;organized in this hierarchy:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; subtypetree(Number)
+Number
+    Complex
+    Real
+        AbstractFloat
+            BigFloat
+            Float16
+            Float32
+            Float64
+        AbstractIrrational
+            Irrational
+        Integer
+            Bool
+            Signed
+                BigInt
+                Int128
+                Int16
+                Int32
+                Int64
+                Int8
+            Unsigned
+                UInt128
+                UInt16
+                UInt32
+                UInt64
+                UInt8
+        Rational
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first thing that struck me here is Julia&amp;rsquo;s keeping with its emphasis on performance: Julia integers are &lt;em&gt;not&lt;/em&gt; &amp;ldquo;big&amp;rdquo; by default (contrast with &lt;a href=&#34;https://docs.python.org/3/library/stdtypes.html#typesnumeric&#34; target=&#34;_blank&#34;&gt;Python 3&lt;/a&gt;). And the rich spectrum of arithmetic bit widths is meaningful: &lt;code&gt;Float16&lt;/code&gt; and &lt;code&gt;Float32&lt;/code&gt; could be useful for GPU computing, while wide &lt;code&gt;Int&lt;/code&gt;-types could work with SSE/AVX/etc instructions and/or support efficient interfacing with native code. (I say &amp;ldquo;could&amp;rdquo; because I have no idea yet if that&amp;rsquo;s really the case.)&lt;/p&gt;
+
+&lt;h2 id=&#34;primitive-types&#34;&gt;Primitive types&lt;/h2&gt;
+
+&lt;p&gt;Turns out all of these arithmetic types are not what you&amp;rsquo;d call &amp;ldquo;built into the compiler&amp;rdquo; but are rather defined in the language itself, as standard primitive types&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:This-is-what-the&#34;&gt;&lt;a href=&#34;#fn:This-is-what-the&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;primitive type Bool  &amp;lt;: Integer   8 end
+primitive type Int64 &amp;lt;: Signed   64 end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The syntax is&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;primitive type «name» &amp;lt;: «supertype» «bits» end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where the supertype is optional (and defaults to &lt;code&gt;Any&lt;/code&gt;). I can apparently define my own primitive type, a 24-bit integer&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:As-I-write-this&#34;&gt;&lt;a href=&#34;#fn:As-I-write-this&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; primitive type Int24 &amp;lt;: Signed 24 end
+
+julia&amp;gt; subtypetree(Number)
+Number
+    Complex
+    Real
+        ...
+        Integer
+            Bool
+            Signed
+                ...
+                Int24
+                ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;(This is great&amp;hellip; but how do I construct an &lt;code&gt;Int24&lt;/code&gt; or define arithmetic? Julia docs are not clear on that &amp;ndash; I think I know how to proceed but that is outside of today&amp;rsquo;s scope.)&lt;/p&gt;
+
+&lt;h2 id=&#34;concrete-vs-abstract-types&#34;&gt;Concrete vs abstract types&lt;/h2&gt;
+
+&lt;p&gt;I&amp;rsquo;ve already used a &lt;code&gt;struct&lt;/code&gt; in the &lt;a href=&#34;../knapsack_benchmark#DP&#34;&gt;knapsack benchmark&lt;/a&gt; to represent knapsack items as instances of this type:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;struct Item
+    value   ::Int64
+    weight  ::Int64
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These are straightforward: &lt;code&gt;Item&lt;/code&gt;s contain fields (the type is &lt;strong&gt;composite&lt;/strong&gt;) and can be instantiated (the type is &lt;strong&gt;concrete&lt;/strong&gt;). They can also be &lt;em&gt;introspected&lt;/em&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; sizeof(Item)
+16
+
+julia&amp;gt; fieldcount(Item)
+2
+
+julia&amp;gt; fieldnames(Item)
+(:value, :weight)
+
+julia&amp;gt; fieldtypes(Item)
+(Int64, Int64)
+
+julia&amp;gt; function showfields(T)
+           for i in 1 : fieldcount(T)
+               println(fieldoffset(T, i), &#39;\t&#39;, fieldname(T, i), &amp;quot;\t::&amp;quot;, fieldtype(T, i))
+           end
+       end
+showfields (generic function with 1 method)
+
+julia&amp;gt; showfields(Item)
+0   value   ::Int64
+8   weight  ::Int64
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;but a few things here are less obvious:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;struct&lt;/code&gt;s default to being &lt;strong&gt;immutable&lt;/strong&gt; unless explicitly marked as &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#mutable%20struct&#34; target=&#34;_blank&#34;&gt;mutable&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;they are always &lt;strong&gt;final&lt;/strong&gt;, i.e. cannot be further inherited from&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:Just-like-classe&#34;&gt;&lt;a href=&#34;#fn:Just-like-classe&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;. (This is also true of primitive and, in fact, any non-abstract types.)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Defaulting to immutability is not an arbitrary choice. It can be exploited by the compiler to optimize performance and memory usage by &lt;a href=&#34;https://en.wikipedia.org/wiki/String_interning&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;interning&amp;rdquo;&lt;/a&gt; values that are &lt;em&gt;indistinguishable&lt;/em&gt; if they are equal. Compare&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; i1 = Item(1, 2)
+Item(1, 2)
+
+julia&amp;gt; i2 = Item(1, 2)
+Item(1, 2)
+
+julia&amp;gt; i1 == i2  # equal
+true
+
+julia&amp;gt; i1 === i2 # actually, the same &amp;quot;interned&amp;quot; object
+true
+
+julia&amp;gt; i1 == Item(1, 3)
+false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;with&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; mutable struct MutableItem # mutable version of &#39;Item&#39;
+           value   ::Int64
+           weight  ::Int64
+       end
+
+julia&amp;gt; i1 = MutableItem(1, 2)
+MutableItem(1, 2)
+
+julia&amp;gt; i2 = MutableItem(1, 2)
+MutableItem(1, 2)
+
+julia&amp;gt; i1 == i2  # not equal!
+false # &amp;lt;- surprised? looks like &#39;==&#39; needs to be defined for custom mutable types...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Julia also has &lt;strong&gt;abstract types&lt;/strong&gt; which can&amp;rsquo;t be instantiated, but are instead used to organize the type graph via shared parent nodes. You could also say they act as &amp;ldquo;marker&amp;rdquo; or &amp;ldquo;trait&amp;rdquo; base classes, like &lt;code&gt;Number&lt;/code&gt; or &lt;code&gt;Signed&lt;/code&gt; above. Since all non-abstract Julia types are &lt;em&gt;final&lt;/em&gt;, any supertype is necessarily an abstract type (&lt;code&gt;Any&lt;/code&gt; if not specified explicitly).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; abstract type MyInt &amp;lt;: Int32 end
+ERROR: invalid subtyping in definition of MyInt
+Stacktrace:
+ [1] ...
+
+julia&amp;gt; abstract type MyInt &amp;lt;: supertype(Int32) end
+
+julia&amp;gt; subtypetree(Number)
+Number
+    Complex
+    Real
+        ...
+        Integer
+            Bool
+            Signed
+                ...
+                Int24
+                ...
+                MyInt
+        ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;type-parameters&#34;&gt;Type parameters&lt;/h2&gt;
+
+&lt;p&gt;To various degrees, all of the three major categories of Julia types (primitive, composite, abstract) are available in other dynamic languages, either natively or via some libraries. Julia also offers something that gets it if not into the realm of uber-powerful (and uber-complicated) C++ metaprogramming, then definitely into the realm of &lt;a href=&#34;https://en.wikipedia.org/wiki/Generics_in_Java&#34; target=&#34;_blank&#34;&gt;Java generics&lt;/a&gt;: all three type categories can be further &lt;em&gt;parameterized&lt;/em&gt; with other types and values. I&amp;rsquo;ll explore this in a future tutorial.&lt;/p&gt;
+
+&lt;h1 id=&#34;type-annotations&#34;&gt;Type annotations&lt;/h1&gt;
+
+&lt;p&gt;And now to the meat of this tutorial: type annotations. A &lt;em&gt;type annotation&lt;/em&gt; in Julia looks like &lt;code&gt;&amp;lt;thing&amp;gt;::&amp;lt;type&amp;gt;&lt;/code&gt;&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:I-use-an-extra-b&#34;&gt;&lt;a href=&#34;#fn:I-use-an-extra-b&#34;&gt;4&lt;/a&gt;&lt;/sup&gt; &amp;ndash; it is an in-place modifier to a &lt;code&gt;&amp;lt;thing&amp;gt;&lt;/code&gt; introduced by the &lt;code&gt;::&lt;/code&gt; operator.&lt;/p&gt;
+
+&lt;h2 id=&#34;tasvsconv&#34;&gt;Typeasserts vs variable declarations&lt;/h2&gt;
+
+&lt;p&gt;The way I read the documentation, Julia type annotations can be applied to two types of &lt;code&gt;&amp;lt;thing&amp;gt;&lt;/code&gt;s:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;[&lt;strong&gt;typeassert&lt;/strong&gt;] expressions computing a value (and recall that everything in Julia is an &lt;a href=&#34;https://en.wikipedia.org/wiki/Expression_(computer_science)&#34; target=&#34;_blank&#34;&gt;expression&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;x = y ::Float64 # promises to the runtime that at this point in the execution &#39;y&#39; will be a Float64
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;[&lt;strong&gt;variable type declaration&lt;/strong&gt;] left-hand sides of assignments or declarations that introduce (local) variables:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;x ::Float64 = y # declares a new local &#39;x&#39;, marks it as always containing Float64 values, and initializes with &#39;y&#39; converted to Float64
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This second case also covers typed fields of &lt;code&gt;struct&lt;/code&gt;s and named tuples:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;struct Point
+  x ::Float64 # this field will always contain only Float64 values
+  y           # this field can contain any Julia value
+end
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The first case is a &lt;em&gt;typeassert&lt;/em&gt;. The second kind of annotation marks the name/field to its left as constrained to values compatible with the given type, and also ensures that throughout the variable&amp;rsquo;s scope all subsequent initializations of and assignments to it are filtered through an implicit &lt;em&gt;conversion&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;As a consequence, there are differences in runtime behavior and the information communicated to the system:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;With a &lt;em&gt;typeassert&lt;/em&gt; the compiler will create code that at runtime will &lt;em&gt;check&lt;/em&gt; the annotated value for type compatibility and throw a &lt;code&gt;TypeError&lt;/code&gt; if the check fails &amp;ndash; but it will &lt;em&gt;not&lt;/em&gt; attempt to coerce the computed value to the annotation type in any way. Type-asserted syntax &lt;tt&gt;&amp;lt;exp&amp;gt;::T&lt;/tt&gt; is precisely equivalent to a call, possibly inlined, to &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Core.typeassert&#34; target=&#34;_blank&#34;&gt;typeassert(&amp;lt;exp&amp;gt;, T)&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;With a &lt;em&gt;variable type declaration&lt;/em&gt; any assignment &lt;tt&gt;&amp;lt;lhs&amp;gt;::T&amp;nbsp;=&amp;nbsp;&amp;lt;rhs&amp;gt;&lt;/tt&gt; will effectively translate into &lt;tt&gt;&amp;lt;lhs&amp;gt;::T&amp;nbsp;=&amp;nbsp;convert(T, &amp;lt;rhs&amp;gt;)&lt;/tt&gt;, i.e. contain a call, possibly inlined, to &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Base.convert&#34; target=&#34;_blank&#34;&gt;convert(T, &amp;lt;rhs&amp;gt;)&lt;/a&gt;. And at runtime, every such assignment will attempt to coerce its right hand-side value to &lt;tt&gt;T&lt;/tt&gt;, possibly resulting in a value that&amp;rsquo;s only an approximation. Should this conversion fail, an exception will be thrown:
+
+&lt;ul&gt;
+&lt;li&gt;if no such conversion exists at all, a &lt;code&gt;MethodError&lt;/code&gt; is thrown;&lt;/li&gt;
+&lt;li&gt;if &lt;tt&gt;T&lt;/tt&gt; is an &lt;code&gt;Integer&lt;/code&gt; (sub)type and cannot represent the expression value, an &lt;code&gt;InexactError&lt;/code&gt; is thrown.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;To appreciate the difference, compare&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; function foo()
+         x ::Float64 = 1 # implies &#39;convert(Float64, 1)&#39;
+         x, typeof(x)
+       end
+foo (generic function with 1 method)
+
+julia&amp;gt; foo()
+(1.0, Float64)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;with&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; function foo()
+         x = 1 ::Float64 # implies &#39;typeassert(1, Float64)&#39;
+         x, typeof(x)
+       end
+foo (generic function with 1 method)
+
+julia&amp;gt; foo()
+ERROR: TypeError: in typeassert, expected Float64, got Int64
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Literal &lt;tt&gt;1&lt;/tt&gt; is of a (machine-dependent) &lt;code&gt;Int&lt;/code&gt; type:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; typeof(1)
+Int64
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and even though it can be converted to a &lt;code&gt;Float64&lt;/code&gt; without loss, such a conversion is not even attempted in the second version of &lt;code&gt;foo()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    As I write this, Julia does not yet support type declarations for &lt;em&gt;global&lt;/em&gt; variables &amp;ndash; this is the reason I wrapped the above examples into functions.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&#34;what-about-function-signatures&#34;&gt;What about function signatures?&lt;/h2&gt;
+
+&lt;p&gt;Unsurprisingly, it is also possible to type-annotate function arguments and return types:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function bar(x ::Float64) ::Float32
+    sin(2π * x)
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;function-arguments&#34;&gt;Function arguments&lt;/h3&gt;
+
+&lt;p&gt;If you&amp;rsquo;re coming from languages like C++ or Java where type conversions can happen as part of argument passing, you might think that &lt;tt&gt;x ::Float64&lt;/tt&gt; in &lt;code&gt;bar()&lt;/code&gt; is like a local (typed) variable declaration, similar to the &lt;a href=&#34;#tasvsconv&#34;&gt;second case above&lt;/a&gt;, perhaps implying a call to something like &lt;strong&gt;convert(Float64, x)&lt;/strong&gt; everywhere before &lt;code&gt;bar()&lt;/code&gt; is invoked. That is not the case in Julia: no conversions ever take place as part of Julia function argument passing. In fact, Julia argument type annotations are actually more like those typeasserts: &lt;code&gt;foo(x)&lt;/code&gt; will &lt;em&gt;expect&lt;/em&gt; &lt;code&gt;x&lt;/code&gt; to be a &lt;code&gt;Float64&lt;/code&gt; already.&lt;/p&gt;
+
+&lt;p&gt;There is a subtle difference from an in-place typeassert, however: with the above definition of &lt;code&gt;bar()&lt;/code&gt; there will be no need to generate an implicit call to &lt;strong&gt;typeassert()&lt;/strong&gt; at all because I will &lt;em&gt;only&lt;/em&gt; be allowed to call it with &lt;code&gt;Float64&lt;/code&gt;s. If I need &lt;tt&gt;sin(2π&amp;nbsp;*&amp;nbsp;x)&lt;/tt&gt; for a &lt;code&gt;Float64&lt;/code&gt; input &lt;code&gt;x&lt;/code&gt;, no problem. For any other type&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:To-simply-the-na&#34;&gt;&lt;a href=&#34;#fn:To-simply-the-na&#34;&gt;5&lt;/a&gt;&lt;/sup&gt;, say, &lt;code&gt;Int64&lt;/code&gt;, I will get a flat rejection not because a method call was tried and failed during &lt;code&gt;Int64&lt;/code&gt;-to-&lt;code&gt;Float64&lt;/code&gt; input type conversion (&lt;code&gt;TypeError&lt;/code&gt;) but because the requisite method (named &amp;ldquo;foo&amp;rdquo; and taking a single argument of type &lt;code&gt;Int64&lt;/code&gt;) did not exist (&lt;code&gt;MethodError&lt;/code&gt;). And since &lt;code&gt;Float64&lt;/code&gt; is a concrete type and, again, all concrete types are &lt;em&gt;final&lt;/em&gt; in Julia, the universe of possible outcomes here shrinks dramatically:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; bar(0.75)
+-1.0f0
+
+julia&amp;gt; bar(1.)
+-2.4492937f-16
+
+julia&amp;gt; bar(1)
+ERROR: MethodError: no method matching bar(::Int64)
+Closest candidates are:
+  bar(::Float64) at ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This may seem a little draconian, but it is connected to how Julia&amp;rsquo;s &lt;em&gt;multiple dispatch&lt;/em&gt; works and is further ameliorated by Julia&amp;rsquo;s system of &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/conversion-and-promotion/&#34; target=&#34;_blank&#34;&gt;promoting function arguments to a common type&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;function-return-types&#34;&gt;Function return types&lt;/h3&gt;
+
+&lt;p&gt;Specifying &lt;code&gt;bar()&lt;/code&gt; return type to be &lt;code&gt;Float32&lt;/code&gt; is a way to ensure that value being returned is passed through a &lt;strong&gt;convert(Float32, &amp;hellip;)&lt;/strong&gt;. Whether this is desired depends on software design. I can imagine situations where it could be used as a way to safely return &amp;ldquo;special&amp;rdquo; values:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function sqrt_or_nothing(x ::Float64) ::Union{Float64, Nothing}
+    x &amp;lt; 0.0 ? nothing : √x
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; @show sqrt_or_nothing(2.0)
+sqrt_or_nothing(2.0) = 1.4142135623730951
+1.414213562373095
+
+julia&amp;gt; @show sqrt_or_nothing(-2.0)
+sqrt_or_nothing(-2.0) = nothing
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Alternatively, it might be easier to reason about your code behavior if most functions are strict about their return value types. Otherwise, it seems like it could be easy in Julia to accidentally return &lt;em&gt;different types along different value return paths&lt;/em&gt;, which could cause inefficiencies or maybe even errors downstream:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function bar_clipped(x ::Float64)
+    x &amp;lt; 0.0 ? 0 : sin(2π * x)
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; typeof(bar_clipped(0.75))
+Float64
+
+julia&amp;gt; typeof(bar_clipped(-0.75))
+Int64 # oops, use 0.0 literal instead of 0 above
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;when-are-implicit-conversions-done&#34;&gt;When are implicit conversions done?&lt;/h2&gt;
+
+&lt;p&gt;Most of the cases of implicit calls to &lt;code&gt;convert(...)&lt;/code&gt; have already been mentioned. Julia &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/conversion-and-promotion/&#34; target=&#34;_blank&#34;&gt;documentation&lt;/a&gt; offers this complete list:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;Assigning to an array converts to the array&amp;rsquo;s element type.&lt;/li&gt;
+&lt;li&gt;Assigning to a field of an object converts to the declared type of the field.&lt;/li&gt;
+&lt;li&gt;Constructing an object with new converts to the object&amp;rsquo;s declared field types.&lt;/li&gt;
+&lt;li&gt;Assigning to a variable with a declared type (e.g. local x::T) converts to that type.&lt;/li&gt;
+&lt;li&gt;A function with a declared return type converts its return value to that type.&lt;/li&gt;
+&lt;li&gt;Passing a value to ccall converts it to the corresponding argument type.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&#34;case-study-functional-oop&#34;&gt;Case study: functional OOP&lt;/h1&gt;
+
+&lt;p&gt;Now that we know every function argument in Julia is always associated with a type, that raises a question: is it possible for a Julia runtime session to contain multiple functions that all have the same name and input signature except for types of some (a few) parameters?&lt;/p&gt;
+
+&lt;p&gt;Not only is the answer &amp;ldquo;yes&amp;rdquo;, it is actually kind of like &amp;ldquo;yes, it is meant to happen &lt;em&gt;a lot&lt;/em&gt;&amp;ldquo;: Julia thrives on maintaining multiple versions of the &amp;ldquo;same&amp;rdquo; function (called &amp;ldquo;methods&amp;rdquo;) and figuring out which version to invoke for a given set of inputs. Enter &amp;ldquo;multiple dispatch&amp;rdquo;, a &lt;strong&gt;&lt;em&gt;core paradigm&lt;/em&gt;&lt;/strong&gt; of Julia programming&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:From-what-I-can&#34;&gt;&lt;a href=&#34;#fn:From-what-I-can&#34;&gt;6&lt;/a&gt;&lt;/sup&gt;. The intuition is that Julia functions are essentially &amp;ldquo;always virtual&amp;rdquo;: unlike other languages where a class method needs to be marked in a special way to support &amp;ldquo;late binding&amp;rdquo; (method dispatch based on runtime, not compile, type of an object), Julia runtime system always dispatches &lt;em&gt;all&lt;/em&gt; functions on the &lt;em&gt;concrete runtime types&lt;/em&gt; of &lt;em&gt;all&lt;/em&gt; their arguments. Because no argument position is &amp;ldquo;special&amp;rdquo; and the method does not &amp;ldquo;belong&amp;rdquo; to any particular parameter type, this form of polymorphism usually opts for language design with standalone functions, that is functions that do not live inside any &amp;ldquo;classes&amp;rdquo;. Some people call such designs &amp;ldquo;functional OOP&amp;rdquo;. It makes a lot of sense for math-style coding due to symmetries in function parameters.&lt;/p&gt;
+
+&lt;p&gt;Now, one way to ease into Julia multiple dispatch is to consider its simplest edge case: &lt;em&gt;single&lt;/em&gt; dispatch.&lt;/p&gt;
+
+&lt;h2 id=&#34;serializing-julia-objects-to-json&#34;&gt;Serializing Julia objects to JSON&lt;/h2&gt;
+
+&lt;p&gt;I am going to implement a simple serializer of Julia objects to &lt;a href=&#34;https://en.wikipedia.org/wiki/JSON&#34; target=&#34;_blank&#34;&gt;JSON&lt;/a&gt;. This will be a &lt;a href=&#34;https://github.com/vladium/study_julia_with_me/tree/master/type_annotations/Tutorial.jl&#34; target=&#34;_blank&#34;&gt;toy example&lt;/a&gt;, useless in any kind of production setting. My initial point is the &amp;ldquo;interface&amp;rdquo; method &lt;tt&gt;to_JSON()&lt;/tt&gt; calling &lt;tt&gt;visit()&lt;/tt&gt; that in turn starts as a single fallback that always fails:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function to_JSON(io ::IO, obj)
+    visit(obj, io)
+end
+
+function visit(obj, io ::IO)
+    error(&amp;quot;default visit() called for obj type: &amp;quot;, typeof(obj))
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I am going to anchor my design in the &amp;ldquo;virtual nature&amp;rdquo; of &lt;tt&gt;visit(obj,&amp;nbsp;io)&lt;/tt&gt;, with execution routed based on the runtime type of &lt;tt&gt;obj&lt;/tt&gt;. Looking at my &lt;code&gt;Number&lt;/code&gt; type trees above, I can see that this overload can cover JSON numbers and booleans:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function visit(obj ::Real, io ::IO)
+    print(io, obj)
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Strings are equally easy, but the method body needs to quote them&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:Note-that-this-t&#34;&gt;&lt;a href=&#34;#fn:Note-that-this-t&#34;&gt;7&lt;/a&gt;&lt;/sup&gt;, so I need a new method overload:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function visit(obj ::AbstractString, io ::IO)
+    print(io, &#39;\&amp;quot;&#39;)
+    print(io, obj)
+    print(io, &#39;\&amp;quot;&#39;)
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, for objects that can contain other objects the virtual nature of &lt;tt&gt;visit()&lt;/tt&gt; is critical:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function visit(obj ::AbstractArray, io ::IO)
+    print(io, &#39;[&#39;)
+    for i in 1 : length(obj)
+        i &amp;gt; 1 &amp;amp;&amp;amp; print(io, &amp;quot;, &amp;quot;)
+        visit(obj[i], io)
+    end
+    print(io, &#39;]&#39;)
+end
+
+function visit(obj ::AbstractDict, io ::IO)
+    print(io, &#39;{&#39;)
+    first = true
+    for (k, v) in obj
+        first ? first = false : print(io, &amp;quot;, &amp;quot;)
+        visit(k ::AbstractString, io) # assert that key is a string
+        print(io, &amp;quot; : &amp;quot;)
+        visit(v, io)
+    end
+    print(io, &#39;}&#39;)
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The nested &lt;tt&gt;visit()&lt;/tt&gt;s are already virtual, nothing else needs to be done to pick up a particular overload. There are also no &amp;ldquo;if-obj-type-is-&amp;hellip;&amp;rdquo; condition checks &amp;ndash; everything is as clean as in some &amp;ldquo;pure&amp;rdquo; textbook OOP.&lt;/p&gt;
+
+&lt;p&gt;This version is already functional:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; to_JSON(stdout, [1, false, zeros(2), [1.2345, 12, Dict(&amp;quot;a&amp;quot; =&amp;gt; true, &amp;quot;b&amp;quot; =&amp;gt; 2.3, &amp;quot;c&amp;quot; =&amp;gt; [1, 2, 3.4])]])
+[1, false, [0.0, 0.0], [1.2345, 12, {&amp;quot;c&amp;quot; : [1.0, 2.0, 3.4], &amp;quot;b&amp;quot; : 2.3, &amp;quot;a&amp;quot; : true}]]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Nice!&lt;/p&gt;
+
+&lt;p&gt;Now, suppose that I would like to extend the set of supported &amp;ldquo;JSON-compatible&amp;rdquo; Julia types to also include tuples. I want to output them as JSON arrays. All I need to do is add another overload:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;function visit(obj ::Tuple, io ::IO)
+    print(io, &#39;[&#39;)
+    for i in 1 : length(obj)
+        i &amp;gt; 1 &amp;amp;&amp;amp; print(io, &amp;quot;, &amp;quot;)
+        visit(obj[i], io)
+    end
+    print(io, &#39;]&#39;)
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; to_JSON(stdout, [(&amp;quot;tuple&amp;quot;, (1, &amp;quot;nested&amp;quot;, &amp;quot;tuple&amp;quot;))  1, false, zeros(2), [1.2345, 12, Dict(&amp;quot;a&amp;quot; =&amp;gt; true, &amp;quot;b&amp;quot; =&amp;gt; 2.3, &amp;quot;c&amp;quot; =&amp;gt; [1, 2, 3.4])]])
+[[&amp;quot;tuple&amp;quot;, [1, &amp;quot;nested&amp;quot;, &amp;quot;tuple&amp;quot;]], 1, false, [0.0, 0.0], [1.2345, 12, {&amp;quot;c&amp;quot; : [1.0, 2.0, 3.4], &amp;quot;b&amp;quot; : 2.3, &amp;quot;a&amp;quot; : true}]]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you&amp;rsquo;re interested in playing with various design alternatives yourself, you can find this entire example &lt;a href=&#34;https://github.com/vladium/study_julia_with_me/tree/master/type_annotations/Tutorial.jl&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+
+&lt;p&gt;In summary, I would like to call out some things about Julia typing that make Julia feel different from many languages:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Julia supports user-definable primitive types which do not need to be &amp;ldquo;boxed&amp;rdquo;.&lt;/li&gt;
+&lt;li&gt;All superclasses are abstract and all concrete classes are final.&lt;/li&gt;
+&lt;li&gt;Mutability is part of type definition, not of argument/variable/field.&lt;/li&gt;
+&lt;li&gt;Multiple dispatch is a primary paradigm (&amp;ldquo;all methods are virtual&amp;rdquo;). This design is consistent with lack of classic &amp;ldquo;objects&amp;rdquo; that forcefully bundle state with behavior.&lt;/li&gt;
+&lt;li&gt;Duck-typing also works in Julia, possibly even without any performance loss.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+
+&lt;hr /&gt;
+
+&lt;ol&gt;
+&lt;li id=&#34;fn:This-is-what-the&#34;&gt;This is what the public documentation says. Examining &lt;tt&gt;boot.jl&lt;/tt&gt; of my Julia install shows that many of these types are actually implemented in C. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:This-is-what-the&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:As-I-write-this&#34;&gt;As I write this, bit widths must be multiples of 8. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:As-I-write-this&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:Just-like-classe&#34;&gt;Just like classes marked with &lt;code&gt;final&lt;/code&gt; keyword in C++ or Java. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:Just-like-classe&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:I-use-an-extra-b&#34;&gt;I use an extra blank before &lt;code&gt;::&lt;/code&gt; but you don&amp;rsquo;t have to. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:I-use-an-extra-b&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:To-simply-the-na&#34;&gt;To simply the narrative, I am glossing over possibilities for &lt;em&gt;promotion&lt;/em&gt; of &lt;code&gt;x&lt;/code&gt; to another type. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:To-simply-the-na&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:From-what-I-can&#34;&gt;From what I can tell so far, that is. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:From-what-I-can&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:Note-that-this-t&#34;&gt;Note that this toy serializer doesn&amp;rsquo;t bother with backslash escapes, Unicode, etc. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:Note-that-this-t&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>

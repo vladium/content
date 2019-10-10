@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.4.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Vlad Roubtsov">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Julia is unusual in that it is a dynamically typed language (meaning you don&rsquo;t have to declare variable types &ldquo;statically&rdquo;, in program text), while at the same time supporting a rich mechanism for communicating type information to the JIT compiler and runtime. Effectively, Julia has both dynamic and static typing. When provided, static type information can have non-trivial impact on Julia code behavior, both in terms of functionality and performance.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/tutorials/study_julia_with_me/type_annotations/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#3f51b5">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.927aeb2a835eaf9005c1499820562316.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.c95fc539390309404839f86767b13568.css">
+  
+
+  
+  
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', 'UA-148582714-1', 'auto');
+      
+      ga('require', 'eventTracker');
+      ga('require', 'outboundLinkTracker');
+      ga('require', 'urlChangeTracker');
+      ga('send', 'pageview');
+    </script>
+    <script async src="https://www.google-analytics.com/analytics.js"></script>
+    
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/autotrack/2.4.1/autotrack.js" integrity="sha512-HUmooslVKj4m6OBu0OgzjXXr+QuFYy/k7eLI5jdeEy/F4RSgMn6XRWRGkFi5IFaFgy7uFTkegp3Z0XnJf3Jq+g==" crossorigin="anonymous"></script>
+    
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/tutorials/study_julia_with_me/type_annotations/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="vladium">
+  <meta property="og:url" content="/tutorials/study_julia_with_me/type_annotations/">
+  <meta property="og:title" content="Julia type annotations: what Python &#39;type hints&#39; wish they were | vladium">
+  <meta property="og:description" content="Julia is unusual in that it is a dynamically typed language (meaning you don&rsquo;t have to declare variable types &ldquo;statically&rdquo;, in program text), while at the same time supporting a rich mechanism for communicating type information to the JIT compiler and runtime. Effectively, Julia has both dynamic and static typing. When provided, static type information can have non-trivial impact on Julia code behavior, both in terms of functionality and performance."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2019-10-06T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2019-10-06T00:00:00&#43;00:00">
+  
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Julia type annotations: what Python &#39;type hints&#39; wish they were | vladium</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">vladium</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link  active" href="/tutorials/"><span>tutorials</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  
+
+<div class="container-fluid docs">
+  <div class="row flex-xl-nowrap">
+    <div class="col-12 col-md-3 col-xl-2 docs-sidebar">
+      
+
+
+
+
+
+<form class="docs-search d-flex align-items-center">
+  <button class="btn docs-toggle d-md-none p-0 mr-3" type="button" data-toggle="collapse" data-target="#docs-nav" aria-controls="docs-nav" aria-expanded="false" aria-label="Toggle section navigation">
+    <span><i class="fas fa-bars"></i></span>
+  </button>
+
+  
+  <input name="q" type="search" class="form-control" placeholder="Search..." autocomplete="off">
+  
+</form>
+
+<nav class="collapse docs-links" id="docs-nav">
+  
+  
+  <div class="docs-toc-item">
+    <a class="docs-toc-link" href="/tutorials/study_julia_with_me/">About</a>
+    <ul class="nav docs-sidenav">
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/structure/">Setup, FAQ, resources</a>
+      </li>
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/knapsack_benchmark/">Benchmark 1: iterative algorithm</a>
+      </li>
+      
+      <li class="active">
+        <a href="/tutorials/study_julia_with_me/type_annotations/">Types 1: annotations, reflection, OOP</a>
+      </li>
+      
+    </ul>
+    
+
+  </div>
+  
+  
+</nav>
+
+    </div>
+
+    
+    <div class="d-none d-xl-block col-xl-2 docs-toc">
+      <ul class="nav toc-top">
+        <li><a href="#" id="back_to_top" class="docs-toc-title">Contents</a></li>
+      </ul>
+
+      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#preview">Preview</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#types-and-inheritance">Types and inheritance</a>
+<ul>
+<li>
+<ul>
+<li><a href="#speaking-of-type-trees">Speaking of [type] trees</a></li>
+</ul></li>
+<li><a href="#arithmetic-types">Arithmetic types</a></li>
+<li><a href="#primitive-types">Primitive types</a></li>
+<li><a href="#concrete-vs-abstract-types">Concrete vs abstract types</a></li>
+<li><a href="#type-parameters">Type parameters</a></li>
+</ul></li>
+<li><a href="#type-annotations">Type annotations</a>
+<ul>
+<li><a href="#tasvsconv">Typeasserts vs variable declarations</a></li>
+<li><a href="#what-about-function-signatures">What about function signatures?</a>
+<ul>
+<li><a href="#function-arguments">Function arguments</a></li>
+<li><a href="#function-return-types">Function return types</a></li>
+</ul></li>
+<li><a href="#when-are-implicit-conversions-done">When are implicit conversions done?</a></li>
+</ul></li>
+<li><a href="#case-study-functional-oop">Case study: functional OOP</a>
+<ul>
+<li><a href="#serializing-julia-objects-to-json">Serializing Julia objects to JSON</a></li>
+</ul></li>
+<li><a href="#summary">Summary</a></li>
+</ul>
+</nav>
+
+      
+    </div>
+    
+
+    <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 docs-content" role="main">
+
+      <article class="article" itemscope itemtype="http://schema.org/Article">
+
+        <div class="docs-article-container">
+          <h1 itemprop="name">Julia type annotations: what Python &#39;type hints&#39; wish they were</h1>
+
+          <div class="article-style" itemprop="articleBody">
+            
+
+<p>Julia is unusual in that it is a dynamically typed language (meaning you don&rsquo;t have to declare variable types &ldquo;statically&rdquo;, in program text), while at the same time supporting a rich mechanism for communicating type information to the JIT compiler and runtime. Effectively, Julia has both dynamic and static typing. When provided, static type information can have non-trivial impact on Julia code behavior, both in terms of functionality and performance.</p>
+
+<p>This distinctive typing seems to be one of the defining features of Julia. To keep tutorials to a reasonable length, I cover basics here and delay further case studies (parameterized types, overloading, multiple dispatch) until the next one.</p>
+
+<h4 id="preview">Preview</h4>
+
+<ul>
+<li>A quick tour of Julia type taxonomy.</li>
+<li>Drill into <em>type annotations</em> and understand their impact on: code documentation, correctness, performance.</li>
+<li>Julia functions are always &ldquo;virtual&rdquo;. Julia supports <em>functional OOP</em> as a <strong><em>paradigm</em></strong>.</li>
+</ul>
+
+<h1 id="types-and-inheritance">Types and inheritance</h1>
+
+<p>Everything in Julia that is a value also has a type and the types are first-class objects (think <code>T.class</code> in Java or <code>T.__type__</code> in Python). Subtyping relationships are set up and queried with the <a href="https://docs.julialang.org/en/v1/base/base/#Core.:%3C:" target="_blank">&lt;: subtype operator</a>:</p>
+
+<pre><code class="language-julia-repl">julia&gt; typeof(1)
+Int64
+
+julia&gt; supertype(typeof(1))
+Signed
+
+julia&gt; typeof(1) &lt;: supertype(typeof(2))
+true
+
+julia&gt; Int64 &lt;: Signed
+true
+
+julia&gt; Int64 &gt;: Signed # there is also a 'supertype operator', used trivially here but more useful for parameterized types
+false
+</code></pre>
+
+<p>Types known to a given runtime session form a tree (a directed graph, actually) rooted at <code>Any</code>.</p>
+
+<h3 id="speaking-of-type-trees">Speaking of [type] trees</h3>
+
+<p>I found it handy to explore subtrees within this graph of types using the following helper function. It builds on <code>subtypes()</code> from <a href="https://github.com/JuliaStdlibs/InteractiveUtils.jl" target="_blank">InteractiveUtils.jl</a>, which would be already imported and availalbe if you&rsquo;re in REPL but may need an <code>import</code> in a script:</p>
+
+<pre><code class="language-julia">import InteractiveUtils
+
+function subtypetree(T, depth = 0) # you might also want to add 'max_depth'...
+    println('\t' ^ depth, T)
+    for t in InteractiveUtils.subtypes(T)
+        subtypetree(t, depth + 1)
+    end
+end
+</code></pre>
+
+<h2 id="arithmetic-types">Arithmetic types</h2>
+
+<p>There is a collection of (ahem) typical types for arithmetic:</p>
+
+<ul>
+<li><code>Int8</code>, &hellip;, <code>Int64</code>, <code>Int128</code>, plus unsigned variants,</li>
+<li><code>Float16</code>, <code>Float32</code>, <code>Float64</code>,</li>
+<li><code>BigInt</code> and <code>BigFloat</code>,</li>
+</ul>
+
+<p>organized in this hierarchy:</p>
+
+<pre><code class="language-julia-repl">julia&gt; subtypetree(Number)
+Number
+    Complex
+    Real
+        AbstractFloat
+            BigFloat
+            Float16
+            Float32
+            Float64
+        AbstractIrrational
+            Irrational
+        Integer
+            Bool
+            Signed
+                BigInt
+                Int128
+                Int16
+                Int32
+                Int64
+                Int8
+            Unsigned
+                UInt128
+                UInt16
+                UInt32
+                UInt64
+                UInt8
+        Rational
+</code></pre>
+
+<p>The first thing that struck me here is Julia&rsquo;s keeping with its emphasis on performance: Julia integers are <em>not</em> &ldquo;big&rdquo; by default (contrast with <a href="https://docs.python.org/3/library/stdtypes.html#typesnumeric" target="_blank">Python 3</a>). And the rich spectrum of arithmetic bit widths is meaningful: <code>Float16</code> and <code>Float32</code> could be useful for GPU computing, while wide <code>Int</code>-types could work with SSE/AVX/etc instructions and/or support efficient interfacing with native code. (I say &ldquo;could&rdquo; because I have no idea yet if that&rsquo;s really the case.)</p>
+
+<h2 id="primitive-types">Primitive types</h2>
+
+<p>Turns out all of these arithmetic types are not what you&rsquo;d call &ldquo;built into the compiler&rdquo; but are rather defined in the language itself, as standard primitive types<sup class="footnote-ref" id="fnref:This-is-what-the"><a href="#fn:This-is-what-the">1</a></sup>:</p>
+
+<pre><code class="language-julia">primitive type Bool  &lt;: Integer   8 end
+primitive type Int64 &lt;: Signed   64 end
+</code></pre>
+
+<p>The syntax is</p>
+
+<pre><code class="language-julia">primitive type «name» &lt;: «supertype» «bits» end
+</code></pre>
+
+<p>where the supertype is optional (and defaults to <code>Any</code>). I can apparently define my own primitive type, a 24-bit integer<sup class="footnote-ref" id="fnref:As-I-write-this"><a href="#fn:As-I-write-this">2</a></sup>:</p>
+
+<pre><code class="language-julia-repl">julia&gt; primitive type Int24 &lt;: Signed 24 end
+
+julia&gt; subtypetree(Number)
+Number
+    Complex
+    Real
+        ...
+        Integer
+            Bool
+            Signed
+                ...
+                Int24
+                ...
+</code></pre>
+
+<p>(This is great&hellip; but how do I construct an <code>Int24</code> or define arithmetic? Julia docs are not clear on that &ndash; I think I know how to proceed but that is outside of today&rsquo;s scope.)</p>
+
+<h2 id="concrete-vs-abstract-types">Concrete vs abstract types</h2>
+
+<p>I&rsquo;ve already used a <code>struct</code> in the <a href="../knapsack_benchmark#DP">knapsack benchmark</a> to represent knapsack items as instances of this type:</p>
+
+<pre><code class="language-julia">struct Item
+    value   ::Int64
+    weight  ::Int64
+end
+</code></pre>
+
+<p>These are straightforward: <code>Item</code>s contain fields (the type is <strong>composite</strong>) and can be instantiated (the type is <strong>concrete</strong>). They can also be <em>introspected</em>:</p>
+
+<pre><code class="language-julia-repl">julia&gt; sizeof(Item)
+16
+
+julia&gt; fieldcount(Item)
+2
+
+julia&gt; fieldnames(Item)
+(:value, :weight)
+
+julia&gt; fieldtypes(Item)
+(Int64, Int64)
+
+julia&gt; function showfields(T)
+           for i in 1 : fieldcount(T)
+               println(fieldoffset(T, i), '\t', fieldname(T, i), &quot;\t::&quot;, fieldtype(T, i))
+           end
+       end
+showfields (generic function with 1 method)
+
+julia&gt; showfields(Item)
+0   value   ::Int64
+8   weight  ::Int64
+</code></pre>
+
+<p>but a few things here are less obvious:</p>
+
+<ol>
+<li><code>struct</code>s default to being <strong>immutable</strong> unless explicitly marked as <a href="https://docs.julialang.org/en/v1/base/base/#mutable%20struct" target="_blank">mutable</a>.</li>
+<li>they are always <strong>final</strong>, i.e. cannot be further inherited from<sup class="footnote-ref" id="fnref:Just-like-classe"><a href="#fn:Just-like-classe">3</a></sup>. (This is also true of primitive and, in fact, any non-abstract types.)</li>
+</ol>
+
+<p>Defaulting to immutability is not an arbitrary choice. It can be exploited by the compiler to optimize performance and memory usage by <a href="https://en.wikipedia.org/wiki/String_interning" target="_blank">&ldquo;interning&rdquo;</a> values that are <em>indistinguishable</em> if they are equal. Compare</p>
+
+<pre><code class="language-julia-repl">julia&gt; i1 = Item(1, 2)
+Item(1, 2)
+
+julia&gt; i2 = Item(1, 2)
+Item(1, 2)
+
+julia&gt; i1 == i2  # equal
+true
+
+julia&gt; i1 === i2 # actually, the same &quot;interned&quot; object
+true
+
+julia&gt; i1 == Item(1, 3)
+false
+</code></pre>
+
+<p>with</p>
+
+<pre><code class="language-julia-repl">julia&gt; mutable struct MutableItem # mutable version of 'Item'
+           value   ::Int64
+           weight  ::Int64
+       end
+
+julia&gt; i1 = MutableItem(1, 2)
+MutableItem(1, 2)
+
+julia&gt; i2 = MutableItem(1, 2)
+MutableItem(1, 2)
+
+julia&gt; i1 == i2  # not equal!
+false # &lt;- surprised? looks like '==' needs to be defined for custom mutable types...
+</code></pre>
+
+<p>Julia also has <strong>abstract types</strong> which can&rsquo;t be instantiated, but are instead used to organize the type graph via shared parent nodes. You could also say they act as &ldquo;marker&rdquo; or &ldquo;trait&rdquo; base classes, like <code>Number</code> or <code>Signed</code> above. Since all non-abstract Julia types are <em>final</em>, any supertype is necessarily an abstract type (<code>Any</code> if not specified explicitly).</p>
+
+<pre><code class="language-julia-repl">julia&gt; abstract type MyInt &lt;: Int32 end
+ERROR: invalid subtyping in definition of MyInt
+Stacktrace:
+ [1] ...
+
+julia&gt; abstract type MyInt &lt;: supertype(Int32) end
+
+julia&gt; subtypetree(Number)
+Number
+    Complex
+    Real
+        ...
+        Integer
+            Bool
+            Signed
+                ...
+                Int24
+                ...
+                MyInt
+        ...
+</code></pre>
+
+<h2 id="type-parameters">Type parameters</h2>
+
+<p>To various degrees, all of the three major categories of Julia types (primitive, composite, abstract) are available in other dynamic languages, either natively or via some libraries. Julia also offers something that gets it if not into the realm of uber-powerful (and uber-complicated) C++ metaprogramming, then definitely into the realm of <a href="https://en.wikipedia.org/wiki/Generics_in_Java" target="_blank">Java generics</a>: all three type categories can be further <em>parameterized</em> with other types and values. I&rsquo;ll explore this in a future tutorial.</p>
+
+<h1 id="type-annotations">Type annotations</h1>
+
+<p>And now to the meat of this tutorial: type annotations. A <em>type annotation</em> in Julia looks like <code>&lt;thing&gt;::&lt;type&gt;</code><sup class="footnote-ref" id="fnref:I-use-an-extra-b"><a href="#fn:I-use-an-extra-b">4</a></sup> &ndash; it is an in-place modifier to a <code>&lt;thing&gt;</code> introduced by the <code>::</code> operator.</p>
+
+<h2 id="tasvsconv">Typeasserts vs variable declarations</h2>
+
+<p>The way I read the documentation, Julia type annotations can be applied to two types of <code>&lt;thing&gt;</code>s:</p>
+
+<ol>
+<li><p>[<strong>typeassert</strong>] expressions computing a value (and recall that everything in Julia is an <a href="https://en.wikipedia.org/wiki/Expression_(computer_science)" target="_blank">expression</a>):</p>
+
+<pre><code class="language-julia">x = y ::Float64 # promises to the runtime that at this point in the execution 'y' will be a Float64
+</code></pre></li>
+
+<li><p>[<strong>variable type declaration</strong>] left-hand sides of assignments or declarations that introduce (local) variables:</p>
+
+<pre><code class="language-julia">x ::Float64 = y # declares a new local 'x', marks it as always containing Float64 values, and initializes with 'y' converted to Float64
+</code></pre>
+
+<p>This second case also covers typed fields of <code>struct</code>s and named tuples:</p>
+
+<pre><code class="language-julia">struct Point
+  x ::Float64 # this field will always contain only Float64 values
+  y           # this field can contain any Julia value
+end
+</code></pre></li>
+</ol>
+
+<p>The first case is a <em>typeassert</em>. The second kind of annotation marks the name/field to its left as constrained to values compatible with the given type, and also ensures that throughout the variable&rsquo;s scope all subsequent initializations of and assignments to it are filtered through an implicit <em>conversion</em>.</p>
+
+<p>As a consequence, there are differences in runtime behavior and the information communicated to the system:</p>
+
+<ol>
+<li>With a <em>typeassert</em> the compiler will create code that at runtime will <em>check</em> the annotated value for type compatibility and throw a <code>TypeError</code> if the check fails &ndash; but it will <em>not</em> attempt to coerce the computed value to the annotation type in any way. Type-asserted syntax <tt>&lt;exp&gt;::T</tt> is precisely equivalent to a call, possibly inlined, to <a href="https://docs.julialang.org/en/v1/base/base/#Core.typeassert" target="_blank">typeassert(&lt;exp&gt;, T)</a>.</li>
+<li>With a <em>variable type declaration</em> any assignment <tt>&lt;lhs&gt;::T&nbsp;=&nbsp;&lt;rhs&gt;</tt> will effectively translate into <tt>&lt;lhs&gt;::T&nbsp;=&nbsp;convert(T, &lt;rhs&gt;)</tt>, i.e. contain a call, possibly inlined, to <a href="https://docs.julialang.org/en/v1/base/base/#Base.convert" target="_blank">convert(T, &lt;rhs&gt;)</a>. And at runtime, every such assignment will attempt to coerce its right hand-side value to <tt>T</tt>, possibly resulting in a value that&rsquo;s only an approximation. Should this conversion fail, an exception will be thrown:
+
+<ul>
+<li>if no such conversion exists at all, a <code>MethodError</code> is thrown;</li>
+<li>if <tt>T</tt> is an <code>Integer</code> (sub)type and cannot represent the expression value, an <code>InexactError</code> is thrown.</li>
+</ul></li>
+</ol>
+
+<p>To appreciate the difference, compare</p>
+
+<pre><code class="language-julia-repl">julia&gt; function foo()
+         x ::Float64 = 1 # implies 'convert(Float64, 1)'
+         x, typeof(x)
+       end
+foo (generic function with 1 method)
+
+julia&gt; foo()
+(1.0, Float64)
+</code></pre>
+
+<p>with</p>
+
+<pre><code class="language-julia-repl">julia&gt; function foo()
+         x = 1 ::Float64 # implies 'typeassert(1, Float64)'
+         x, typeof(x)
+       end
+foo (generic function with 1 method)
+
+julia&gt; foo()
+ERROR: TypeError: in typeassert, expected Float64, got Int64
+</code></pre>
+
+<p>Literal <tt>1</tt> is of a (machine-dependent) <code>Int</code> type:</p>
+
+<pre><code class="language-julia-repl">julia&gt; typeof(1)
+Int64
+</code></pre>
+
+<p>and even though it can be converted to a <code>Float64</code> without loss, such a conversion is not even attempted in the second version of <code>foo()</code>.</p>
+
+<div class="alert alert-note">
+  <div>
+    As I write this, Julia does not yet support type declarations for <em>global</em> variables &ndash; this is the reason I wrapped the above examples into functions.
+  </div>
+</div>
+
+<h2 id="what-about-function-signatures">What about function signatures?</h2>
+
+<p>Unsurprisingly, it is also possible to type-annotate function arguments and return types:</p>
+
+<pre><code class="language-julia">function bar(x ::Float64) ::Float32
+    sin(2π * x)
+end
+</code></pre>
+
+<h3 id="function-arguments">Function arguments</h3>
+
+<p>If you&rsquo;re coming from languages like C++ or Java where type conversions can happen as part of argument passing, you might think that <tt>x ::Float64</tt> in <code>bar()</code> is like a local (typed) variable declaration, similar to the <a href="#tasvsconv">second case above</a>, perhaps implying a call to something like <strong>convert(Float64, x)</strong> everywhere before <code>bar()</code> is invoked. That is not the case in Julia: no conversions ever take place as part of Julia function argument passing. In fact, Julia argument type annotations are actually more like those typeasserts: <code>foo(x)</code> will <em>expect</em> <code>x</code> to be a <code>Float64</code> already.</p>
+
+<p>There is a subtle difference from an in-place typeassert, however: with the above definition of <code>bar()</code> there will be no need to generate an implicit call to <strong>typeassert()</strong> at all because I will <em>only</em> be allowed to call it with <code>Float64</code>s. If I need <tt>sin(2π&nbsp;*&nbsp;x)</tt> for a <code>Float64</code> input <code>x</code>, no problem. For any other type<sup class="footnote-ref" id="fnref:To-simply-the-na"><a href="#fn:To-simply-the-na">5</a></sup>, say, <code>Int64</code>, I will get a flat rejection not because a method call was tried and failed during <code>Int64</code>-to-<code>Float64</code> input type conversion (<code>TypeError</code>) but because the requisite method (named &ldquo;foo&rdquo; and taking a single argument of type <code>Int64</code>) did not exist (<code>MethodError</code>). And since <code>Float64</code> is a concrete type and, again, all concrete types are <em>final</em> in Julia, the universe of possible outcomes here shrinks dramatically:</p>
+
+<pre><code class="language-julia-repl">julia&gt; bar(0.75)
+-1.0f0
+
+julia&gt; bar(1.)
+-2.4492937f-16
+
+julia&gt; bar(1)
+ERROR: MethodError: no method matching bar(::Int64)
+Closest candidates are:
+  bar(::Float64) at ...
+</code></pre>
+
+<p>This may seem a little draconian, but it is connected to how Julia&rsquo;s <em>multiple dispatch</em> works and is further ameliorated by Julia&rsquo;s system of <a href="https://docs.julialang.org/en/v1/manual/conversion-and-promotion/" target="_blank">promoting function arguments to a common type</a>.</p>
+
+<h3 id="function-return-types">Function return types</h3>
+
+<p>Specifying <code>bar()</code> return type to be <code>Float32</code> is a way to ensure that value being returned is passed through a <strong>convert(Float32, &hellip;)</strong>. Whether this is desired depends on software design. I can imagine situations where it could be used as a way to safely return &ldquo;special&rdquo; values:</p>
+
+<pre><code class="language-julia">function sqrt_or_nothing(x ::Float64) ::Union{Float64, Nothing}
+    x &lt; 0.0 ? nothing : √x
+end
+</code></pre>
+
+<pre><code class="language-julia-repl">julia&gt; @show sqrt_or_nothing(2.0)
+sqrt_or_nothing(2.0) = 1.4142135623730951
+1.414213562373095
+
+julia&gt; @show sqrt_or_nothing(-2.0)
+sqrt_or_nothing(-2.0) = nothing
+</code></pre>
+
+<p>Alternatively, it might be easier to reason about your code behavior if most functions are strict about their return value types. Otherwise, it seems like it could be easy in Julia to accidentally return <em>different types along different value return paths</em>, which could cause inefficiencies or maybe even errors downstream:</p>
+
+<pre><code class="language-julia">function bar_clipped(x ::Float64)
+    x &lt; 0.0 ? 0 : sin(2π * x)
+end
+</code></pre>
+
+<pre><code class="language-julia-repl">julia&gt; typeof(bar_clipped(0.75))
+Float64
+
+julia&gt; typeof(bar_clipped(-0.75))
+Int64 # oops, use 0.0 literal instead of 0 above
+</code></pre>
+
+<h2 id="when-are-implicit-conversions-done">When are implicit conversions done?</h2>
+
+<p>Most of the cases of implicit calls to <code>convert(...)</code> have already been mentioned. Julia <a href="https://docs.julialang.org/en/v1/manual/conversion-and-promotion/" target="_blank">documentation</a> offers this complete list:</p>
+
+<blockquote>
+<ul>
+<li>Assigning to an array converts to the array&rsquo;s element type.</li>
+<li>Assigning to a field of an object converts to the declared type of the field.</li>
+<li>Constructing an object with new converts to the object&rsquo;s declared field types.</li>
+<li>Assigning to a variable with a declared type (e.g. local x::T) converts to that type.</li>
+<li>A function with a declared return type converts its return value to that type.</li>
+<li>Passing a value to ccall converts it to the corresponding argument type.</li>
+</ul>
+</blockquote>
+
+<h1 id="case-study-functional-oop">Case study: functional OOP</h1>
+
+<p>Now that we know every function argument in Julia is always associated with a type, that raises a question: is it possible for a Julia runtime session to contain multiple functions that all have the same name and input signature except for types of some (a few) parameters?</p>
+
+<p>Not only is the answer &ldquo;yes&rdquo;, it is actually kind of like &ldquo;yes, it is meant to happen <em>a lot</em>&ldquo;: Julia thrives on maintaining multiple versions of the &ldquo;same&rdquo; function (called &ldquo;methods&rdquo;) and figuring out which version to invoke for a given set of inputs. Enter &ldquo;multiple dispatch&rdquo;, a <strong><em>core paradigm</em></strong> of Julia programming<sup class="footnote-ref" id="fnref:From-what-I-can"><a href="#fn:From-what-I-can">6</a></sup>. The intuition is that Julia functions are essentially &ldquo;always virtual&rdquo;: unlike other languages where a class method needs to be marked in a special way to support &ldquo;late binding&rdquo; (method dispatch based on runtime, not compile, type of an object), Julia runtime system always dispatches <em>all</em> functions on the <em>concrete runtime types</em> of <em>all</em> their arguments. Because no argument position is &ldquo;special&rdquo; and the method does not &ldquo;belong&rdquo; to any particular parameter type, this form of polymorphism usually opts for language design with standalone functions, that is functions that do not live inside any &ldquo;classes&rdquo;. Some people call such designs &ldquo;functional OOP&rdquo;. It makes a lot of sense for math-style coding due to symmetries in function parameters.</p>
+
+<p>Now, one way to ease into Julia multiple dispatch is to consider its simplest edge case: <em>single</em> dispatch.</p>
+
+<h2 id="serializing-julia-objects-to-json">Serializing Julia objects to JSON</h2>
+
+<p>I am going to implement a simple serializer of Julia objects to <a href="https://en.wikipedia.org/wiki/JSON" target="_blank">JSON</a>. This will be a <a href="https://github.com/vladium/study_julia_with_me/tree/master/type_annotations/Tutorial.jl" target="_blank">toy example</a>, useless in any kind of production setting. My initial point is the &ldquo;interface&rdquo; method <tt>to_JSON()</tt> calling <tt>visit()</tt> that in turn starts as a single fallback that always fails:</p>
+
+<pre><code class="language-julia">function to_JSON(io ::IO, obj)
+    visit(obj, io)
+end
+
+function visit(obj, io ::IO)
+    error(&quot;default visit() called for obj type: &quot;, typeof(obj))
+end
+</code></pre>
+
+<p>I am going to anchor my design in the &ldquo;virtual nature&rdquo; of <tt>visit(obj,&nbsp;io)</tt>, with execution routed based on the runtime type of <tt>obj</tt>. Looking at my <code>Number</code> type trees above, I can see that this overload can cover JSON numbers and booleans:</p>
+
+<pre><code class="language-julia">function visit(obj ::Real, io ::IO)
+    print(io, obj)
+end
+</code></pre>
+
+<p>Strings are equally easy, but the method body needs to quote them<sup class="footnote-ref" id="fnref:Note-that-this-t"><a href="#fn:Note-that-this-t">7</a></sup>, so I need a new method overload:</p>
+
+<pre><code class="language-julia">function visit(obj ::AbstractString, io ::IO)
+    print(io, '\&quot;')
+    print(io, obj)
+    print(io, '\&quot;')
+end
+</code></pre>
+
+<p>Next, for objects that can contain other objects the virtual nature of <tt>visit()</tt> is critical:</p>
+
+<pre><code class="language-julia">function visit(obj ::AbstractArray, io ::IO)
+    print(io, '[')
+    for i in 1 : length(obj)
+        i &gt; 1 &amp;&amp; print(io, &quot;, &quot;)
+        visit(obj[i], io)
+    end
+    print(io, ']')
+end
+
+function visit(obj ::AbstractDict, io ::IO)
+    print(io, '{')
+    first = true
+    for (k, v) in obj
+        first ? first = false : print(io, &quot;, &quot;)
+        visit(k ::AbstractString, io) # assert that key is a string
+        print(io, &quot; : &quot;)
+        visit(v, io)
+    end
+    print(io, '}')
+end
+</code></pre>
+
+<p>The nested <tt>visit()</tt>s are already virtual, nothing else needs to be done to pick up a particular overload. There are also no &ldquo;if-obj-type-is-&hellip;&rdquo; condition checks &ndash; everything is as clean as in some &ldquo;pure&rdquo; textbook OOP.</p>
+
+<p>This version is already functional:</p>
+
+<pre><code class="language-julia-repl">julia&gt; to_JSON(stdout, [1, false, zeros(2), [1.2345, 12, Dict(&quot;a&quot; =&gt; true, &quot;b&quot; =&gt; 2.3, &quot;c&quot; =&gt; [1, 2, 3.4])]])
+[1, false, [0.0, 0.0], [1.2345, 12, {&quot;c&quot; : [1.0, 2.0, 3.4], &quot;b&quot; : 2.3, &quot;a&quot; : true}]]
+</code></pre>
+
+<p>Nice!</p>
+
+<p>Now, suppose that I would like to extend the set of supported &ldquo;JSON-compatible&rdquo; Julia types to also include tuples. I want to output them as JSON arrays. All I need to do is add another overload:</p>
+
+<pre><code class="language-julia-repl">function visit(obj ::Tuple, io ::IO)
+    print(io, '[')
+    for i in 1 : length(obj)
+        i &gt; 1 &amp;&amp; print(io, &quot;, &quot;)
+        visit(obj[i], io)
+    end
+    print(io, ']')
+end
+</code></pre>
+
+<pre><code class="language-julia-repl">julia&gt; to_JSON(stdout, [(&quot;tuple&quot;, (1, &quot;nested&quot;, &quot;tuple&quot;))  1, false, zeros(2), [1.2345, 12, Dict(&quot;a&quot; =&gt; true, &quot;b&quot; =&gt; 2.3, &quot;c&quot; =&gt; [1, 2, 3.4])]])
+[[&quot;tuple&quot;, [1, &quot;nested&quot;, &quot;tuple&quot;]], 1, false, [0.0, 0.0], [1.2345, 12, {&quot;c&quot; : [1.0, 2.0, 3.4], &quot;b&quot; : 2.3, &quot;a&quot; : true}]]
+</code></pre>
+
+<p>If you&rsquo;re interested in playing with various design alternatives yourself, you can find this entire example <a href="https://github.com/vladium/study_julia_with_me/tree/master/type_annotations/Tutorial.jl" target="_blank">here</a>.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>In summary, I would like to call out some things about Julia typing that make Julia feel different from many languages:</p>
+
+<ul>
+<li>Julia supports user-definable primitive types which do not need to be &ldquo;boxed&rdquo;.</li>
+<li>All superclasses are abstract and all concrete classes are final.</li>
+<li>Mutability is part of type definition, not of argument/variable/field.</li>
+<li>Multiple dispatch is a primary paradigm (&ldquo;all methods are virtual&rdquo;). This design is consistent with lack of classic &ldquo;objects&rdquo; that forcefully bundle state with behavior.</li>
+<li>Duck-typing also works in Julia, possibly even without any performance loss.</li>
+</ul>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:This-is-what-the">This is what the public documentation says. Examining <tt>boot.jl</tt> of my Julia install shows that many of these types are actually implemented in C. <a class="footnote-return" href="#fnref:This-is-what-the"><sup>^</sup></a></li>
+<li id="fn:As-I-write-this">As I write this, bit widths must be multiples of 8. <a class="footnote-return" href="#fnref:As-I-write-this"><sup>^</sup></a></li>
+<li id="fn:Just-like-classe">Just like classes marked with <code>final</code> keyword in C++ or Java. <a class="footnote-return" href="#fnref:Just-like-classe"><sup>^</sup></a></li>
+<li id="fn:I-use-an-extra-b">I use an extra blank before <code>::</code> but you don&rsquo;t have to. <a class="footnote-return" href="#fnref:I-use-an-extra-b"><sup>^</sup></a></li>
+<li id="fn:To-simply-the-na">To simply the narrative, I am glossing over possibilities for <em>promotion</em> of <code>x</code> to another type. <a class="footnote-return" href="#fnref:To-simply-the-na"><sup>^</sup></a></li>
+<li id="fn:From-what-I-can">From what I can tell so far, that is. <a class="footnote-return" href="#fnref:From-what-I-can"><sup>^</sup></a></li>
+<li id="fn:Note-that-this-t">Note that this toy serializer doesn&rsquo;t bother with backslash escapes, Unicode, etc. <a class="footnote-return" href="#fnref:Note-that-this-t"><sup>^</sup></a></li>
+</ol>
+</div>
+
+          </div>
+
+          
+
+
+
+          
+          <div class="article-widget">
+            
+<div class="post-nav">
+  
+  
+  
+  <div class="post-nav-item">
+    <div class="meta-nav">Previous</div>
+    <a href="/tutorials/study_julia_with_me/knapsack_benchmark/" rel="next">How do you say &#34;0/1 knapsack&#34; in four languages?</a>
+  </div>
+  
+  
+</div>
+
+          </div>
+          
+        </div>
+
+        <div class="body-footer">
+          <p>Last updated on Oct 6, 2019</p>
+
+          
+
+
+          
+
+        </div>
+
+      </article>
+
+      <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    &copy; vladium 2019  
+
+    
+  </p>
+</footer>
+
+
+    </main>
+  </div>
+</div>
+
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/cpp.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia-repl.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.1/anchor.min.js" integrity="sha256-pB/deHc9CGfFpJRjC43imB29Rse8tak+5eXqntO94ck=" crossorigin="anonymous"></script>
+    <script>
+      anchors.add();
+    </script>
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.16bbb3750feb7244c9bc409a5a4fe678.js"></script>
+
+    
+
+
+
+
+
+
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

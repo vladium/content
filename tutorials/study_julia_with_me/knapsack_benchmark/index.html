@@ -139,9 +139,9 @@ Users of R, Python, and similar “high-productivity” environments know that n
   <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
-      <meta property="article:published_time" content="2019-09-12T00:00:00&#43;00:00">
+      <meta property="article:published_time" content="2019-10-02T00:00:00&#43;00:00">
     
-    <meta property="article:modified_time" content="2019-09-12T00:00:00&#43;00:00">
+    <meta property="article:modified_time" content="2019-10-02T00:00:00&#43;00:00">
   
 
   
@@ -333,6 +333,10 @@ Users of R, Python, and similar “high-productivity” environments know that n
         <a href="/tutorials/study_julia_with_me/knapsack_benchmark/">Benchmark 1: iterative algorithm</a>
       </li>
       
+      <li >
+        <a href="/tutorials/study_julia_with_me/type_annotations/">Types 1: annotations, reflection, OOP</a>
+      </li>
+      
     </ul>
     
 
@@ -361,7 +365,7 @@ Users of R, Python, and similar “high-productivity” environments know that n
 <div id="preview" class="section level4">
 <h4>Preview</h4>
 <ul>
-<li>Julia, Python, Java, and C++ are compared for implementing the same iterative algorithm (knapsack solver) .</li>
+<li>Julia, Python, Java, and C++ are compared for implementing the same iterative algorithm (knapsack solver).</li>
 <li>The implementation does virtually no memory allocation, so what’s being tested is the speed of looping and array access.</li>
 <li>Julia is <em>fast</em> (although not quite as fast as C++ or Java). Python, however, comes out looking <em>horribly slow</em> by comparison.</li>
 </ul>
@@ -384,7 +388,7 @@ Users of R, Python, and similar “high-productivity” environments know that n
 We have <span class="math inline">\(n\)</span> items of integral<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> weights <span class="math inline">\(w_i &gt; 0\)</span> and value <span class="math inline">\(v_i\)</span>. <span class="math inline">\(W\)</span> is the knapsack weight capacity. Each item is either chosen or not, hence the “0/1” in the name.</p>
 <p>Since all <span class="math inline">\(x_i\)</span> are restricted to be binary (boolean), this is an integer linear problem with a search space size of <span class="math inline">\(2^n\)</span>. It can be given to an MILP solver. But because of a simple nested structure the problem also has a straightforward dynamic programming (DP) solution that I can code in a few lines.</p>
 </div>
-<div id="dynamic-programming-algorithm" class="section level2">
+<div id="DP" class="section level2">
 <h2>Dynamic programming algorithm</h2>
 <p>Assume the problem has been solved for all knapsack capacities up to some <span class="math inline">\(w\)</span> while making use of only a subset of items <span class="math inline">\(1, \dots, j\)</span>, and let <span class="math inline">\(V(w, j)\)</span> be the solution, i.e. the maximum achievable knapsack value. Now consider all smaller subproblems without item <span class="math inline">\(j\)</span>, <span class="math inline">\(V(w&#39;, j-1)\)</span> for all possible <span class="math inline">\(w&#39;\)</span>. <span class="math inline">\(V(w, j)\)</span> and <span class="math inline">\(V(w&#39;, j-1)\)</span> are connected with a single “move” of looking at item <span class="math inline">\(j\)</span> and deciding to either include it in the optimal selection for knapsack <span class="math inline">\(V(w, j)\)</span> or not:</p>
 <ul>
@@ -415,8 +419,8 @@ together with a boundary condition for <span class="math inline">\(j = 1\)</span
 <p>(The above could be stated more compactly if <span class="math inline">\(j\)</span> started at 0 and <span class="math inline">\(V(w,0)\)</span> were defined as 0.)</p>
 <p>To capture inputs into a problem instance, I will use an array of Julia <code>struct</code>s. Although I could get away with a list or a tuple, I think a <code>struct</code> makes for more readable example code:</p>
 <pre class="julia"><code>struct Item
-    value   ::Int64;
-    weight  ::Int64;
+    value   ::Int64
+    weight  ::Int64
 end</code></pre>
 <p>If <span class="math inline">\(V(w, j)\)</span> is represented as a matrix (another first-class citizen in Julia), a non-recursive implementation would be to sweep the space of <span class="math inline">\(w\)</span> and <span class="math inline">\(j\)</span> going from smaller to larger item sets:</p>
 <pre class="julia"><code>function opt_value(W ::Int64, items ::Array{Item}) ::Int64
@@ -630,6 +634,12 @@ Figure 1: Calculation time as a function of knapsack problem size. (Note that bo
   </div>
   
   
+  
+  <div class="post-nav-item">
+    <div class="meta-nav">Next</div>
+    <a href="/tutorials/study_julia_with_me/type_annotations/" rel="prev">Julia type annotations: what Python &#39;type hints&#39; wish they were</a>
+  </div>
+  
 </div>
 
           </div>
@@ -637,7 +647,7 @@ Figure 1: Calculation time as a function of knapsack problem size. (Note that bo
         </div>
 
         <div class="body-footer">
-          <p>Last updated on Sep 12, 2019</p>
+          <p>Last updated on Oct 2, 2019</p>
 
           
 
@@ -691,6 +701,8 @@ Figure 1: Calculation time as a function of knapsack problem size. (Note that bo
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/cpp.min.js"></script>
         
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia-repl.min.js"></script>
         
       
 
