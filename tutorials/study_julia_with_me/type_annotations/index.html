@@ -853,15 +853,15 @@ end
 
 <p>The nested <tt>visit()</tt>s are already virtual, nothing else needs to be done to pick up a particular overload. There are also no &ldquo;if-obj-type-is-&hellip;&rdquo; condition checks &ndash; everything is as clean as in some &ldquo;pure&rdquo; textbook OOP.</p>
 
-<p>This version is already functional:</p>
+<p>Just a handful of lines of code so far, and yet they already work on a variety of inputs:</p>
 
 <pre><code class="language-julia-repl">julia&gt; to_JSON(stdout, [1, false, zeros(2), [1.2345, 12, Dict(&quot;a&quot; =&gt; true, &quot;b&quot; =&gt; 2.3, &quot;c&quot; =&gt; [1, 2, 3.4])]])
 [1, false, [0.0, 0.0], [1.2345, 12, {&quot;c&quot; : [1.0, 2.0, 3.4], &quot;b&quot; : 2.3, &quot;a&quot; : true}]]
 </code></pre>
 
-<p>Nice!</p>
+<p>Not bad, looks like valid JSON to me.</p>
 
-<p>Now, suppose that I would like to extend the set of supported &ldquo;JSON-compatible&rdquo; Julia types to also include tuples. I want to output them as JSON arrays. All I need to do is add another overload:</p>
+<p>Now, suppose that I would like to extend the set of supported &ldquo;JSON-compatible&rdquo; Julia types to also include tuples. I would like to output them as JSON arrays. All I need to do is add another overload:</p>
 
 <pre><code class="language-julia-repl">function visit(obj ::Tuple, io ::IO)
     print(io, '[')
@@ -876,6 +876,8 @@ end
 <pre><code class="language-julia-repl">julia&gt; to_JSON(stdout, [(&quot;tuple&quot;, (1, &quot;nested&quot;, &quot;tuple&quot;))  1, false, zeros(2), [1.2345, 12, Dict(&quot;a&quot; =&gt; true, &quot;b&quot; =&gt; 2.3, &quot;c&quot; =&gt; [1, 2, 3.4])]])
 [[&quot;tuple&quot;, [1, &quot;nested&quot;, &quot;tuple&quot;]], 1, false, [0.0, 0.0], [1.2345, 12, {&quot;c&quot; : [1.0, 2.0, 3.4], &quot;b&quot; : 2.3, &quot;a&quot; : true}]]
 </code></pre>
+
+<p>Note that no earlier <tt>visit()</tt>s needed to be modified to become &ldquo;aware&rdquo; of this new support for tuples. In other words, a method added <em>later</em> hooks into a set of mutual method invocations coded <em>earlier</em>, with no ostensible &ldquo;recompilation&rdquo;.</p>
 
 <p>If you&rsquo;re interested in playing with various design alternatives yourself, you can find this entire example <a href="https://github.com/vladium/study_julia_with_me/tree/master/type_annotations/Tutorial.jl" target="_blank">here</a>.</p>
 

@@ -872,15 +872,15 @@ end
 
 &lt;p&gt;The nested &lt;tt&gt;visit()&lt;/tt&gt;s are already virtual, nothing else needs to be done to pick up a particular overload. There are also no &amp;ldquo;if-obj-type-is-&amp;hellip;&amp;rdquo; condition checks &amp;ndash; everything is as clean as in some &amp;ldquo;pure&amp;rdquo; textbook OOP.&lt;/p&gt;
 
-&lt;p&gt;This version is already functional:&lt;/p&gt;
+&lt;p&gt;Just a handful of lines of code so far, and yet they already work on a variety of inputs:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; to_JSON(stdout, [1, false, zeros(2), [1.2345, 12, Dict(&amp;quot;a&amp;quot; =&amp;gt; true, &amp;quot;b&amp;quot; =&amp;gt; 2.3, &amp;quot;c&amp;quot; =&amp;gt; [1, 2, 3.4])]])
 [1, false, [0.0, 0.0], [1.2345, 12, {&amp;quot;c&amp;quot; : [1.0, 2.0, 3.4], &amp;quot;b&amp;quot; : 2.3, &amp;quot;a&amp;quot; : true}]]
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Nice!&lt;/p&gt;
+&lt;p&gt;Not bad, looks like valid JSON to me.&lt;/p&gt;
 
-&lt;p&gt;Now, suppose that I would like to extend the set of supported &amp;ldquo;JSON-compatible&amp;rdquo; Julia types to also include tuples. I want to output them as JSON arrays. All I need to do is add another overload:&lt;/p&gt;
+&lt;p&gt;Now, suppose that I would like to extend the set of supported &amp;ldquo;JSON-compatible&amp;rdquo; Julia types to also include tuples. I would like to output them as JSON arrays. All I need to do is add another overload:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;function visit(obj ::Tuple, io ::IO)
     print(io, &#39;[&#39;)
@@ -895,6 +895,8 @@ end
 &lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; to_JSON(stdout, [(&amp;quot;tuple&amp;quot;, (1, &amp;quot;nested&amp;quot;, &amp;quot;tuple&amp;quot;))  1, false, zeros(2), [1.2345, 12, Dict(&amp;quot;a&amp;quot; =&amp;gt; true, &amp;quot;b&amp;quot; =&amp;gt; 2.3, &amp;quot;c&amp;quot; =&amp;gt; [1, 2, 3.4])]])
 [[&amp;quot;tuple&amp;quot;, [1, &amp;quot;nested&amp;quot;, &amp;quot;tuple&amp;quot;]], 1, false, [0.0, 0.0], [1.2345, 12, {&amp;quot;c&amp;quot; : [1.0, 2.0, 3.4], &amp;quot;b&amp;quot; : 2.3, &amp;quot;a&amp;quot; : true}]]
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that no earlier &lt;tt&gt;visit()&lt;/tt&gt;s needed to be modified to become &amp;ldquo;aware&amp;rdquo; of this new support for tuples. In other words, a method added &lt;em&gt;later&lt;/em&gt; hooks into a set of mutual method invocations coded &lt;em&gt;earlier&lt;/em&gt;, with no ostensible &amp;ldquo;recompilation&amp;rdquo;.&lt;/p&gt;
 
 &lt;p&gt;If you&amp;rsquo;re interested in playing with various design alternatives yourself, you can find this entire example &lt;a href=&#34;https://github.com/vladium/study_julia_with_me/tree/master/type_annotations/Tutorial.jl&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
