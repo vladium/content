@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.4.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Vlad Roubtsov">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Ever since my knapsack benchmark I’ve been curious why Julia was still \(\approx 50\%\) slower than either Java or C&#43;&#43; on what essentially were a couple of nested for-loops over a pair of arrays. I’ve done some exploring and now believe that my first guess was correct: much of the remaining Julia overhead is due to its bounds checking.
+Eliding bounds checking unconditionally with @inbounds My first test was to isolate all opt_value() lines with array access into a begin.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/20191016/checking-bounds-checking-in-julia/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#3f51b5">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.927aeb2a835eaf9005c1499820562316.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.c95fc539390309404839f86767b13568.css">
+  
+
+  
+  
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', 'UA-148582714-1', 'auto');
+      
+      ga('require', 'eventTracker');
+      ga('require', 'outboundLinkTracker');
+      ga('require', 'urlChangeTracker');
+      ga('send', 'pageview');
+    </script>
+    <script async src="https://www.google-analytics.com/analytics.js"></script>
+    
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/autotrack/2.4.1/autotrack.js" integrity="sha512-HUmooslVKj4m6OBu0OgzjXXr+QuFYy/k7eLI5jdeEy/F4RSgMn6XRWRGkFi5IFaFgy7uFTkegp3Z0XnJf3Jq+g==" crossorigin="anonymous"></script>
+    
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/20191016/checking-bounds-checking-in-julia/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="vladium">
+  <meta property="og:url" content="/post/20191016/checking-bounds-checking-in-julia/">
+  <meta property="og:title" content="Checking bounds checking in Julia | vladium">
+  <meta property="og:description" content="Ever since my knapsack benchmark I’ve been curious why Julia was still \(\approx 50\%\) slower than either Java or C&#43;&#43; on what essentially were a couple of nested for-loops over a pair of arrays. I’ve done some exploring and now believe that my first guess was correct: much of the remaining Julia overhead is due to its bounds checking.
+Eliding bounds checking unconditionally with @inbounds My first test was to isolate all opt_value() lines with array access into a begin."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2019-10-16T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2019-10-16T13:05:07-05:00">
+  
+
+  
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/20191016/checking-bounds-checking-in-julia/"
+  },
+  "headline": "Checking bounds checking in Julia",
+  
+  "datePublished": "2019-10-16T00:00:00Z",
+  "dateModified": "2019-10-16T13:05:07-05:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Vlad Roubtsov"
+  },
+  
+  "description": "Ever since my knapsack benchmark I’ve been curious why Julia was still \\(\\approx 50\\%\\) slower than either Java or C++ on what essentially were a couple of nested for-loops over a pair of arrays. I’ve done some exploring and now believe that my first guess was correct: much of the remaining Julia overhead is due to its bounds checking.\nEliding bounds checking unconditionally with @inbounds My first test was to isolate all opt_value() lines with array access into a begin."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Checking bounds checking in Julia | vladium</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">vladium</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link  active" href="/post/"><span>posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/tutorials/"><span>tutorials</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Checking bounds checking in Julia</h1>
+
+  
+
+  
+    
+
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    Oct 16, 2019
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    3 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/julia/">julia</a></span>
+  
+
+  
+    
+
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<p>Ever since my <a href="../../../tutorials/study_julia_with_me/knapsack_benchmark/">knapsack benchmark</a> I’ve been curious why Julia was still <span class="math inline">\(\approx 50\%\)</span> slower than either Java or C++ on what essentially were a couple of nested <tt>for</tt>-loops over a pair of arrays. I’ve done some exploring and now believe that my first guess was correct: much of the remaining Julia overhead is due to its <em>bounds checking</em>.</p>
+<div id="eliding-bounds-checking-unconditionally-with-inbounds" class="section level2">
+<h2>Eliding bounds checking unconditionally with <strong><span class="citation">@inbounds</span></strong></h2>
+<p>My first test was to isolate all <code>opt_value()</code> lines with array access into a <code>begin...end</code> block and annotate it with <a href="https://docs.julialang.org/en/v1/devdocs/boundscheck/#Eliding-bounds-checks-1">@inbounds</a>:</p>
+<pre class="julia"><code>    function opt_value(W ::Int64, items ::Array{Item}) ::Int64
+    ...
+    @inbounds(
+      begin
+          V[items[1].weight:end] .= items[1].value
+          ...
+          for j in 2 : n
+              V, V_prev = V_prev, V
+              itemⱼ = items[j]
+              for w in 1 : W
+                  V_without_itemⱼ = V_prev[w]
+              ...
+              end
+          end
+      end
+    )
+    ...</code></pre>
+Here is the data from the original benchmark with added new timing measurements of the above version, labeled <code>julia.ib</code>:
+<div class="figure" style="text-align: center"><span id="fig:fraction"></span>
+<img src="/post/checking-bounds-checking-in-julia_files/figure-html/fraction-1.png" alt="Calculation time as a function of problem size. **julia.ib** labels data obtained from an @inbounds-annotated Julia implementation." width="80%" />
+<p class="caption">
+Figure 1: Calculation time as a function of problem size. <strong>julia.ib</strong> labels data obtained from an <span class="citation">@inbounds-annotated</span> Julia implementation.
+</p>
+</div>
+<p>Nice! With bounds checks elided Julia performance is now in line with Java and C++: its underperformance has decreased to a maximum of <span class="math inline">\(\approx 15\%\)</span>. And Julia is now even the champion for small problem sizes.</p>
+</div>
+<div id="peeking-at-differences-in-generated-code-via-code_native" class="section level2">
+<h2>Peeking at differences in generated code via <strong><span class="citation">@code_native</span></strong></h2>
+<p>Another neat facility of Julia allows me to examine JIT-compiled code very easily and right from my REPL session:</p>
+<pre class="julia-repl"><code>julia&gt; d = Knapsack.make_random_data(5_000, 12345)
+(5000, Main.Knapsack.Item[Main.Knapsack.Item(609, 6198), ...
+
+julia&gt; @code_native debuginfo=:none Knapsack.opt_value(d[1],d[2])
+    .text
+    pushq   %rbp
+    movq    %rsp, %rbp
+    ...
+L1165:
+    movl    $2, %edx
+    jmp L825
+    nopw    (%rax,%rax)</code></pre>
+<p>I don’t show the full asm listing because that’s not particularly useful unless you’re a low-level programmer. Comparing it with and without <code>@inchecks</code> does confirm, however, that the former version is shorter: about 200 instructions instead of 320.</p>
+<p>It is more instructive to look at the compiled version(s) of a simpler function that simply extracts a single slot from an input array:</p>
+<pre class="julia"><code>function getit(a ::Array{Int64})
+    return a[123]
+end</code></pre>
+<pre class="julia-repl"><code>julia&gt; @code_native getit(rand(Int64, 1000))
+    .text
+; ┌ @ work.jl:185 within `getit&#39;
+; │┌ @ work.jl:185 within `getindex&#39;
+    cmpq    $122, 8(%rdi)
+    jbe L18
+    movq    (%rdi), %rax
+    movq    976(%rax), %rax
+; │└
+    retq
+L18:
+    pushq   %rbp
+    movq    %rsp, %rbp
+; │ @ work.jl:185 within `getit&#39;
+; │┌ @ array.jl:728 within `getindex&#39;
+    movq    %rsp, %rax
+    leaq    -16(%rax), %rsi
+    movq    %rsi, %rsp
+    movq    $123, -16(%rax)
+    movabsq $jl_bounds_error_ints, %rax
+    movl    $1, %edx
+    callq   *%rax
+    nopl    (%rax)
+; └└</code></pre>
+<p>Note the instructions to check the fixed (and 0-based) index against the array input length (<tt>cmpq $122, 8(%rdi)</tt>) followed by a conditional jump to native C routine <a href="https://github.com/JuliaLang/julia/blob/master/src/rtutils.c">jl_bounds_error_ints()</a> that creates and throws a <code>BoundsError</code> exception object. The following version of <code>getit()</code>, with the only array indexing expression annotated with <code>@inchecks</code>, is much shorter:</p>
+<pre class="julia"><code>function getit(a ::Array{Int64})
+    return @inbounds a[123]
+end</code></pre>
+<pre class="julia-repl"><code>julia&gt; @code_native getit(rand(Int64, 1000))
+    .text
+; ┌ @ work.jl:185 within `getit&#39;
+; │┌ @ work.jl:185 within `getindex&#39;
+    movq    (%rdi), %rax
+    movq    976(%rax), %rax
+; │└
+    retq
+    nopl    (%rax,%rax)
+; └</code></pre>
+</div>
+<div id="disabling-bounds-checking-from-command-line" class="section level2">
+<h2>Disabling bounds checking from command line</h2>
+<p>It seems that I can get disable bounds checking summarily using <tt>–check-bounds=no</tt> option:</p>
+<pre class="bash"><code>&gt;julia --check-bounds=no Knapsack.jl</code></pre>
+<p>The documentation is somewhat sparse, but it appears that when this option is used it will completely override all <code>@inbounds</code> annotations in the source code, i.e. either all checks are done in a mandatory fashion (“yes”) or none are (“no”). This could be used for “debug” vs “release” calculation runs. However, since bounds checking affects code as it’s being generated, some more documentation is needed to understand how this option works with “pre-compiled” packages and Julia “system” code. I also would like to understand the functionality and use cases for the <a href="https://docs.julialang.org/en/v1/devdocs/boundscheck/#Propagating-inbounds-1">@propagate_inbounds macro</a>.</p>
+</div>
+
+    </div>
+
+    
+
+
+    
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/performance/">performance</a>
+  
+</div>
+
+
+
+    
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card">
+    
+      
+      <img class="portrait mr-3" src="/authors/vlad/avatar_hu0d5701d8ee24ab39895774387ef12238_74030_250x250_fill_lanczos_center_2.png" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Vlad Roubtsov</a></h5>
+      <h6 class="card-subtitle">Principal AI Scientist</h6>
+      <p class="card-text">I am interested in machine learning and stochastic optimization.</p>
+      <ul class="network-icon" aria-hidden="true">
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a href="http://www.linkedin.com/in/vladroubtsov" target="_blank" rel="noopener">
+              <i class="fab fa-linkedin"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+          <li>
+            <a href="mailto:vlad.roubtsov@gmail.com" >
+              <i class="fas fa-envelope"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a href="https://github.com/vladium" target="_blank" rel="noopener">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+
+      
+      
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/cpp.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia-repl.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.16bbb3750feb7244c9bc409a5a4fe678.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    &copy; vladium 2019  
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" id="back_to_top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

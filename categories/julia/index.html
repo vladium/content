@@ -31,7 +31,7 @@
   <meta name="description" content="Principal AI Scientist">
 
   
-  <link rel="alternate" hreflang="en-us" href="/categories/">
+  <link rel="alternate" hreflang="en-us" href="/categories/julia/">
 
   
 
@@ -113,14 +113,14 @@
   
 
   
-  <link rel="alternate" href="/categories/index.xml" type="application/rss+xml" title="vladium">
+  <link rel="alternate" href="/categories/julia/index.xml" type="application/rss+xml" title="vladium">
   
 
   <link rel="manifest" href="/index.webmanifest">
   <link rel="icon" type="image/png" href="/img/icon-32.png">
   <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
 
-  <link rel="canonical" href="/categories/">
+  <link rel="canonical" href="/categories/julia/">
 
   
   
@@ -133,8 +133,8 @@
   <meta property="twitter:card" content="summary">
   
   <meta property="og:site_name" content="vladium">
-  <meta property="og:url" content="/categories/">
-  <meta property="og:title" content="Categories | vladium">
+  <meta property="og:url" content="/categories/julia/">
+  <meta property="og:title" content="julia | vladium">
   <meta property="og:description" content="Principal AI Scientist"><meta property="og:image" content="/img/icon-192.png">
   <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
   
@@ -154,7 +154,7 @@
 
 
 
-  <title>Categories | vladium</title>
+  <title>julia | vladium</title>
 
 </head>
 
@@ -335,7 +335,7 @@
     
   
 <div class="universal-wrapper pt-3">
-  <h1>Categories</h1>
+  <h1>julia</h1>
 
   
 
@@ -350,8 +350,11 @@
   
   
   <div>
-    <h2><a href="/categories/julia/">julia</a></h2>
+    <h2><a href="/post/20191016/checking-bounds-checking-in-julia/">Checking bounds checking in Julia</a></h2>
     <div class="article-style">
+      
+      Ever since my knapsack benchmark I’ve been curious why Julia was still \(\approx 50\%\) slower than either Java or C++ on what essentially were a couple of nested for-loops over a pair of arrays. I’ve done some exploring and now believe that my first guess was correct: much of the remaining Julia overhead is due to its bounds checking.
+Eliding bounds checking unconditionally with @inbounds My first test was to isolate all opt_value() lines with array access into a begin.
       
     </div>
   </div>

@@ -23,8 +23,38 @@
   </url>
   
   <url>
+    <loc>/categories/</loc>
+    <lastmod>2019-10-16T13:05:07-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/20191016/checking-bounds-checking-in-julia/</loc>
+    <lastmod>2019-10-16T13:05:07-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/julia/</loc>
+    <lastmod>2019-10-16T13:05:07-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/performance/</loc>
+    <lastmod>2019-10-16T13:05:07-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2019-10-16T13:05:07-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2019-10-16T13:05:07-05:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/</loc>
-    <lastmod>2019-10-06T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-16T13:05:07-05:00</lastmod>
   </url>
   
   <url>
@@ -36,23 +66,11 @@
   </url>
   
   <url>
-    <loc>/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
-  </url>
-  
-  <url>
     <loc>/publication_types/</loc>
   </url>
   
   <url>
     <loc>/publication/</loc>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
   </url>
   
   <url>
