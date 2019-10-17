@@ -509,7 +509,7 @@ L1165:
     movl    $2, %edx
     jmp L825
     nopw    (%rax,%rax)</code></pre>
-<p>I don’t show the full asm listing because that’s not particularly useful unless you’re a low-level programmer. Comparing it with and without <code>@inchecks</code> does confirm, however, that the former version is shorter: about 200 instructions instead of 320.</p>
+<p>I don’t show the full asm listing because that’s not particularly useful unless you’re a low-level programmer. Comparing it with and without <code>@inbounds</code> does confirm, however, that the former version is shorter: about 200 instructions instead of 320.</p>
 <p>It is more instructive to look at the compiled version(s) of a simpler function that simply extracts a single slot from an input array:</p>
 <pre class="julia"><code>function getit(a ::Array{Int64})
     return a[123]
@@ -538,7 +538,7 @@ L18:
     callq   *%rax
     nopl    (%rax)
 ; └└</code></pre>
-<p>Note the instructions to check the fixed (and 0-based) index against the array input length (<tt>cmpq $122, 8(%rdi)</tt>) followed by a conditional jump to native C routine <a href="https://github.com/JuliaLang/julia/blob/master/src/rtutils.c">jl_bounds_error_ints()</a> that creates and throws a <code>BoundsError</code> exception object. The following version of <code>getit()</code>, with the only array indexing expression annotated with <code>@inchecks</code>, is much shorter:</p>
+<p>Note the instructions to check the fixed (and 0-based) index against the array input length (<tt>cmpq $122, 8(%rdi)</tt>) followed by a conditional jump to native C routine <a href="https://github.com/JuliaLang/julia/blob/master/src/rtutils.c">jl_bounds_error_ints()</a> that creates and throws a <code>BoundsError</code> exception object. The following version of <code>getit()</code>, with the only array indexing expression annotated with <code>@inbounds</code>, is much shorter:</p>
 <pre class="julia"><code>function getit(a ::Array{Int64})
     return @inbounds a[123]
 end</code></pre>

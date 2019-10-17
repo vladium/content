@@ -65,7 +65,7 @@ L1165:
     movl    $2, %edx
     jmp L825
     nopw    (%rax,%rax)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;I don’t show the full asm listing because that’s not particularly useful unless you’re a low-level programmer. Comparing it with and without &lt;code&gt;@inchecks&lt;/code&gt; does confirm, however, that the former version is shorter: about 200 instructions instead of 320.&lt;/p&gt;
+&lt;p&gt;I don’t show the full asm listing because that’s not particularly useful unless you’re a low-level programmer. Comparing it with and without &lt;code&gt;@inbounds&lt;/code&gt; does confirm, however, that the former version is shorter: about 200 instructions instead of 320.&lt;/p&gt;
 &lt;p&gt;It is more instructive to look at the compiled version(s) of a simpler function that simply extracts a single slot from an input array:&lt;/p&gt;
 &lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function getit(a ::Array{Int64})
     return a[123]
@@ -94,7 +94,7 @@ L18:
     callq   *%rax
     nopl    (%rax)
 ; └└&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Note the instructions to check the fixed (and 0-based) index against the array input length (&lt;tt&gt;cmpq $122, 8(%rdi)&lt;/tt&gt;) followed by a conditional jump to native C routine &lt;a href=&#34;https://github.com/JuliaLang/julia/blob/master/src/rtutils.c&#34;&gt;jl_bounds_error_ints()&lt;/a&gt; that creates and throws a &lt;code&gt;BoundsError&lt;/code&gt; exception object. The following version of &lt;code&gt;getit()&lt;/code&gt;, with the only array indexing expression annotated with &lt;code&gt;@inchecks&lt;/code&gt;, is much shorter:&lt;/p&gt;
+&lt;p&gt;Note the instructions to check the fixed (and 0-based) index against the array input length (&lt;tt&gt;cmpq $122, 8(%rdi)&lt;/tt&gt;) followed by a conditional jump to native C routine &lt;a href=&#34;https://github.com/JuliaLang/julia/blob/master/src/rtutils.c&#34;&gt;jl_bounds_error_ints()&lt;/a&gt; that creates and throws a &lt;code&gt;BoundsError&lt;/code&gt; exception object. The following version of &lt;code&gt;getit()&lt;/code&gt;, with the only array indexing expression annotated with &lt;code&gt;@inbounds&lt;/code&gt;, is much shorter:&lt;/p&gt;
 &lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function getit(a ::Array{Int64})
     return @inbounds a[123]
 end&lt;/code&gt;&lt;/pre&gt;
