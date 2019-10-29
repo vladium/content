@@ -421,7 +421,7 @@ Figure 1: Calculation time as a function of knapsack problem size. (Note that bo
     <item>
       <title>Julia type annotations: what Python &#39;type hints&#39; wish they were</title>
       <link>/tutorials/study_julia_with_me/type_annotations/</link>
-      <pubDate>Sun, 06 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 25 Oct 2019 00:00:00 +0000</pubDate>
       <guid>/tutorials/study_julia_with_me/type_annotations/</guid>
       <description>
 
@@ -434,7 +434,7 @@ Figure 1: Calculation time as a function of knapsack problem size. (Note that bo
 &lt;ul&gt;
 &lt;li&gt;A quick tour of Julia type taxonomy.&lt;/li&gt;
 &lt;li&gt;Drill into &lt;em&gt;type annotations&lt;/em&gt; and understand their impact on: code documentation, correctness, performance.&lt;/li&gt;
-&lt;li&gt;Julia functions are always &amp;ldquo;virtual&amp;rdquo;. Julia supports &lt;em&gt;functional OOP&lt;/em&gt; as a &lt;strong&gt;&lt;em&gt;paradigm&lt;/em&gt;&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;Julia functions are always &amp;ldquo;virtual&amp;rdquo;. Julia supports &lt;em&gt;functional OOP&lt;/em&gt; as a paradigm.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h1 id=&#34;types-and-inheritance&#34;&gt;Types and inheritance&lt;/h1&gt;
@@ -548,7 +548,7 @@ Number
 
 &lt;p&gt;(This is great&amp;hellip; but how do I construct an &lt;code&gt;Int24&lt;/code&gt; or define arithmetic? Julia docs are not clear on that &amp;ndash; I think I know how to proceed but that is outside of today&amp;rsquo;s scope.)&lt;/p&gt;
 
-&lt;h2 id=&#34;concrete-vs-abstract-types&#34;&gt;Concrete vs abstract types&lt;/h2&gt;
+&lt;h2 id=&#34;mutable&#34;&gt;Concrete vs abstract types&lt;/h2&gt;
 
 &lt;p&gt;I&amp;rsquo;ve already used a &lt;code&gt;struct&lt;/code&gt; in the &lt;a href=&#34;../knapsack_benchmark#DP&#34;&gt;knapsack benchmark&lt;/a&gt; to represent knapsack items as instances of this type:&lt;/p&gt;
 
@@ -558,7 +558,7 @@ Number
 end
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;These are straightforward: &lt;code&gt;Item&lt;/code&gt;s contain fields (the type is &lt;strong&gt;composite&lt;/strong&gt;) and can be instantiated (the type is &lt;strong&gt;concrete&lt;/strong&gt;). They can also be &lt;em&gt;introspected&lt;/em&gt;:&lt;/p&gt;
+&lt;p&gt;These are straightforward: &lt;code&gt;Item&lt;/code&gt;s contain fields (the type is &lt;strong&gt;composite&lt;/strong&gt;) and can be instantiated (the type is &lt;strong&gt;concrete&lt;/strong&gt;). They can also be examined at runtime using Julia&amp;rsquo;s &lt;em&gt;reflection facilities&lt;/em&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; sizeof(Item)
 16
@@ -652,7 +652,7 @@ Number
 
 &lt;h2 id=&#34;type-parameters&#34;&gt;Type parameters&lt;/h2&gt;
 
-&lt;p&gt;To various degrees, all of the three major categories of Julia types (primitive, composite, abstract) are available in other dynamic languages, either natively or via some libraries. Julia also offers something that gets it if not into the realm of uber-powerful (and uber-complicated) C++ metaprogramming, then definitely into the realm of &lt;a href=&#34;https://en.wikipedia.org/wiki/Generics_in_Java&#34; target=&#34;_blank&#34;&gt;Java generics&lt;/a&gt;: all three type categories can be further &lt;em&gt;parameterized&lt;/em&gt; with other types and values. I&amp;rsquo;ll explore this in a future tutorial.&lt;/p&gt;
+&lt;p&gt;To various degrees, all of the three major categories of Julia types (primitive, composite, abstract) are available in other dynamic languages, either natively or via some &lt;a href=&#34;https://docs.python.org/3/library/abc.html&#34; target=&#34;_blank&#34;&gt;libraries&lt;/a&gt;. Julia also offers something that gets it if not into the realm of uber-powerful (and uber-complicated) &lt;a href=&#34;http://www.tmplbook.com/&#34; target=&#34;_blank&#34;&gt;C++ metaprogramming&lt;/a&gt;, then definitely into the realm of &lt;a href=&#34;https://en.wikipedia.org/wiki/Generics_in_Java&#34; target=&#34;_blank&#34;&gt;Java generics&lt;/a&gt;: all three type categories can be further &lt;em&gt;parameterized&lt;/em&gt; with other types and values. I&amp;rsquo;ll explore this in a future tutorial.&lt;/p&gt;
 
 &lt;h1 id=&#34;type-annotations&#34;&gt;Type annotations&lt;/h1&gt;
 
@@ -811,9 +811,11 @@ Int64 # oops, use 0.0 literal instead of 0 above
 
 &lt;h1 id=&#34;case-study-functional-oop&#34;&gt;Case study: functional OOP&lt;/h1&gt;
 
-&lt;p&gt;Now that we know every function argument in Julia is always associated with a type, that raises a question: is it possible for a Julia runtime session to contain multiple functions that all have the same name and input signature except for types of some (a few) parameters?&lt;/p&gt;
+&lt;p&gt;So far, Julia type annotations appeared to be potentially beneficial (for code maintenance, performance), yet somehow optional, feature of the language. Let me now show a situation where annotation are truly &lt;em&gt;necessary&lt;/em&gt;.&lt;/p&gt;
 
-&lt;p&gt;Not only is the answer &amp;ldquo;yes&amp;rdquo;, it is actually kind of like &amp;ldquo;yes, it is meant to happen &lt;em&gt;a lot&lt;/em&gt;&amp;ldquo;: Julia thrives on maintaining multiple versions of the &amp;ldquo;same&amp;rdquo; function (called &amp;ldquo;methods&amp;rdquo;) and figuring out which version to invoke for a given set of inputs. Enter &amp;ldquo;multiple dispatch&amp;rdquo;, a &lt;strong&gt;&lt;em&gt;core paradigm&lt;/em&gt;&lt;/strong&gt; of Julia programming&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:From-what-I-can&#34;&gt;&lt;a href=&#34;#fn:From-what-I-can&#34;&gt;6&lt;/a&gt;&lt;/sup&gt;. The intuition is that Julia functions are essentially &amp;ldquo;always virtual&amp;rdquo;: unlike other languages where a class method needs to be marked in a special way to support &amp;ldquo;late binding&amp;rdquo; (method dispatch based on runtime, not compile, type of an object), Julia runtime system always dispatches &lt;em&gt;all&lt;/em&gt; functions on the &lt;em&gt;concrete runtime types&lt;/em&gt; of &lt;em&gt;all&lt;/em&gt; their arguments. Because no argument position is &amp;ldquo;special&amp;rdquo; and the method does not &amp;ldquo;belong&amp;rdquo; to any particular parameter type, this form of polymorphism usually opts for language design with standalone functions, that is functions that do not live inside any &amp;ldquo;classes&amp;rdquo;. Some people call such designs &amp;ldquo;functional OOP&amp;rdquo;. It makes a lot of sense for math-style coding due to symmetries in function parameters.&lt;/p&gt;
+&lt;p&gt;We saw how every function argument in Julia is always associated with a type. Is it possible for there to be &lt;em&gt;multiple&lt;/em&gt; functions that all have the same name but different parameter types?&lt;/p&gt;
+
+&lt;p&gt;Not only is the answer &amp;ldquo;yes&amp;rdquo;, it is actually kind of like &amp;ldquo;yes, it is meant to happen &lt;em&gt;a lot&lt;/em&gt;&amp;ldquo;: Julia thrives on maintaining multiple versions of the &amp;ldquo;same&amp;rdquo; function (called &amp;ldquo;methods&amp;rdquo;) and figuring out which version to invoke for a given set of inputs. These versions are distinguished by annotating parameters with different types. Enter &amp;ldquo;multiple dispatch&amp;rdquo;, a &lt;strong&gt;&lt;em&gt;core paradigm&lt;/em&gt;&lt;/strong&gt; of Julia programming&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:From-what-I-can&#34;&gt;&lt;a href=&#34;#fn:From-what-I-can&#34;&gt;6&lt;/a&gt;&lt;/sup&gt;. The intuition is that Julia functions are essentially &amp;ldquo;always virtual&amp;rdquo;: unlike other languages where a class method needs to be marked in a special way to support &amp;ldquo;late binding&amp;rdquo; (method dispatch based on runtime, not compile, type of an object), Julia runtime system always dispatches &lt;em&gt;all&lt;/em&gt; functions on the &lt;em&gt;concrete runtime types&lt;/em&gt; of &lt;em&gt;all&lt;/em&gt; their arguments. Because no argument position is &amp;ldquo;special&amp;rdquo; and the method does not &amp;ldquo;belong&amp;rdquo; to any particular parameter type, this form of polymorphism usually opts for language design with standalone functions, that is functions that do not live inside any &amp;ldquo;classes&amp;rdquo;. Some people call such designs &amp;ldquo;functional OOP&amp;rdquo;. It makes a lot of sense for math-style coding due to symmetries in function parameters.&lt;/p&gt;
 
 &lt;p&gt;Now, one way to ease into Julia multiple dispatch is to consider its simplest edge case: &lt;em&gt;single&lt;/em&gt; dispatch.&lt;/p&gt;
 
@@ -848,7 +850,20 @@ end
 end
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;By this point, my design strategy should be clear: I am going to keep adding more &lt;tt&gt;visit()&lt;/tt&gt; overloads with &lt;tt&gt;obj&lt;/tt&gt; parameter types chosen so as to partition the type universe into subtrees that correctly isolate each supported type of expression I expect to find inside my input. Taking the next step, for objects that can contain other objects the virtual nature of &lt;tt&gt;visit()&lt;/tt&gt; becomes critical:&lt;/p&gt;
+&lt;p&gt;So far, I have told Julia to &lt;em&gt;dispatch&lt;/em&gt; execution to either &lt;code&gt;Real&lt;/code&gt; (and its subtypes, which include ints, floats, and booleans) or &lt;code&gt;AbstractString&lt;/code&gt; (and its subtypes, including &lt;code&gt;String&lt;/code&gt; and everything that is string-like).&lt;/p&gt;
+
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;By the way, the actual dispatch decision is based on &lt;tt&gt;(obj,&amp;nbsp;io)&lt;/tt&gt; but &lt;tt&gt;io&lt;/tt&gt; happens to be the same across all &lt;tt&gt;visit()&lt;/tt&gt;s, so the dispatch is effectively on a &lt;em&gt;single&lt;/em&gt; argument &lt;tt&gt;obj&lt;/tt&gt;.&lt;/p&gt;
+
+&lt;p&gt;Why do I suggest thinking of &lt;tt&gt;visit()&lt;/tt&gt; as &amp;ldquo;virtual&amp;rdquo;? Think of &lt;tt&gt;visit(obj,&amp;hellip;)&lt;/tt&gt; as equivalent to &lt;tt&gt;obj.visit(&amp;hellip;)&lt;/tt&gt; in a language like Python, Java, C++, where the version of &lt;tt&gt;visit()&lt;/tt&gt; to use depends on the &lt;em&gt;runtime&lt;/em&gt; type of &lt;tt&gt;obj&lt;/tt&gt;.&lt;/p&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Also note how abstract parent types come in handy: I don&amp;rsquo;t need to code explicit &lt;tt&gt;visit(Float32,&amp;hellip;)&lt;/tt&gt;, &lt;tt&gt;visit(Float64,&amp;hellip;)&lt;/tt&gt;, &lt;tt&gt;visit(BigFloat,&amp;hellip;)&lt;/tt&gt; for all possible (and future!) leaves of the type tree because I can handle things at the level of abstract parent nodes.&lt;/p&gt;
+
+&lt;p&gt;By this point, my imlementation roadmap should be apparent: I am going to keep adding more &lt;tt&gt;visit()&lt;/tt&gt; overloads with &lt;tt&gt;obj&lt;/tt&gt; parameter types chosen so as to partition the type universe into subtrees that correctly &amp;ldquo;carve out&amp;rdquo; each supported type of anything I expect to find inside my input. Taking the next step, for objects that can contain other objects the virtual nature of &lt;tt&gt;visit()&lt;/tt&gt; becomes critical:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;function visit(obj ::AbstractArray, io ::IO)
     print(io, &#39;[&#39;)
@@ -872,7 +887,7 @@ function visit(obj ::AbstractDict, io ::IO)
 end
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The nested &lt;tt&gt;visit()&lt;/tt&gt;s are already virtual, nothing else needs to be done to pick up a particular overload. There are also no &amp;ldquo;if-obj-type-is-&amp;hellip;&amp;rdquo; condition checks &amp;ndash; everything is as clean as in some &amp;ldquo;pure&amp;rdquo; textbook OOP.&lt;/p&gt;
+&lt;p&gt;The nested &lt;tt&gt;visit()&lt;/tt&gt;s are already virtual, nothing else needs to be done to pick up a particular overload. There are also no &amp;ldquo;if-obj-type-is-&amp;hellip;&amp;rdquo; condition checks &amp;ndash; everything is as clean as in &amp;ldquo;pure&amp;rdquo; textbook OOP.&lt;/p&gt;
 
 &lt;p&gt;Just a handful of lines of code so far, and yet they already work on a variety of inputs:&lt;/p&gt;
 
@@ -898,7 +913,11 @@ end
 [[&amp;quot;tuple&amp;quot;, [1, &amp;quot;nested&amp;quot;, &amp;quot;tuple&amp;quot;]], 1, false, [0.0, 0.0], [1.2345, 12, {&amp;quot;c&amp;quot; : [1.0, 2.0, 3.4], &amp;quot;b&amp;quot; : 2.3, &amp;quot;a&amp;quot; : true}]]
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Note that no earlier &lt;tt&gt;visit()&lt;/tt&gt;s needed to be modified to become &amp;ldquo;aware&amp;rdquo; of this new support for tuples. In other words, a method added &lt;em&gt;later&lt;/em&gt; hooks into a set of mutual method invocations coded &lt;em&gt;earlier&lt;/em&gt;, with no ostensible &amp;ldquo;recompilation&amp;rdquo;.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Observe how no earlier &lt;tt&gt;visit()&lt;/tt&gt;s needed to be modified to become &amp;ldquo;aware&amp;rdquo; of this new support for tuples. In other words, a method added &lt;em&gt;later&lt;/em&gt; hooks into a set of mutual method invocations coded &lt;em&gt;earlier&lt;/em&gt;, with no ostensible &amp;ldquo;recompilation&amp;rdquo;.
+  &lt;/div&gt;
+&lt;/div&gt;
 
 &lt;p&gt;If you&amp;rsquo;re interested in playing with various design alternatives yourself, you can find this entire example &lt;a href=&#34;https://github.com/vladium/study_julia_with_me/tree/master/type_annotations/Tutorial.jl&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
@@ -925,6 +944,352 @@ end
 &lt;li id=&#34;fn:To-simply-the-na&#34;&gt;To simply the narrative, I am glossing over possibilities for &lt;em&gt;promotion&lt;/em&gt; of &lt;code&gt;x&lt;/code&gt; to another type. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:To-simply-the-na&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;li id=&#34;fn:From-what-I-can&#34;&gt;From what I can tell so far, that is. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:From-what-I-can&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;li id=&#34;fn:Note-that-this-t&#34;&gt;Note that this toy serializer doesn&amp;rsquo;t bother with backslash escapes, Unicode, etc. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:Note-that-this-t&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Automatic differentiation from scratch, in 10 lines of Julia</title>
+      <link>/tutorials/study_julia_with_me/multiple_dispatch/</link>
+      <pubDate>Sun, 27 Oct 2019 00:00:00 +0000</pubDate>
+      <guid>/tutorials/study_julia_with_me/multiple_dispatch/</guid>
+      <description>
+
+
+&lt;p&gt;I mentioned Julia’s fondness for multiple dispatch in my &lt;a href=&#34;../type_annotations/&#34;&gt;first typing tutorial&lt;/a&gt;. On purpose at the time, my case study was limited to the simplest case: single dispatch. I’ve waited until I ran across an example of a “natural”&#34; problem where multiple dispatch would play an important role. I think I’ve found one: differentiating a function with no closed-form formula.&lt;/p&gt;
+&lt;div id=&#34;preview&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Preview&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Play with a custom number-like type.&lt;/li&gt;
+&lt;li&gt;Simplify implementation by leveraging Julia’s support for type promotions.&lt;/li&gt;
+&lt;li&gt;Review (very quickly) one technique for automated differentiation (AD).&lt;/li&gt;
+&lt;li&gt;Implement Forward AD through operator overloading. Test it in several ways, finish by plugging it into a Newton-Raphson solver.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;differentiate-this&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Differentiate this&lt;/h1&gt;
+&lt;p&gt;To set my overall objective, I would like to be able to compute the derivative of the following function:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function myerf(x ::Number)
+    Σ = 0.0
+    x² = x * x
+    for k in 0 : 20 # hardcoding the number of summation terms for simplicity
+        Σ += x / (factorial(k) * (2k + 1))
+        x *= -x²
+    end
+    return 2.0 / √π * Σ
+end&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This just sums a truncated Taylor series for &lt;a href=&#34;https://en.wikipedia.org/wiki/Error_function&#34;&gt;erf(x)&lt;/a&gt;:
+&lt;span class=&#34;math display&#34;&gt;\[
+\text{erf}(x) = \frac{2}{\sqrt{\pi}} \int_{-\infty}^{x}e^{-t^2}dt = \frac{2}{\sqrt{\pi}} \sum_{k=0}^{\infty} \frac{(-1)^k x^{2k+1}}{k! (2k+1)}
+\]&lt;/span&gt;
+This series is straightforward to derive by integrating the one for &lt;span class=&#34;math inline&#34;&gt;\(e^{-x^2}\)&lt;/span&gt;. That fact will also allow me to easily check my derivative function, when I get one, against the known correct answer&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt;:
+&lt;span class=&#34;math display&#34;&gt;\[
+\frac{\partial}{\partial x} \text{erf}(x) = \frac{2}{\sqrt{\pi}} e^{-x^2}
+\]&lt;/span&gt;
+My sum-of-the-series implementation seems correct&lt;a href=&#34;#fn2&#34; class=&#34;footnote-ref&#34; id=&#34;fnref2&#34;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt;:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;# if you haven&amp;#39;t installed SpecialFunctions yet:
+# pkg&amp;gt; add SpecialFunctions
+julia&amp;gt;using SpecialFunctions # for the &amp;quot;official&amp;quot; erf(x)
+
+julia&amp;gt; myerf(0.7), erf(0.7)
+(0.6778011938374184, 0.6778011938374184)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So, I know the closed-form expression for the derivative of &lt;tt&gt;myerf(x)&lt;/tt&gt; and somehow I need to get the computer to get it, too, but without actually entering the closed-form answer. And, by the way, I would like a solution that’s as &lt;em&gt;exact&lt;/em&gt; as possible, something not based on &lt;a href=&#34;https://en.wikipedia.org/wiki/Finite_difference#Relation_with_derivatives&#34;&gt;finite differences&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;baby-julia-steps-operators-functions-and-methods&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Baby Julia steps: operators, functions, and methods&lt;/h1&gt;
+&lt;p&gt;To understand the AD example that’s coming up, it will be helpful to delve a little bit into Julia’s model of function dispatch and evaluation. It may seem like an unnecessarily long detour but I promise it will all come together and the learnings will be general.&lt;/p&gt;
+&lt;p&gt;For the following one-line function definition&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; g(x) = x * (x + x)
+g (generic function with 1 method)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;consider how the inputs (of which &lt;span class=&#34;math inline&#34;&gt;\(g\)&lt;/span&gt; has only one, &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;) determine its eventual value&lt;a href=&#34;#fn3&#34; class=&#34;footnote-ref&#34; id=&#34;fnref3&#34;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/a&gt;: we sum two copies of &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;, then multiply that intermediate result by another &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;. You could say that all these values, both the inputs and the intermediates, &lt;em&gt;propagate&lt;/em&gt; through &lt;span class=&#34;math inline&#34;&gt;\(g\)&lt;/span&gt;’s &lt;em&gt;calculation graph&lt;/em&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;g_graph.png&#34; style=&#34;width:35.0%&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Each function call node in such a graph is an elementary step of the calculation. In fact, I can drill into these steps directly from Julia:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; g_tree = :(x * (x + x)) # &amp;#39;:(...)&amp;#39; is the &amp;quot;quoting&amp;quot; operator here: it parses what&amp;#39;s inside into a syntax tree
+:(x * (x + x))
+
+julia&amp;gt; typeof(g_tree)
+Expr
+
+julia&amp;gt; dump(g_tree) # show g_tree as a tree of annotated nodes
+Expr
+  head: Symbol call
+  args: Array{Any}((3,))
+    1: Symbol *
+    2: Symbol x
+    3: Expr
+      head: Symbol call
+      args: Array{Any}((3,))
+        1: Symbol +
+        2: Symbol x
+        3: Symbol x&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;What &lt;code&gt;dump()&lt;/code&gt; shows is a tree of expression (&lt;code&gt;Expr&lt;/code&gt;) nodes comprising the calculation graph for &lt;span class=&#34;math inline&#34;&gt;\(g(x)\)&lt;/span&gt;. Each node annotated with &lt;code&gt;Symbol call&lt;/code&gt; is an invocation of one elementary step like multiplication (&lt;code&gt;*&lt;/code&gt;), addition (&lt;code&gt;+&lt;/code&gt;), and so on – those were the diamond-shaped nodes in the picture. (If you have some CS background or ever worked on an interpreter or compiler, this ground should feel very familiar.)&lt;/p&gt;
+&lt;div id=&#34;julia-operators-are-functions&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Julia operators are functions&lt;/h2&gt;
+&lt;p&gt;As already implied by the syntax tree form of &lt;span class=&#34;math inline&#34;&gt;\(g(x)\)&lt;/span&gt;, almost&lt;a href=&#34;#fn4&#34; class=&#34;footnote-ref&#34; id=&#34;fnref4&#34;&gt;&lt;sup&gt;4&lt;/sup&gt;&lt;/a&gt; all elementary operators like &lt;code&gt;*&lt;/code&gt;, &lt;code&gt;+&lt;/code&gt;, etc are actually Julia functions with special infix syntax. They are defined as such and can be invoked with the “normal” function call syntax:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; x = 2;
+
+julia&amp;gt; x + x
+4
+
+julia&amp;gt; +(x, x) # call function named &amp;quot;+&amp;quot; with parameter tuple &amp;quot;(x, x)&amp;quot;
+4&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;(In fact, most of Julia is defined via its own syntax, something the language designers and user community are justifiably proud of.)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;julia-functions-are-overloadable-or-is-it-overridable-smile&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Julia functions are “overloadable” (or is it “overridable”? 😄)&lt;/h2&gt;
+&lt;p&gt;Multiplying two integers is not the same as “multiplying” two strings&lt;a href=&#34;#fn5&#34; class=&#34;footnote-ref&#34; id=&#34;fnref5&#34;&gt;&lt;sup&gt;5&lt;/sup&gt;&lt;/a&gt;:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; x * x
+4
+
+julia&amp;gt; &amp;quot;x&amp;quot; * &amp;quot;x&amp;quot;
+&amp;quot;xx&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;and might be different from “multiplying” objects of a user-defined type. As I started to explain in my &lt;a href=&#34;../type_annotations/#case-study-functional-oop&#34;&gt;previous typing tutorial&lt;/a&gt;, this is made possible by using different parameter types for different function versions (“methods”, in Julia parlance). Internally, Julia keeps a list of all methods it is aware of for each operator/function and they can be examined using &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Base.methods&#34;&gt;methods()&lt;/a&gt;:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; methods(*)
+# 358 methods for generic function &amp;quot;*&amp;quot;:
+[1] *(x::Bool, z::Complex{Bool}) in Base at complex.jl:282
+[2] *(x::Bool, y::Bool) in Base at bool.jl:98
+[3] *(x::Bool, y::T) where T&amp;lt;:AbstractFloat in Base at bool.jl:110
+[4] *(x::Bool, z::Complex) in Base at complex.jl:289
+[5] *(x::Bool, y::AbstractIrrational) in Base at irrationals.jl:139
+[6] *(a::Float16, b::Float16) in Base at float.jl:392
+[7] *(x::Float32, y::Float32) in Base at float.jl:398
+[8] *(x::Float64, y::Float64) in Base at float.jl:399
+[9] *(z::Complex{Bool}, x::Bool) in Base at complex.jl:283
+... lots more ...&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It is possible for a user to add more methods to such lists. Each row has a unique signature. Imagine defining your own “numbers”:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; struct MyNum &amp;lt;: Number
+           v   ::Float64
+       end
+
+julia&amp;gt; MyNum(2.0) * MyNum(2.0) # this won&amp;#39;t work
+ERROR: MethodError: no method matching *(::MyNum, ::MyNum)
+Closest candidates are:
+  *(::Any, ::Any, ::Any, ::Any...) at operators.jl:529
+
+julia&amp;gt; Base.:(*)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v * rhs.v) # define &amp;#39;MyNum * MyNum&amp;#39;, so now it will
+
+julia&amp;gt; MyNum(2.0) * MyNum(2.0)
+MyNum(4.0)
+
+julia&amp;gt; methods(MyNum)
+# 2 methods for generic function &amp;quot;(::Type)&amp;quot;:
+[1] MyNum(v::Float64) in Main at none:1
+[2] MyNum(v) in Main at none:1
+
+julia&amp;gt; methods(*)
+# 359 methods for generic function &amp;quot;*&amp;quot;: # &amp;lt;- note that count is up by one
+[1] *(x::Bool, z::Complex{Bool}) in Base at complex.jl:282
+...
+[31] *(lhs::MyNum, rhs::MyNum) in Main at none:1
+...&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note again how the new method doesn’t “belong” to &lt;code&gt;MyNum&lt;/code&gt; but rather to a global &lt;a href=&#34;https://docs.julialang.org/en/v1/devdocs/functions/#Method-Tables-1&#34;&gt;method table&lt;/a&gt; associated with &lt;code&gt;*&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Continuing, I would need to define a minimal collection of arithmetic operations in order for `MyNum’s to be useful as something resembling numbers:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;# binary ops:
+
+Base.:(+)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v + rhs.v)
+Base.:(-)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v - rhs.v)
+
+Base.:(*)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v * rhs.v)
+Base.:(/)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v / rhs.v)
+
+# unary ops:
+
+Base.:(+)(x ::MyNum) = x
+Base.:(-)(x ::MyNum) = MyNum(- x.v)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; MyNum(3.0) + MyNum(4.0)
+MyNum(7.0)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So far, so good. Note that &lt;span class=&#34;math inline&#34;&gt;\(g(x)\)&lt;/span&gt; is generic enough so it “just works” for both plain floats &lt;em&gt;and&lt;/em&gt; &lt;code&gt;MyNum&lt;/code&gt;s:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; g(2.0)
+8.0
+
+julia&amp;gt; g(MyNum(2.0))
+MyNum(8.0)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Take note, this will happen again later. Of course, &lt;span class=&#34;math inline&#34;&gt;\(g(x)\)&lt;/span&gt; is downright trivial: it uses only &lt;code&gt;*&lt;/code&gt; and &lt;code&gt;+&lt;/code&gt; – this was truly a baby step.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;something-is-missing&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Something is missing&lt;/h2&gt;
+&lt;p&gt;My custom, soon-to-win-many-awards, number type is missing some boilerplate stuff. Trying another simple function fails; it flat out refuses to work with &lt;code&gt;MyNum&lt;/code&gt;s:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; f(x) = 1.0 / x
+f (generic function with 1 method)
+
+julia&amp;gt; f(MyNum(2.0))
+ERROR: promotion of types Float64 and MyNum failed to change any arguments
+Stacktrace:
+ [1] sametype_error(::Tuple{Float64,MyNum}) at ./promotion.jl:308
+ [2] not_sametype(::Tuple{Float64,MyNum}, ::Tuple{Float64,MyNum}) at ./promotion.jl:302
+ [3] promote at ./promotion.jl:285 [inlined]
+ [4] /(::Float64, ::MyNum) at ./promotion.jl:316
+ [5] f(::MyNum) at ./none:1&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I can see from the stacktrace that &lt;span class=&#34;math inline&#34;&gt;\(f(x)\)&lt;/span&gt; was indeed found and started, but something went wrong later: there was no suitable defition of &lt;code&gt;/&lt;/code&gt; for parameter type pair (&lt;code&gt;Float64&lt;/code&gt;, &lt;code&gt;MyNum&lt;/code&gt;). Julia does not know to convert the &lt;tt&gt;1.0&lt;/tt&gt; in &lt;code&gt;1.0 / x&lt;/code&gt; to a &lt;code&gt;MyNum&lt;/code&gt; – the language does not have what’s called &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/conversion-and-promotion/&#34;&gt;&lt;em&gt;automatic&lt;/em&gt; promotion&lt;/a&gt;. As a result, &lt;code&gt;MyNum&lt;/code&gt;s don’t interoperate with the “stock” numbers particularly well.&lt;/p&gt;
+&lt;div id=&#34;promotion-fix-1-moar-dispatch&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Promotion fix #1: MOAR dispatch!&lt;/h3&gt;
+&lt;p&gt;One way to proceed is to keep adding to the method table for &lt;code&gt;/&lt;/code&gt; (and other ops) until all conceivable cases are covered:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; Base.:(/)(lhs ::Float64, rhs ::MyNum) = MyNum(lhs / rhs.v) # float / MyNum
+
+julia&amp;gt; f(MyNum(2.0)) # f() works now
+MyNum(0.5)
+
+julia&amp;gt; h(x) = x / 3.0
+h (generic function with 1 method)
+
+julia&amp;gt; h(MyNum(2.0))
+ERROR: promotion of types MyNum and Float64 failed to change any arguments
+...
+
+julia&amp;gt; Base.:(/)(lhs ::MyNum, rhs ::Float64) = MyNum(lhs.v / rhs) # MyNum / float
+
+julia&amp;gt; h(MyNum(2.0)) # h() works now, too
+MyNum(0.6666666666666666)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In other words, &lt;em&gt;all possible permutations&lt;/em&gt; of parameter types need to be implemented by &lt;em&gt;all&lt;/em&gt; operators. This game of whack-a-mole seems laborious and error-prone. Hmm, is it possible to have &lt;em&gt;too much&lt;/em&gt; dispatch? 😄&lt;/p&gt;
+&lt;p&gt;This design choice begs for some automatic code generation and indeed I think it can be made viable through Julia’s &lt;em&gt;metaprogramming&lt;/em&gt; facilities, specifically &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/metaprogramming/#man-macros-1&#34;&gt;macros&lt;/a&gt;. But because I haven’t covered metaprogramming yet, I will instead go another, easier for the time being, route.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;promotion-fix-2-promote_rule&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Promotion fix #2: &lt;strong&gt;promote_rule()&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Julia has &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/conversion-and-promotion/#Promotion-1&#34;&gt;provisions for dealing with the explosion in the number of needed permutations of argument types&lt;/a&gt;. The idea is as follows: instead of expecting for there to be an &lt;tt&gt;op(T1, T2)&lt;/tt&gt; method for every possible &lt;tt&gt;(T1, T2)&lt;/tt&gt; pair, a collection of “promotion rules” is queried to find out whether &lt;tt&gt;T1&lt;/tt&gt; and &lt;tt&gt;T2&lt;/tt&gt; can be first converted to a &lt;em&gt;common&lt;/em&gt; type &lt;tt&gt;T&lt;/tt&gt; (which could be, but doesn’t have to be, either &lt;tt&gt;T1&lt;/tt&gt; or &lt;tt&gt;T2&lt;/tt&gt;). If that is possible, it is assumed that the conversion is lossless and subsequently only the &lt;tt&gt;op(T, T)&lt;/tt&gt; overload will be needed.&lt;/p&gt;
+&lt;p&gt;It is easy to see how this system reduces the need for very large method tables. In the case of &lt;code&gt;MyNum&lt;/code&gt;, the correct incantation is:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;Base.promote_rule(::Type{MyNum}, ::Type{&amp;lt;: Number}) = MyNum&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;which specifies that whenever a mix of &lt;code&gt;MyNum&lt;/code&gt; and subtype-of-&lt;code&gt;Number&lt;/code&gt; is encountered, the common type &lt;tt&gt;T&lt;/tt&gt; to use is &lt;code&gt;MyNum&lt;/code&gt;. This is less “automatic”, but it works. This way Julia supports type promotions that in other languages like C++ and Java are done by the compiler (and hence are fairly fixed).&lt;/p&gt;
+&lt;p&gt;So now a much more compact and yet robust arithmetic system for a custom number type can be implemented with two types of building blocks:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;actual arithmetic/math operators and functions, defined to take &lt;em&gt;only&lt;/em&gt; the custom number arguments;&lt;/li&gt;
+&lt;li&gt;if needed, promotion rules to make the custom types interoperate with the “stock” types.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This is the design I use below as part of my demo AD implementation. You can read the handful of lines needed to have custom arithmetic operations in the &lt;a href=&#34;https://github.com/vladium/study_julia_with_me/tree/master/multiple_dispatch/FAD.jl&#34;&gt;supporting module file&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Whew! 😰 It took a bit longer than I thought, but the language mechanics have been explained and I can return to my original objective: fun with differentiating stuff in Julia.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;case-study-automatic-differentiation-via-forward-prop&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Case study: automatic differentiation via “forward prop”&lt;/h1&gt;
+&lt;p&gt;What I need now is some &lt;a href=&#34;https://en.wikipedia.org/wiki/Automatic_differentiation&#34;&gt;Automatic Differentiation (AD)&lt;/a&gt;. There are many AD flavors but I will exlore just one simple variant called “forward” (also “tangent” or “standard”) AD. Forward AD is particularly easy to engineer in a language that offers operator overloading, which we now understand Julia does. (By the way, if you search the web chances are you will run into tutorials that introduce Forward AD via &lt;a href=&#34;https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_numbers&#34;&gt;dual numbers&lt;/a&gt; – I do not do that here because I don’t think it is particularly intuition-inducing.)&lt;/p&gt;
+&lt;p&gt;You may have noted that &lt;tt&gt;myerf(x)&lt;/tt&gt; was coded in a profoundly “non-functional” style: it has evil procedural things like variable mutation in a &lt;tt&gt;for&lt;/tt&gt;-loop. Nevertheless, AD can work with it&lt;a href=&#34;#fn6&#34; class=&#34;footnote-ref&#34; id=&#34;fnref6&#34;&gt;&lt;sup&gt;6&lt;/sup&gt;&lt;/a&gt; and I believe that to be a simple example of &lt;a href=&#34;https://sinews.siam.org/Details-Page/scientific-machine-learning-how-julia-employs-differentiable-programming-to-do-it-best&#34;&gt;&lt;em&gt;differentiable programming&lt;/em&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;strong&gt;Core AD ideas:&lt;/strong&gt;&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;A calculation is a &lt;em&gt;composition&lt;/em&gt; of smaller steps&lt;/li&gt;
+&lt;li&gt;These steps can be &lt;em&gt;instrumented&lt;/em&gt; to generate “stuff” &lt;em&gt;in addition&lt;/em&gt; to the original expression values.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div id=&#34;core-ad-idea-1-composition-of-steps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Core AD idea #1: composition of steps&lt;/h2&gt;
+&lt;p&gt;If you’ve made it through the preceeding sections, the following should now be seared into your subconscious: a function computes its output by forward-propagating inputs and intermediate expression values through its calculation graph. These elementary steps are &lt;code&gt;+&lt;/code&gt;, &lt;code&gt;*&lt;/code&gt;, &lt;code&gt;cos&lt;/code&gt;, &lt;code&gt;sin&lt;/code&gt;, etc.&lt;/p&gt;
+&lt;p&gt;Futhermore, these steps are not very “intrinsic” or somehow untouchable: I’ve shown that I could wrap values into a custom type and overload all the operations I am interested in. This works beacuse of Julia’s core paradigm of (multiple) dispatch on argument types.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;core-ad-idea-2-step-instrumentation&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Core AD idea #2: step instrumentation&lt;/h2&gt;
+&lt;p&gt;Just one more step remaining. Why did I bother replicating standard arithmetic with &lt;code&gt;MyNum&lt;/code&gt;? Sure, it was to understand better how some aspects of Julia worked. But note this: computing the derivative of a function is also a &lt;em&gt;composable&lt;/em&gt; calculation and &lt;em&gt;it can be done in parallel with computing the function value&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;So… if I extend &lt;code&gt;MyNum&lt;/code&gt; with another field to hold the current expression’s &lt;em&gt;derivative&lt;/em&gt;, I can forward-propagate it in the same pass as the main&#34; value:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;struct Context &amp;lt;: Number
+    v   ::Float64
+    ∂   ::Float64
+end&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;# binary ops:
+
+Base.:(+)(lhs ::Context, rhs ::Context) = Context(lhs.v + rhs.v, lhs.∂ + rhs.∂)
+Base.:(-)(lhs ::Context, rhs ::Context) = Context(lhs.v - rhs.v, lhs.∂ - rhs.∂)
+
+Base.:(*)(lhs ::Context, rhs ::Context) = Context(lhs.v * rhs.v, lhs.v * rhs.∂ + lhs.∂ * rhs.v)
+Base.:(/)(lhs ::Context, rhs ::Context) = Context(lhs.v / rhs.v, (lhs.∂ * rhs.v - lhs.v * rhs.∂) / rhs.v^2)
+
+# unary ops:
+
+Base.:(+)(x ::Context) = x
+Base.:(-)(x ::Context) = Context(- x.v, - x.∂)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here &lt;code&gt;Context&lt;/code&gt; is the grown-up version of &lt;code&gt;MyNum&lt;/code&gt;. It has been extended with field &lt;span class=&#34;math inline&#34;&gt;\(\partial\)&lt;/span&gt;. The arithmetic overloads for &lt;code&gt;Context&lt;/code&gt; continue to propagate &lt;em&gt;expression values&lt;/em&gt; in &lt;span class=&#34;math inline&#34;&gt;\(v\)&lt;/span&gt; while some new logic propagates &lt;em&gt;derivative values&lt;/em&gt; in &lt;span class=&#34;math inline&#34;&gt;\(\partial\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Individual &lt;code&gt;Context&lt;/code&gt; &lt;span class=&#34;math inline&#34;&gt;\(v\)&lt;/span&gt;-rules are composed to form a larger calculation such as &lt;tt&gt;myerf(x)&lt;/tt&gt;. Consistently with such pattern of composition, each &lt;span class=&#34;math inline&#34;&gt;\(\partial\)&lt;/span&gt;-rule can be seen to be an application of the &lt;a href=&#34;https://en.wikipedia.org/wiki/Chain_rule&#34;&gt;chain rule&lt;/a&gt; for obtaining derivatives of the composition of functions. For example, since
+&lt;span class=&#34;math display&#34;&gt;\[
+\frac{\partial}{\partial x} (lhs + rhs)(x) = \frac{\partial}{\partial x} lhs(x) + \frac{\partial}{\partial x} rhs(x)
+\]&lt;/span&gt;
+the &lt;code&gt;Context&lt;/code&gt; rule for &lt;code&gt;+&lt;/code&gt; must be
+&lt;span class=&#34;math display&#34;&gt;\[
++\big( \langle lhs.v, lhs.\partial \rangle, \langle rhs.v, rhs.\partial \rangle \big) = \big\langle (lhs.v + rhs.v), (lhs.\partial + rhs.\partial) \big\rangle.
+\]&lt;/span&gt;
+The rule for &lt;code&gt;sin&lt;/code&gt;, should it be needed, would be
+&lt;span class=&#34;math display&#34;&gt;\[
+\sin \big(\langle x.v, x.\partial \rangle \big) = \big\langle \sin(x.v), \cos(x.v) \partial \big\rangle,
+\]&lt;/span&gt;
+and so on.&lt;/p&gt;
+&lt;p&gt;What &lt;code&gt;Context&lt;/code&gt; value should be fed as the initial input? It’s &lt;span class=&#34;math inline&#34;&gt;\(v\)&lt;/span&gt;-field is &lt;tt&gt;x&lt;/tt&gt;. The derivative of that with respect to &lt;tt&gt;x&lt;/tt&gt; is 1.0, so to establish derivative propagation correctly it needs to be seeded with &lt;code&gt;Context(x, 1.0)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;And that’s pretty much it. Does it work? Let’s give it a try:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function derivative(f ::Function)
+    return x ::Number -&amp;gt; f(Context(x, 1.0)).∂ # discard value, return derivative
+end
+
+∂ = derivative # add a nice-looking alias&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the moment of truth:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; include(&amp;quot;multiple_dispatch/FAD.jl&amp;quot;)
+Main.FAD
+
+julia&amp;gt; using Main.FAD # bring ∂, etc into this REPL
+
+julia&amp;gt; x = 0.7;
+
+julia&amp;gt; ∂(myerf)(x), 2/√π * exp(-x^2)
+(0.6912748604105389, 0.6912748604105386)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Success!&lt;/p&gt;
+&lt;p&gt;&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;Observe something neat: myerf(x) hasn’t stopped working for plain float x’s – it is still &lt;em&gt;generic&lt;/em&gt;. Invoked with a scalar float x, it will return just the erf(x) value and spend no CPU cycles computing anything else. Invoked with a &lt;code&gt;Context&lt;/code&gt;, it will return both erf(x) and its derivative at x. Of course, two different bits of native assembly execute in these two cases. Both versions (that is, &lt;em&gt;methods&lt;/em&gt; of a function named “myerf”) will be JIT’ed separately.&lt;/p&gt;
+&lt;p&gt;myerf(Context) is in fact a version of myerf(x) &lt;strong&gt;instrumented&lt;/strong&gt; to carry out additional calculations and carry additional, well, &lt;em&gt;context&lt;/em&gt; through the calculation graph that defines myerf(x).&lt;/p&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;p&gt;As a different test, the chain rule &lt;span class=&#34;math inline&#34;&gt;\(\frac{\partial}{\partial x}(f \circ g)(x) = \frac{\partial}{\partial g} f(g(x)) \frac{\partial}{\partial x} g(x)\)&lt;/span&gt; should also hold for arbitrary “differentiable” Julia functions:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; f(x) = 1.0 / x
+f (generic function with 1 method)
+
+julia&amp;gt; g(x) = x * (x + x)
+g (generic function with 1 method)
+
+julia&amp;gt; x = 1.2345;
+
+julia&amp;gt; ∂(f ∘ g)(x), ∂(f)(g(x)) * ∂(g)(x)
+(-0.5315286974115385, -0.5315286974115385)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I think this is downright &lt;em&gt;beautiful&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;And last but not least, let me try an algorithm that can benefit from having both &lt;span class=&#34;math inline&#34;&gt;\(f(x)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\frac{\partial}{\partial x}f(x)\)&lt;/span&gt; available at the same time, e.g. &lt;a href=&#34;https://en.wikipedia.org/wiki/Newton%27s_method&#34;&gt;Newton-Raphons root finder&lt;/a&gt;. Here is a prototype version performing &lt;span class=&#34;math inline&#34;&gt;\(x_{n+1} = x_n - \frac{f(x_n)}{\frac{\partial}{\partial x}f(x_n)}\)&lt;/span&gt; iterations until convergence within given tolerance:&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function root_solve(f ::Function, x₀ ::Number; ϵ = 1e-8)
+    i = 1
+    while true
+        ctx = f(Context(x₀, 1.0))
+        println(&amp;quot;[$i]: f($x₀)\t= $(ctx.v)&amp;quot;)
+        abs(ctx.v) &amp;lt; ϵ &amp;amp;&amp;amp; break
+        x₀ -= ctx.v / ctx.∂ # use both value and derivative
+        i += 1
+    end
+    return x₀
+end&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If I extend my &lt;code&gt;Context&lt;/code&gt; “algebra” with some more elementary operations&lt;/p&gt;
+&lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;Base.sin(d ::Context) = Context(sin(d.v),   cos(d.v) * d.∂)
+Base.cos(d ::Context) = Context(cos(d.v), - sin(d.v) * d.∂)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;then I can try solving, say, trigonometric equations:&lt;/p&gt;
+&lt;pre class=&#34;julia-repl&#34;&gt;&lt;code&gt;julia&amp;gt; root_solve(x -&amp;gt; sin(x) - cos(x), 0.0) # find a root of sin(x) = cos(x) starting from x₀ = 0
+[1]: f(0.0) = -1.0
+[2]: f(1.0) = 0.30116867893975674
+[3]: f(0.782041901539138)   = -0.004746462127804163
+[4]: f(0.7853981759997019)  = 1.7822277875723103e-8
+[5]: f(0.7853981633974483)  = -1.1102230246251565e-16
+0.7853981633974483
+
+julia&amp;gt; π/4
+0.7853981633974483&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Nice. I find this all &lt;em&gt;very&lt;/em&gt; satisfying. Especially given how few lines of Julia actually went into the &lt;a href=&#34;https://github.com/vladium/study_julia_with_me/tree/master/multiple_dispatch/FAD.jl&#34;&gt;final implementation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;For an industrial-strength implementation of this approach to AD, check out &lt;a href=&#34;https://github.com/JuliaDiff/ForwardDiff.jl&#34;&gt;ForwardDiff.jl&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;I am abusing the partial derivative symbol &lt;span class=&#34;math inline&#34;&gt;\(\partial\)&lt;/span&gt; for all my derivative notation here, including Julia code.&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn2&#34;&gt;&lt;p&gt;My implementation ignores possible overflows in &lt;tt&gt;x²&lt;/tt&gt;, &lt;tt&gt;factorial(k)&lt;/tt&gt;, etc – it is intentionally made to evoke the symbolic series expression. A.k.a. “research code”.😄 &lt;a href=&#34;#fnref2&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn3&#34;&gt;&lt;p&gt;The compiler may choose to optimize this subexpression to &lt;span class=&#34;math inline&#34;&gt;\(2x\)&lt;/span&gt; but that doesn’t invalidate the forgoing.&lt;a href=&#34;#fnref3&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn4&#34;&gt;&lt;p&gt;There are exceptions like &lt;code&gt;&amp;amp;&amp;amp;&lt;/code&gt; and &lt;code&gt;||&lt;/code&gt; because those obey &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/control-flow/#Short-Circuit-Evaluation-1&#34;&gt;short-circuit evaluation rules&lt;/a&gt;.&lt;a href=&#34;#fnref4&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn5&#34;&gt;&lt;p&gt;Yes, Julia uses &lt;code&gt;*&lt;/code&gt; for string concatenation. A little unorthodox?&lt;a href=&#34;#fnref5&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn6&#34;&gt;&lt;p&gt;Although in general AD isn’t guaranteed to work with &lt;em&gt;all&lt;/em&gt; such functions.&lt;a href=&#34;#fnref6&#34; class=&#34;footnote-back&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>

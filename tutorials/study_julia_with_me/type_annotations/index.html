@@ -137,9 +137,9 @@
   <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
-      <meta property="article:published_time" content="2019-10-06T00:00:00&#43;00:00">
+      <meta property="article:published_time" content="2019-10-25T00:00:00&#43;00:00">
     
-    <meta property="article:modified_time" content="2019-10-06T00:00:00&#43;00:00">
+    <meta property="article:modified_time" content="2019-10-25T00:00:00&#43;00:00">
   
 
   
@@ -357,6 +357,10 @@
         <a href="/tutorials/study_julia_with_me/type_annotations/">Types 1: annotations, reflection, OOP</a>
       </li>
       
+      <li >
+        <a href="/tutorials/study_julia_with_me/multiple_dispatch/">Types 2: type promotion, multiple dispatch</a>
+      </li>
+      
     </ul>
     
 
@@ -393,7 +397,7 @@
 </ul></li>
 <li><a href="#arithmetic-types">Arithmetic types</a></li>
 <li><a href="#primitive-types">Primitive types</a></li>
-<li><a href="#concrete-vs-abstract-types">Concrete vs abstract types</a></li>
+<li><a href="#mutable">Concrete vs abstract types</a></li>
 <li><a href="#type-parameters">Type parameters</a></li>
 </ul></li>
 <li><a href="#type-annotations">Type annotations</a>
@@ -437,7 +441,7 @@
 <ul>
 <li>A quick tour of Julia type taxonomy.</li>
 <li>Drill into <em>type annotations</em> and understand their impact on: code documentation, correctness, performance.</li>
-<li>Julia functions are always &ldquo;virtual&rdquo;. Julia supports <em>functional OOP</em> as a <strong><em>paradigm</em></strong>.</li>
+<li>Julia functions are always &ldquo;virtual&rdquo;. Julia supports <em>functional OOP</em> as a paradigm.</li>
 </ul>
 
 <h1 id="types-and-inheritance">Types and inheritance</h1>
@@ -551,7 +555,7 @@ Number
 
 <p>(This is great&hellip; but how do I construct an <code>Int24</code> or define arithmetic? Julia docs are not clear on that &ndash; I think I know how to proceed but that is outside of today&rsquo;s scope.)</p>
 
-<h2 id="concrete-vs-abstract-types">Concrete vs abstract types</h2>
+<h2 id="mutable">Concrete vs abstract types</h2>
 
 <p>I&rsquo;ve already used a <code>struct</code> in the <a href="../knapsack_benchmark#DP">knapsack benchmark</a> to represent knapsack items as instances of this type:</p>
 
@@ -561,7 +565,7 @@ Number
 end
 </code></pre>
 
-<p>These are straightforward: <code>Item</code>s contain fields (the type is <strong>composite</strong>) and can be instantiated (the type is <strong>concrete</strong>). They can also be <em>introspected</em>:</p>
+<p>These are straightforward: <code>Item</code>s contain fields (the type is <strong>composite</strong>) and can be instantiated (the type is <strong>concrete</strong>). They can also be examined at runtime using Julia&rsquo;s <em>reflection facilities</em>:</p>
 
 <pre><code class="language-julia-repl">julia&gt; sizeof(Item)
 16
@@ -655,7 +659,7 @@ Number
 
 <h2 id="type-parameters">Type parameters</h2>
 
-<p>To various degrees, all of the three major categories of Julia types (primitive, composite, abstract) are available in other dynamic languages, either natively or via some libraries. Julia also offers something that gets it if not into the realm of uber-powerful (and uber-complicated) C++ metaprogramming, then definitely into the realm of <a href="https://en.wikipedia.org/wiki/Generics_in_Java" target="_blank">Java generics</a>: all three type categories can be further <em>parameterized</em> with other types and values. I&rsquo;ll explore this in a future tutorial.</p>
+<p>To various degrees, all of the three major categories of Julia types (primitive, composite, abstract) are available in other dynamic languages, either natively or via some <a href="https://docs.python.org/3/library/abc.html" target="_blank">libraries</a>. Julia also offers something that gets it if not into the realm of uber-powerful (and uber-complicated) <a href="http://www.tmplbook.com/" target="_blank">C++ metaprogramming</a>, then definitely into the realm of <a href="https://en.wikipedia.org/wiki/Generics_in_Java" target="_blank">Java generics</a>: all three type categories can be further <em>parameterized</em> with other types and values. I&rsquo;ll explore this in a future tutorial.</p>
 
 <h1 id="type-annotations">Type annotations</h1>
 
@@ -814,9 +818,11 @@ Int64 # oops, use 0.0 literal instead of 0 above
 
 <h1 id="case-study-functional-oop">Case study: functional OOP</h1>
 
-<p>Now that we know every function argument in Julia is always associated with a type, that raises a question: is it possible for a Julia runtime session to contain multiple functions that all have the same name and input signature except for types of some (a few) parameters?</p>
+<p>So far, Julia type annotations appeared to be potentially beneficial (for code maintenance, performance), yet somehow optional, feature of the language. Let me now show a situation where annotation are truly <em>necessary</em>.</p>
 
-<p>Not only is the answer &ldquo;yes&rdquo;, it is actually kind of like &ldquo;yes, it is meant to happen <em>a lot</em>&ldquo;: Julia thrives on maintaining multiple versions of the &ldquo;same&rdquo; function (called &ldquo;methods&rdquo;) and figuring out which version to invoke for a given set of inputs. Enter &ldquo;multiple dispatch&rdquo;, a <strong><em>core paradigm</em></strong> of Julia programming<sup class="footnote-ref" id="fnref:From-what-I-can"><a href="#fn:From-what-I-can">6</a></sup>. The intuition is that Julia functions are essentially &ldquo;always virtual&rdquo;: unlike other languages where a class method needs to be marked in a special way to support &ldquo;late binding&rdquo; (method dispatch based on runtime, not compile, type of an object), Julia runtime system always dispatches <em>all</em> functions on the <em>concrete runtime types</em> of <em>all</em> their arguments. Because no argument position is &ldquo;special&rdquo; and the method does not &ldquo;belong&rdquo; to any particular parameter type, this form of polymorphism usually opts for language design with standalone functions, that is functions that do not live inside any &ldquo;classes&rdquo;. Some people call such designs &ldquo;functional OOP&rdquo;. It makes a lot of sense for math-style coding due to symmetries in function parameters.</p>
+<p>We saw how every function argument in Julia is always associated with a type. Is it possible for there to be <em>multiple</em> functions that all have the same name but different parameter types?</p>
+
+<p>Not only is the answer &ldquo;yes&rdquo;, it is actually kind of like &ldquo;yes, it is meant to happen <em>a lot</em>&ldquo;: Julia thrives on maintaining multiple versions of the &ldquo;same&rdquo; function (called &ldquo;methods&rdquo;) and figuring out which version to invoke for a given set of inputs. These versions are distinguished by annotating parameters with different types. Enter &ldquo;multiple dispatch&rdquo;, a <strong><em>core paradigm</em></strong> of Julia programming<sup class="footnote-ref" id="fnref:From-what-I-can"><a href="#fn:From-what-I-can">6</a></sup>. The intuition is that Julia functions are essentially &ldquo;always virtual&rdquo;: unlike other languages where a class method needs to be marked in a special way to support &ldquo;late binding&rdquo; (method dispatch based on runtime, not compile, type of an object), Julia runtime system always dispatches <em>all</em> functions on the <em>concrete runtime types</em> of <em>all</em> their arguments. Because no argument position is &ldquo;special&rdquo; and the method does not &ldquo;belong&rdquo; to any particular parameter type, this form of polymorphism usually opts for language design with standalone functions, that is functions that do not live inside any &ldquo;classes&rdquo;. Some people call such designs &ldquo;functional OOP&rdquo;. It makes a lot of sense for math-style coding due to symmetries in function parameters.</p>
 
 <p>Now, one way to ease into Julia multiple dispatch is to consider its simplest edge case: <em>single</em> dispatch.</p>
 
@@ -851,7 +857,20 @@ end
 end
 </code></pre>
 
-<p>By this point, my design strategy should be clear: I am going to keep adding more <tt>visit()</tt> overloads with <tt>obj</tt> parameter types chosen so as to partition the type universe into subtrees that correctly isolate each supported type of expression I expect to find inside my input. Taking the next step, for objects that can contain other objects the virtual nature of <tt>visit()</tt> becomes critical:</p>
+<p>So far, I have told Julia to <em>dispatch</em> execution to either <code>Real</code> (and its subtypes, which include ints, floats, and booleans) or <code>AbstractString</code> (and its subtypes, including <code>String</code> and everything that is string-like).</p>
+
+<div class="alert alert-note">
+  <div>
+    <p>By the way, the actual dispatch decision is based on <tt>(obj,&nbsp;io)</tt> but <tt>io</tt> happens to be the same across all <tt>visit()</tt>s, so the dispatch is effectively on a <em>single</em> argument <tt>obj</tt>.</p>
+
+<p>Why do I suggest thinking of <tt>visit()</tt> as &ldquo;virtual&rdquo;? Think of <tt>visit(obj,&hellip;)</tt> as equivalent to <tt>obj.visit(&hellip;)</tt> in a language like Python, Java, C++, where the version of <tt>visit()</tt> to use depends on the <em>runtime</em> type of <tt>obj</tt>.</p>
+
+  </div>
+</div>
+
+<p>Also note how abstract parent types come in handy: I don&rsquo;t need to code explicit <tt>visit(Float32,&hellip;)</tt>, <tt>visit(Float64,&hellip;)</tt>, <tt>visit(BigFloat,&hellip;)</tt> for all possible (and future!) leaves of the type tree because I can handle things at the level of abstract parent nodes.</p>
+
+<p>By this point, my imlementation roadmap should be apparent: I am going to keep adding more <tt>visit()</tt> overloads with <tt>obj</tt> parameter types chosen so as to partition the type universe into subtrees that correctly &ldquo;carve out&rdquo; each supported type of anything I expect to find inside my input. Taking the next step, for objects that can contain other objects the virtual nature of <tt>visit()</tt> becomes critical:</p>
 
 <pre><code class="language-julia">function visit(obj ::AbstractArray, io ::IO)
     print(io, '[')
@@ -875,7 +894,7 @@ function visit(obj ::AbstractDict, io ::IO)
 end
 </code></pre>
 
-<p>The nested <tt>visit()</tt>s are already virtual, nothing else needs to be done to pick up a particular overload. There are also no &ldquo;if-obj-type-is-&hellip;&rdquo; condition checks &ndash; everything is as clean as in some &ldquo;pure&rdquo; textbook OOP.</p>
+<p>The nested <tt>visit()</tt>s are already virtual, nothing else needs to be done to pick up a particular overload. There are also no &ldquo;if-obj-type-is-&hellip;&rdquo; condition checks &ndash; everything is as clean as in &ldquo;pure&rdquo; textbook OOP.</p>
 
 <p>Just a handful of lines of code so far, and yet they already work on a variety of inputs:</p>
 
@@ -901,7 +920,11 @@ end
 [[&quot;tuple&quot;, [1, &quot;nested&quot;, &quot;tuple&quot;]], 1, false, [0.0, 0.0], [1.2345, 12, {&quot;c&quot; : [1.0, 2.0, 3.4], &quot;b&quot; : 2.3, &quot;a&quot; : true}]]
 </code></pre>
 
-<p>Note that no earlier <tt>visit()</tt>s needed to be modified to become &ldquo;aware&rdquo; of this new support for tuples. In other words, a method added <em>later</em> hooks into a set of mutual method invocations coded <em>earlier</em>, with no ostensible &ldquo;recompilation&rdquo;.</p>
+<div class="alert alert-note">
+  <div>
+    Observe how no earlier <tt>visit()</tt>s needed to be modified to become &ldquo;aware&rdquo; of this new support for tuples. In other words, a method added <em>later</em> hooks into a set of mutual method invocations coded <em>earlier</em>, with no ostensible &ldquo;recompilation&rdquo;.
+  </div>
+</div>
 
 <p>If you&rsquo;re interested in playing with various design alternatives yourself, you can find this entire example <a href="https://github.com/vladium/study_julia_with_me/tree/master/type_annotations/Tutorial.jl" target="_blank">here</a>.</p>
 
@@ -950,6 +973,12 @@ end
   </div>
   
   
+  
+  <div class="post-nav-item">
+    <div class="meta-nav">Next</div>
+    <a href="/tutorials/study_julia_with_me/multiple_dispatch/" rel="prev">Automatic differentiation from scratch, in 10 lines of Julia</a>
+  </div>
+  
 </div>
 
           </div>
@@ -957,20 +986,12 @@ end
         </div>
 
         <div class="body-footer">
-          <p>Last updated on Oct 6, 2019</p>
+          <p>Last updated on Oct 25, 2019</p>
 
           
 
 
           
-<section id="comments">
-  
-    <div id="commento"></div>
-<script src="https://cdn.commento.io/js/commento.js" defer></script>
-
-  
-</section>
-
 
         </div>
 

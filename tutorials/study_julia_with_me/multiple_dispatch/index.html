@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.4.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Vlad Roubtsov">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="I mentioned Julia’s fondness for multiple dispatch in my first typing tutorial. On purpose at the time, my case study was limited to the simplest case: single dispatch. I’ve waited until I ran across an example of a “natural”&#34; problem where multiple dispatch would play an important role. I think I’ve found one: differentiating a function with no closed-form formula.
+Preview  Play with a custom number-like type. Simplify implementation by leveraging Julia’s support for type promotions.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/tutorials/study_julia_with_me/multiple_dispatch/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#3f51b5">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.927aeb2a835eaf9005c1499820562316.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.c95fc539390309404839f86767b13568.css">
+  
+
+  
+  
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', 'UA-148582714-1', 'auto');
+      
+      ga('require', 'eventTracker');
+      ga('require', 'outboundLinkTracker');
+      ga('require', 'urlChangeTracker');
+      ga('send', 'pageview');
+    </script>
+    <script async src="https://www.google-analytics.com/analytics.js"></script>
+    
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/autotrack/2.4.1/autotrack.js" integrity="sha512-HUmooslVKj4m6OBu0OgzjXXr+QuFYy/k7eLI5jdeEy/F4RSgMn6XRWRGkFi5IFaFgy7uFTkegp3Z0XnJf3Jq+g==" crossorigin="anonymous"></script>
+    
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/tutorials/study_julia_with_me/multiple_dispatch/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="vladium">
+  <meta property="og:url" content="/tutorials/study_julia_with_me/multiple_dispatch/">
+  <meta property="og:title" content="Automatic differentiation from scratch, in 10 lines of Julia | vladium">
+  <meta property="og:description" content="I mentioned Julia’s fondness for multiple dispatch in my first typing tutorial. On purpose at the time, my case study was limited to the simplest case: single dispatch. I’ve waited until I ran across an example of a “natural”&#34; problem where multiple dispatch would play an important role. I think I’ve found one: differentiating a function with no closed-form formula.
+Preview  Play with a custom number-like type. Simplify implementation by leveraging Julia’s support for type promotions."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2019-10-27T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2019-10-27T00:00:00&#43;00:00">
+  
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Automatic differentiation from scratch, in 10 lines of Julia | vladium</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">vladium</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/post/"><span>posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link  active" href="/tutorials/"><span>tutorials</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  
+
+<div class="container-fluid docs">
+  <div class="row flex-xl-nowrap">
+    <div class="col-12 col-md-3 col-xl-2 docs-sidebar">
+      
+
+
+
+
+
+<form class="docs-search d-flex align-items-center">
+  <button class="btn docs-toggle d-md-none p-0 mr-3" type="button" data-toggle="collapse" data-target="#docs-nav" aria-controls="docs-nav" aria-expanded="false" aria-label="Toggle section navigation">
+    <span><i class="fas fa-bars"></i></span>
+  </button>
+
+  
+  <input name="q" type="search" class="form-control" placeholder="Search..." autocomplete="off">
+  
+</form>
+
+<nav class="collapse docs-links" id="docs-nav">
+  
+  
+  <div class="docs-toc-item">
+    <a class="docs-toc-link" href="/tutorials/study_julia_with_me/">About</a>
+    <ul class="nav docs-sidenav">
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/structure/">Setup, FAQ, resources</a>
+      </li>
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/knapsack_benchmark/">Benchmark 1: iterative algorithm</a>
+      </li>
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/type_annotations/">Types 1: annotations, reflection, OOP</a>
+      </li>
+      
+      <li class="active">
+        <a href="/tutorials/study_julia_with_me/multiple_dispatch/">Types 2: type promotion, multiple dispatch</a>
+      </li>
+      
+    </ul>
+    
+
+  </div>
+  
+  
+</nav>
+
+    </div>
+
+    
+
+    <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 docs-content" role="main">
+
+      <article class="article" itemscope itemtype="http://schema.org/Article">
+
+        <div class="docs-article-container">
+          <h1 itemprop="name">Automatic differentiation from scratch, in 10 lines of Julia</h1>
+
+          <div class="article-style" itemprop="articleBody">
+            
+
+
+<p>I mentioned Julia’s fondness for multiple dispatch in my <a href="../type_annotations/">first typing tutorial</a>. On purpose at the time, my case study was limited to the simplest case: single dispatch. I’ve waited until I ran across an example of a “natural”" problem where multiple dispatch would play an important role. I think I’ve found one: differentiating a function with no closed-form formula.</p>
+<div id="preview" class="section level4">
+<h4>Preview</h4>
+<ul>
+<li>Play with a custom number-like type.</li>
+<li>Simplify implementation by leveraging Julia’s support for type promotions.</li>
+<li>Review (very quickly) one technique for automated differentiation (AD).</li>
+<li>Implement Forward AD through operator overloading. Test it in several ways, finish by plugging it into a Newton-Raphson solver.</li>
+</ul>
+</div>
+<div id="differentiate-this" class="section level1">
+<h1>Differentiate this</h1>
+<p>To set my overall objective, I would like to be able to compute the derivative of the following function:</p>
+<pre class="julia"><code>function myerf(x ::Number)
+    Σ = 0.0
+    x² = x * x
+    for k in 0 : 20 # hardcoding the number of summation terms for simplicity
+        Σ += x / (factorial(k) * (2k + 1))
+        x *= -x²
+    end
+    return 2.0 / √π * Σ
+end</code></pre>
+<p>This just sums a truncated Taylor series for <a href="https://en.wikipedia.org/wiki/Error_function">erf(x)</a>:
+<span class="math display">\[
+\text{erf}(x) = \frac{2}{\sqrt{\pi}} \int_{-\infty}^{x}e^{-t^2}dt = \frac{2}{\sqrt{\pi}} \sum_{k=0}^{\infty} \frac{(-1)^k x^{2k+1}}{k! (2k+1)}
+\]</span>
+This series is straightforward to derive by integrating the one for <span class="math inline">\(e^{-x^2}\)</span>. That fact will also allow me to easily check my derivative function, when I get one, against the known correct answer<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>:
+<span class="math display">\[
+\frac{\partial}{\partial x} \text{erf}(x) = \frac{2}{\sqrt{\pi}} e^{-x^2}
+\]</span>
+My sum-of-the-series implementation seems correct<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>:</p>
+<pre class="julia-repl"><code># if you haven&#39;t installed SpecialFunctions yet:
+# pkg&gt; add SpecialFunctions
+julia&gt;using SpecialFunctions # for the &quot;official&quot; erf(x)
+
+julia&gt; myerf(0.7), erf(0.7)
+(0.6778011938374184, 0.6778011938374184)</code></pre>
+<p>So, I know the closed-form expression for the derivative of <tt>myerf(x)</tt> and somehow I need to get the computer to get it, too, but without actually entering the closed-form answer. And, by the way, I would like a solution that’s as <em>exact</em> as possible, something not based on <a href="https://en.wikipedia.org/wiki/Finite_difference#Relation_with_derivatives">finite differences</a>.</p>
+</div>
+<div id="baby-julia-steps-operators-functions-and-methods" class="section level1">
+<h1>Baby Julia steps: operators, functions, and methods</h1>
+<p>To understand the AD example that’s coming up, it will be helpful to delve a little bit into Julia’s model of function dispatch and evaluation. It may seem like an unnecessarily long detour but I promise it will all come together and the learnings will be general.</p>
+<p>For the following one-line function definition</p>
+<pre class="julia-repl"><code>julia&gt; g(x) = x * (x + x)
+g (generic function with 1 method)</code></pre>
+<p>consider how the inputs (of which <span class="math inline">\(g\)</span> has only one, <span class="math inline">\(x\)</span>) determine its eventual value<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>: we sum two copies of <span class="math inline">\(x\)</span>, then multiply that intermediate result by another <span class="math inline">\(x\)</span>. You could say that all these values, both the inputs and the intermediates, <em>propagate</em> through <span class="math inline">\(g\)</span>’s <em>calculation graph</em>:</p>
+<p><img src="g_graph.png" style="width:35.0%" /></p>
+<p>Each function call node in such a graph is an elementary step of the calculation. In fact, I can drill into these steps directly from Julia:</p>
+<pre class="julia-repl"><code>julia&gt; g_tree = :(x * (x + x)) # &#39;:(...)&#39; is the &quot;quoting&quot; operator here: it parses what&#39;s inside into a syntax tree
+:(x * (x + x))
+
+julia&gt; typeof(g_tree)
+Expr
+
+julia&gt; dump(g_tree) # show g_tree as a tree of annotated nodes
+Expr
+  head: Symbol call
+  args: Array{Any}((3,))
+    1: Symbol *
+    2: Symbol x
+    3: Expr
+      head: Symbol call
+      args: Array{Any}((3,))
+        1: Symbol +
+        2: Symbol x
+        3: Symbol x</code></pre>
+<p>What <code>dump()</code> shows is a tree of expression (<code>Expr</code>) nodes comprising the calculation graph for <span class="math inline">\(g(x)\)</span>. Each node annotated with <code>Symbol call</code> is an invocation of one elementary step like multiplication (<code>*</code>), addition (<code>+</code>), and so on – those were the diamond-shaped nodes in the picture. (If you have some CS background or ever worked on an interpreter or compiler, this ground should feel very familiar.)</p>
+<div id="julia-operators-are-functions" class="section level2">
+<h2>Julia operators are functions</h2>
+<p>As already implied by the syntax tree form of <span class="math inline">\(g(x)\)</span>, almost<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> all elementary operators like <code>*</code>, <code>+</code>, etc are actually Julia functions with special infix syntax. They are defined as such and can be invoked with the “normal” function call syntax:</p>
+<pre class="julia-repl"><code>julia&gt; x = 2;
+
+julia&gt; x + x
+4
+
+julia&gt; +(x, x) # call function named &quot;+&quot; with parameter tuple &quot;(x, x)&quot;
+4</code></pre>
+<p>(In fact, most of Julia is defined via its own syntax, something the language designers and user community are justifiably proud of.)</p>
+</div>
+<div id="julia-functions-are-overloadable-or-is-it-overridable-smile" class="section level2">
+<h2>Julia functions are “overloadable” (or is it “overridable”? 😄)</h2>
+<p>Multiplying two integers is not the same as “multiplying” two strings<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>:</p>
+<pre class="julia-repl"><code>julia&gt; x * x
+4
+
+julia&gt; &quot;x&quot; * &quot;x&quot;
+&quot;xx&quot;</code></pre>
+<p>and might be different from “multiplying” objects of a user-defined type. As I started to explain in my <a href="../type_annotations/#case-study-functional-oop">previous typing tutorial</a>, this is made possible by using different parameter types for different function versions (“methods”, in Julia parlance). Internally, Julia keeps a list of all methods it is aware of for each operator/function and they can be examined using <a href="https://docs.julialang.org/en/v1/base/base/#Base.methods">methods()</a>:</p>
+<pre class="julia-repl"><code>julia&gt; methods(*)
+# 358 methods for generic function &quot;*&quot;:
+[1] *(x::Bool, z::Complex{Bool}) in Base at complex.jl:282
+[2] *(x::Bool, y::Bool) in Base at bool.jl:98
+[3] *(x::Bool, y::T) where T&lt;:AbstractFloat in Base at bool.jl:110
+[4] *(x::Bool, z::Complex) in Base at complex.jl:289
+[5] *(x::Bool, y::AbstractIrrational) in Base at irrationals.jl:139
+[6] *(a::Float16, b::Float16) in Base at float.jl:392
+[7] *(x::Float32, y::Float32) in Base at float.jl:398
+[8] *(x::Float64, y::Float64) in Base at float.jl:399
+[9] *(z::Complex{Bool}, x::Bool) in Base at complex.jl:283
+... lots more ...</code></pre>
+<p>It is possible for a user to add more methods to such lists. Each row has a unique signature. Imagine defining your own “numbers”:</p>
+<pre class="julia-repl"><code>julia&gt; struct MyNum &lt;: Number
+           v   ::Float64
+       end
+
+julia&gt; MyNum(2.0) * MyNum(2.0) # this won&#39;t work
+ERROR: MethodError: no method matching *(::MyNum, ::MyNum)
+Closest candidates are:
+  *(::Any, ::Any, ::Any, ::Any...) at operators.jl:529
+
+julia&gt; Base.:(*)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v * rhs.v) # define &#39;MyNum * MyNum&#39;, so now it will
+
+julia&gt; MyNum(2.0) * MyNum(2.0)
+MyNum(4.0)
+
+julia&gt; methods(MyNum)
+# 2 methods for generic function &quot;(::Type)&quot;:
+[1] MyNum(v::Float64) in Main at none:1
+[2] MyNum(v) in Main at none:1
+
+julia&gt; methods(*)
+# 359 methods for generic function &quot;*&quot;: # &lt;- note that count is up by one
+[1] *(x::Bool, z::Complex{Bool}) in Base at complex.jl:282
+...
+[31] *(lhs::MyNum, rhs::MyNum) in Main at none:1
+...</code></pre>
+<p>Note again how the new method doesn’t “belong” to <code>MyNum</code> but rather to a global <a href="https://docs.julialang.org/en/v1/devdocs/functions/#Method-Tables-1">method table</a> associated with <code>*</code>.</p>
+<p>Continuing, I would need to define a minimal collection of arithmetic operations in order for `MyNum’s to be useful as something resembling numbers:</p>
+<pre class="julia"><code># binary ops:
+
+Base.:(+)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v + rhs.v)
+Base.:(-)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v - rhs.v)
+
+Base.:(*)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v * rhs.v)
+Base.:(/)(lhs ::MyNum, rhs ::MyNum) = MyNum(lhs.v / rhs.v)
+
+# unary ops:
+
+Base.:(+)(x ::MyNum) = x
+Base.:(-)(x ::MyNum) = MyNum(- x.v)</code></pre>
+<pre class="julia-repl"><code>julia&gt; MyNum(3.0) + MyNum(4.0)
+MyNum(7.0)</code></pre>
+<p>So far, so good. Note that <span class="math inline">\(g(x)\)</span> is generic enough so it “just works” for both plain floats <em>and</em> <code>MyNum</code>s:</p>
+<pre class="julia-repl"><code>julia&gt; g(2.0)
+8.0
+
+julia&gt; g(MyNum(2.0))
+MyNum(8.0)</code></pre>
+<p>Take note, this will happen again later. Of course, <span class="math inline">\(g(x)\)</span> is downright trivial: it uses only <code>*</code> and <code>+</code> – this was truly a baby step.</p>
+</div>
+<div id="something-is-missing" class="section level2">
+<h2>Something is missing</h2>
+<p>My custom, soon-to-win-many-awards, number type is missing some boilerplate stuff. Trying another simple function fails; it flat out refuses to work with <code>MyNum</code>s:</p>
+<pre class="julia-repl"><code>julia&gt; f(x) = 1.0 / x
+f (generic function with 1 method)
+
+julia&gt; f(MyNum(2.0))
+ERROR: promotion of types Float64 and MyNum failed to change any arguments
+Stacktrace:
+ [1] sametype_error(::Tuple{Float64,MyNum}) at ./promotion.jl:308
+ [2] not_sametype(::Tuple{Float64,MyNum}, ::Tuple{Float64,MyNum}) at ./promotion.jl:302
+ [3] promote at ./promotion.jl:285 [inlined]
+ [4] /(::Float64, ::MyNum) at ./promotion.jl:316
+ [5] f(::MyNum) at ./none:1</code></pre>
+<p>I can see from the stacktrace that <span class="math inline">\(f(x)\)</span> was indeed found and started, but something went wrong later: there was no suitable defition of <code>/</code> for parameter type pair (<code>Float64</code>, <code>MyNum</code>). Julia does not know to convert the <tt>1.0</tt> in <code>1.0 / x</code> to a <code>MyNum</code> – the language does not have what’s called <a href="https://docs.julialang.org/en/v1/manual/conversion-and-promotion/"><em>automatic</em> promotion</a>. As a result, <code>MyNum</code>s don’t interoperate with the “stock” numbers particularly well.</p>
+<div id="promotion-fix-1-moar-dispatch" class="section level3">
+<h3>Promotion fix #1: MOAR dispatch!</h3>
+<p>One way to proceed is to keep adding to the method table for <code>/</code> (and other ops) until all conceivable cases are covered:</p>
+<pre class="julia-repl"><code>julia&gt; Base.:(/)(lhs ::Float64, rhs ::MyNum) = MyNum(lhs / rhs.v) # float / MyNum
+
+julia&gt; f(MyNum(2.0)) # f() works now
+MyNum(0.5)
+
+julia&gt; h(x) = x / 3.0
+h (generic function with 1 method)
+
+julia&gt; h(MyNum(2.0))
+ERROR: promotion of types MyNum and Float64 failed to change any arguments
+...
+
+julia&gt; Base.:(/)(lhs ::MyNum, rhs ::Float64) = MyNum(lhs.v / rhs) # MyNum / float
+
+julia&gt; h(MyNum(2.0)) # h() works now, too
+MyNum(0.6666666666666666)</code></pre>
+<p>In other words, <em>all possible permutations</em> of parameter types need to be implemented by <em>all</em> operators. This game of whack-a-mole seems laborious and error-prone. Hmm, is it possible to have <em>too much</em> dispatch? 😄</p>
+<p>This design choice begs for some automatic code generation and indeed I think it can be made viable through Julia’s <em>metaprogramming</em> facilities, specifically <a href="https://docs.julialang.org/en/v1/manual/metaprogramming/#man-macros-1">macros</a>. But because I haven’t covered metaprogramming yet, I will instead go another, easier for the time being, route.</p>
+</div>
+<div id="promotion-fix-2-promote_rule" class="section level3">
+<h3>Promotion fix #2: <strong>promote_rule()</strong></h3>
+<p>Julia has <a href="https://docs.julialang.org/en/v1/manual/conversion-and-promotion/#Promotion-1">provisions for dealing with the explosion in the number of needed permutations of argument types</a>. The idea is as follows: instead of expecting for there to be an <tt>op(T1, T2)</tt> method for every possible <tt>(T1, T2)</tt> pair, a collection of “promotion rules” is queried to find out whether <tt>T1</tt> and <tt>T2</tt> can be first converted to a <em>common</em> type <tt>T</tt> (which could be, but doesn’t have to be, either <tt>T1</tt> or <tt>T2</tt>). If that is possible, it is assumed that the conversion is lossless and subsequently only the <tt>op(T, T)</tt> overload will be needed.</p>
+<p>It is easy to see how this system reduces the need for very large method tables. In the case of <code>MyNum</code>, the correct incantation is:</p>
+<pre class="julia"><code>Base.promote_rule(::Type{MyNum}, ::Type{&lt;: Number}) = MyNum</code></pre>
+<p>which specifies that whenever a mix of <code>MyNum</code> and subtype-of-<code>Number</code> is encountered, the common type <tt>T</tt> to use is <code>MyNum</code>. This is less “automatic”, but it works. This way Julia supports type promotions that in other languages like C++ and Java are done by the compiler (and hence are fairly fixed).</p>
+<p>So now a much more compact and yet robust arithmetic system for a custom number type can be implemented with two types of building blocks:</p>
+<ol style="list-style-type: decimal">
+<li>actual arithmetic/math operators and functions, defined to take <em>only</em> the custom number arguments;</li>
+<li>if needed, promotion rules to make the custom types interoperate with the “stock” types.</li>
+</ol>
+<p>This is the design I use below as part of my demo AD implementation. You can read the handful of lines needed to have custom arithmetic operations in the <a href="https://github.com/vladium/study_julia_with_me/tree/master/multiple_dispatch/FAD.jl">supporting module file</a>.</p>
+<p>Whew! 😰 It took a bit longer than I thought, but the language mechanics have been explained and I can return to my original objective: fun with differentiating stuff in Julia.</p>
+</div>
+</div>
+</div>
+<div id="case-study-automatic-differentiation-via-forward-prop" class="section level1">
+<h1>Case study: automatic differentiation via “forward prop”</h1>
+<p>What I need now is some <a href="https://en.wikipedia.org/wiki/Automatic_differentiation">Automatic Differentiation (AD)</a>. There are many AD flavors but I will exlore just one simple variant called “forward” (also “tangent” or “standard”) AD. Forward AD is particularly easy to engineer in a language that offers operator overloading, which we now understand Julia does. (By the way, if you search the web chances are you will run into tutorials that introduce Forward AD via <a href="https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_numbers">dual numbers</a> – I do not do that here because I don’t think it is particularly intuition-inducing.)</p>
+<p>You may have noted that <tt>myerf(x)</tt> was coded in a profoundly “non-functional” style: it has evil procedural things like variable mutation in a <tt>for</tt>-loop. Nevertheless, AD can work with it<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a> and I believe that to be a simple example of <a href="https://sinews.siam.org/Details-Page/scientific-machine-learning-how-julia-employs-differentiable-programming-to-do-it-best"><em>differentiable programming</em></a>.</p>
+<p><div class="alert alert-note">
+  <div>
+    <strong>Core AD ideas:</strong></p>
+<ol style="list-style-type: decimal">
+<li>A calculation is a <em>composition</em> of smaller steps</li>
+<li>These steps can be <em>instrumented</em> to generate “stuff” <em>in addition</em> to the original expression values.
+  </div>
+</div>
+</li>
+</ol>
+<div id="core-ad-idea-1-composition-of-steps" class="section level2">
+<h2>Core AD idea #1: composition of steps</h2>
+<p>If you’ve made it through the preceeding sections, the following should now be seared into your subconscious: a function computes its output by forward-propagating inputs and intermediate expression values through its calculation graph. These elementary steps are <code>+</code>, <code>*</code>, <code>cos</code>, <code>sin</code>, etc.</p>
+<p>Futhermore, these steps are not very “intrinsic” or somehow untouchable: I’ve shown that I could wrap values into a custom type and overload all the operations I am interested in. This works beacuse of Julia’s core paradigm of (multiple) dispatch on argument types.</p>
+</div>
+<div id="core-ad-idea-2-step-instrumentation" class="section level2">
+<h2>Core AD idea #2: step instrumentation</h2>
+<p>Just one more step remaining. Why did I bother replicating standard arithmetic with <code>MyNum</code>? Sure, it was to understand better how some aspects of Julia worked. But note this: computing the derivative of a function is also a <em>composable</em> calculation and <em>it can be done in parallel with computing the function value</em>.</p>
+<p>So… if I extend <code>MyNum</code> with another field to hold the current expression’s <em>derivative</em>, I can forward-propagate it in the same pass as the main" value:</p>
+<pre class="julia"><code>struct Context &lt;: Number
+    v   ::Float64
+    ∂   ::Float64
+end</code></pre>
+<pre class="julia"><code># binary ops:
+
+Base.:(+)(lhs ::Context, rhs ::Context) = Context(lhs.v + rhs.v, lhs.∂ + rhs.∂)
+Base.:(-)(lhs ::Context, rhs ::Context) = Context(lhs.v - rhs.v, lhs.∂ - rhs.∂)
+
+Base.:(*)(lhs ::Context, rhs ::Context) = Context(lhs.v * rhs.v, lhs.v * rhs.∂ + lhs.∂ * rhs.v)
+Base.:(/)(lhs ::Context, rhs ::Context) = Context(lhs.v / rhs.v, (lhs.∂ * rhs.v - lhs.v * rhs.∂) / rhs.v^2)
+
+# unary ops:
+
+Base.:(+)(x ::Context) = x
+Base.:(-)(x ::Context) = Context(- x.v, - x.∂)</code></pre>
+<p>Here <code>Context</code> is the grown-up version of <code>MyNum</code>. It has been extended with field <span class="math inline">\(\partial\)</span>. The arithmetic overloads for <code>Context</code> continue to propagate <em>expression values</em> in <span class="math inline">\(v\)</span> while some new logic propagates <em>derivative values</em> in <span class="math inline">\(\partial\)</span>.</p>
+<p>Individual <code>Context</code> <span class="math inline">\(v\)</span>-rules are composed to form a larger calculation such as <tt>myerf(x)</tt>. Consistently with such pattern of composition, each <span class="math inline">\(\partial\)</span>-rule can be seen to be an application of the <a href="https://en.wikipedia.org/wiki/Chain_rule">chain rule</a> for obtaining derivatives of the composition of functions. For example, since
+<span class="math display">\[
+\frac{\partial}{\partial x} (lhs + rhs)(x) = \frac{\partial}{\partial x} lhs(x) + \frac{\partial}{\partial x} rhs(x)
+\]</span>
+the <code>Context</code> rule for <code>+</code> must be
+<span class="math display">\[
++\big( \langle lhs.v, lhs.\partial \rangle, \langle rhs.v, rhs.\partial \rangle \big) = \big\langle (lhs.v + rhs.v), (lhs.\partial + rhs.\partial) \big\rangle.
+\]</span>
+The rule for <code>sin</code>, should it be needed, would be
+<span class="math display">\[
+\sin \big(\langle x.v, x.\partial \rangle \big) = \big\langle \sin(x.v), \cos(x.v) \partial \big\rangle,
+\]</span>
+and so on.</p>
+<p>What <code>Context</code> value should be fed as the initial input? It’s <span class="math inline">\(v\)</span>-field is <tt>x</tt>. The derivative of that with respect to <tt>x</tt> is 1.0, so to establish derivative propagation correctly it needs to be seeded with <code>Context(x, 1.0)</code>.</p>
+<p>And that’s pretty much it. Does it work? Let’s give it a try:</p>
+<pre class="julia"><code>function derivative(f ::Function)
+    return x ::Number -&gt; f(Context(x, 1.0)).∂ # discard value, return derivative
+end
+
+∂ = derivative # add a nice-looking alias</code></pre>
+<p>And the moment of truth:</p>
+<pre class="julia-repl"><code>julia&gt; include(&quot;multiple_dispatch/FAD.jl&quot;)
+Main.FAD
+
+julia&gt; using Main.FAD # bring ∂, etc into this REPL
+
+julia&gt; x = 0.7;
+
+julia&gt; ∂(myerf)(x), 2/√π * exp(-x^2)
+(0.6912748604105389, 0.6912748604105386)</code></pre>
+<p>Success!</p>
+<p><div class="alert alert-note">
+  <div>
+    <p>Observe something neat: myerf(x) hasn’t stopped working for plain float x’s – it is still <em>generic</em>. Invoked with a scalar float x, it will return just the erf(x) value and spend no CPU cycles computing anything else. Invoked with a <code>Context</code>, it will return both erf(x) and its derivative at x. Of course, two different bits of native assembly execute in these two cases. Both versions (that is, <em>methods</em> of a function named “myerf”) will be JIT’ed separately.</p>
+<p>myerf(Context) is in fact a version of myerf(x) <strong>instrumented</strong> to carry out additional calculations and carry additional, well, <em>context</em> through the calculation graph that defines myerf(x).</p>
+
+  </div>
+</div>
+</p>
+<p>As a different test, the chain rule <span class="math inline">\(\frac{\partial}{\partial x}(f \circ g)(x) = \frac{\partial}{\partial g} f(g(x)) \frac{\partial}{\partial x} g(x)\)</span> should also hold for arbitrary “differentiable” Julia functions:</p>
+<pre class="julia-repl"><code>julia&gt; f(x) = 1.0 / x
+f (generic function with 1 method)
+
+julia&gt; g(x) = x * (x + x)
+g (generic function with 1 method)
+
+julia&gt; x = 1.2345;
+
+julia&gt; ∂(f ∘ g)(x), ∂(f)(g(x)) * ∂(g)(x)
+(-0.5315286974115385, -0.5315286974115385)</code></pre>
+<p>I think this is downright <em>beautiful</em>.</p>
+<p>And last but not least, let me try an algorithm that can benefit from having both <span class="math inline">\(f(x)\)</span> and <span class="math inline">\(\frac{\partial}{\partial x}f(x)\)</span> available at the same time, e.g. <a href="https://en.wikipedia.org/wiki/Newton%27s_method">Newton-Raphons root finder</a>. Here is a prototype version performing <span class="math inline">\(x_{n+1} = x_n - \frac{f(x_n)}{\frac{\partial}{\partial x}f(x_n)}\)</span> iterations until convergence within given tolerance:</p>
+<pre class="julia"><code>function root_solve(f ::Function, x₀ ::Number; ϵ = 1e-8)
+    i = 1
+    while true
+        ctx = f(Context(x₀, 1.0))
+        println(&quot;[$i]: f($x₀)\t= $(ctx.v)&quot;)
+        abs(ctx.v) &lt; ϵ &amp;&amp; break
+        x₀ -= ctx.v / ctx.∂ # use both value and derivative
+        i += 1
+    end
+    return x₀
+end</code></pre>
+<p>If I extend my <code>Context</code> “algebra” with some more elementary operations</p>
+<pre class="julia"><code>Base.sin(d ::Context) = Context(sin(d.v),   cos(d.v) * d.∂)
+Base.cos(d ::Context) = Context(cos(d.v), - sin(d.v) * d.∂)</code></pre>
+<p>then I can try solving, say, trigonometric equations:</p>
+<pre class="julia-repl"><code>julia&gt; root_solve(x -&gt; sin(x) - cos(x), 0.0) # find a root of sin(x) = cos(x) starting from x₀ = 0
+[1]: f(0.0) = -1.0
+[2]: f(1.0) = 0.30116867893975674
+[3]: f(0.782041901539138)   = -0.004746462127804163
+[4]: f(0.7853981759997019)  = 1.7822277875723103e-8
+[5]: f(0.7853981633974483)  = -1.1102230246251565e-16
+0.7853981633974483
+
+julia&gt; π/4
+0.7853981633974483</code></pre>
+<p>Nice. I find this all <em>very</em> satisfying. Especially given how few lines of Julia actually went into the <a href="https://github.com/vladium/study_julia_with_me/tree/master/multiple_dispatch/FAD.jl">final implementation</a>.</p>
+<p>For an industrial-strength implementation of this approach to AD, check out <a href="https://github.com/JuliaDiff/ForwardDiff.jl">ForwardDiff.jl</a>.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>I am abusing the partial derivative symbol <span class="math inline">\(\partial\)</span> for all my derivative notation here, including Julia code.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>My implementation ignores possible overflows in <tt>x²</tt>, <tt>factorial(k)</tt>, etc – it is intentionally made to evoke the symbolic series expression. A.k.a. “research code”.😄 <a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>The compiler may choose to optimize this subexpression to <span class="math inline">\(2x\)</span> but that doesn’t invalidate the forgoing.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>There are exceptions like <code>&amp;&amp;</code> and <code>||</code> because those obey <a href="https://docs.julialang.org/en/v1/manual/control-flow/#Short-Circuit-Evaluation-1">short-circuit evaluation rules</a>.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p>Yes, Julia uses <code>*</code> for string concatenation. A little unorthodox?<a href="#fnref5" class="footnote-back">↩</a></p></li>
+<li id="fn6"><p>Although in general AD isn’t guaranteed to work with <em>all</em> such functions.<a href="#fnref6" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
+
+          </div>
+
+          
+
+
+
+          
+          <div class="article-widget">
+            
+<div class="post-nav">
+  
+  
+  
+  <div class="post-nav-item">
+    <div class="meta-nav">Previous</div>
+    <a href="/tutorials/study_julia_with_me/type_annotations/" rel="next">Julia type annotations: what Python &#39;type hints&#39; wish they were</a>
+  </div>
+  
+  
+</div>
+
+          </div>
+          
+        </div>
+
+        <div class="body-footer">
+          <p>Last updated on Oct 27, 2019</p>
+
+          
+
+
+          
+
+        </div>
+
+      </article>
+
+      <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    &copy; vladium 2019  
+
+    
+  </p>
+</footer>
+
+
+    </main>
+  </div>
+</div>
+
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.0.0/mermaid.min.js" integrity="sha256-0w92bcB21IY5+rGI84MGj52jNfHNbXVeQLrZ0CGdjNY=" crossorigin="anonymous" title="mermaid"></script>
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/cpp.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia-repl.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.1/anchor.min.js" integrity="sha256-pB/deHc9CGfFpJRjC43imB29Rse8tak+5eXqntO94ck=" crossorigin="anonymous"></script>
+    <script>
+      anchors.add();
+    </script>
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.16bbb3750feb7244c9bc409a5a4fe678.js"></script>
+
+    
+
+
+
+
+
+
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
