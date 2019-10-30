@@ -1142,6 +1142,17 @@ julia&amp;gt; Base.:(/)(lhs ::MyNum, rhs ::Float64) = MyNum(lhs.v / rhs) # MyNum
 julia&amp;gt; h(MyNum(2.0)) # h() works now, too
 MyNum(0.6666666666666666)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;In other words, &lt;em&gt;all possible permutations&lt;/em&gt; of parameter types need to be implemented by &lt;em&gt;all&lt;/em&gt; operators. This game of whack-a-mole seems laborious and error-prone. Hmm, is it possible to have &lt;em&gt;too much&lt;/em&gt; dispatch? 😄&lt;/p&gt;
+&lt;p&gt;&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;Again, the “multiple” in Julia method dispatch is apparent if you review all variants of &lt;code&gt;MyNum&lt;/code&gt; division so far:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Base.:(/)(lhs ::MyNum,   rhs ::MyNum)   = MyNum(lhs.v / rhs.v)
+Base.:(/)(lhs ::Float64, rhs ::MyNum)   = MyNum(lhs / rhs.v)
+Base.:(/)(lhs ::MyNum,   rhs ::Float64) = MyNum(lhs.v / rhs)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There is complete symmetry between the left-hand side (&lt;code&gt;lhs&lt;/code&gt;) and the right-hand side (&lt;code&gt;rhs&lt;/code&gt;) arguments: neither one has “ownership” of &lt;code&gt;/&lt;/code&gt;. However, to make all these different overloads co-exist and do slightly different things it is necessary to dispatch on the runtime type of &lt;em&gt;both&lt;/em&gt; arguments.&lt;/p&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/p&gt;
 &lt;p&gt;This design choice begs for some automatic code generation and indeed I think it can be made viable through Julia’s &lt;em&gt;metaprogramming&lt;/em&gt; facilities, specifically &lt;a href=&#34;https://docs.julialang.org/en/v1/manual/metaprogramming/#man-macros-1&#34;&gt;macros&lt;/a&gt;. But because I haven’t covered metaprogramming yet, I will instead go another, easier for the time being, route.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;promotion-fix-2-promote_rule&#34; class=&#34;section level3&#34;&gt;
@@ -1206,14 +1217,14 @@ Base.:(-)(x ::Context) = Context(- x.v, - x.∂)&lt;/code&gt;&lt;/pre&gt;
 \]&lt;/span&gt;
 the &lt;code&gt;Context&lt;/code&gt; rule for &lt;code&gt;+&lt;/code&gt; must be
 &lt;span class=&#34;math display&#34;&gt;\[
-+\big( \langle lhs.v, lhs.\partial \rangle, \langle rhs.v, rhs.\partial \rangle \big) = \big\langle (lhs.v + rhs.v), (lhs.\partial + rhs.\partial) \big\rangle.
++\big( \langle lhs.v, lhs.\partial \rangle, \langle rhs.v, rhs.\partial \rangle \big) = \big\langle lhs.v + rhs.v, lhs.\partial + rhs.\partial \big\rangle.
 \]&lt;/span&gt;
 The rule for &lt;code&gt;sin&lt;/code&gt;, should it be needed, would be
 &lt;span class=&#34;math display&#34;&gt;\[
 \sin \big(\langle x.v, x.\partial \rangle \big) = \big\langle \sin(x.v), \cos(x.v) \partial \big\rangle,
 \]&lt;/span&gt;
 and so on.&lt;/p&gt;
-&lt;p&gt;What &lt;code&gt;Context&lt;/code&gt; value should be fed as the initial input? It’s &lt;span class=&#34;math inline&#34;&gt;\(v\)&lt;/span&gt;-field is &lt;tt&gt;x&lt;/tt&gt;. The derivative of that with respect to &lt;tt&gt;x&lt;/tt&gt; is 1.0, so to establish derivative propagation correctly it needs to be seeded with &lt;code&gt;Context(x, 1.0)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;What &lt;code&gt;Context&lt;/code&gt; value should be fed as the initial input? Its &lt;span class=&#34;math inline&#34;&gt;\(v\)&lt;/span&gt;-field is &lt;tt&gt;x&lt;/tt&gt;. The derivative of that with respect to &lt;tt&gt;x&lt;/tt&gt; is 1.0, so to establish derivative propagation correctly it needs to be seeded with &lt;code&gt;Context(x, 1.0)&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;And that’s pretty much it. Does it work? Let’s give it a try:&lt;/p&gt;
 &lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;function derivative(f ::Function)
     return x ::Number -&amp;gt; f(Context(x, 1.0)).∂ # discard value, return derivative

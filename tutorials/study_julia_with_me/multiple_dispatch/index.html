@@ -571,6 +571,17 @@ julia&gt; Base.:(/)(lhs ::MyNum, rhs ::Float64) = MyNum(lhs.v / rhs) # MyNum / f
 julia&gt; h(MyNum(2.0)) # h() works now, too
 MyNum(0.6666666666666666)</code></pre>
 <p>In other words, <em>all possible permutations</em> of parameter types need to be implemented by <em>all</em> operators. This game of whack-a-mole seems laborious and error-prone. Hmm, is it possible to have <em>too much</em> dispatch? 😄</p>
+<p><div class="alert alert-note">
+  <div>
+    <p>Again, the “multiple” in Julia method dispatch is apparent if you review all variants of <code>MyNum</code> division so far:</p>
+<pre><code>Base.:(/)(lhs ::MyNum,   rhs ::MyNum)   = MyNum(lhs.v / rhs.v)
+Base.:(/)(lhs ::Float64, rhs ::MyNum)   = MyNum(lhs / rhs.v)
+Base.:(/)(lhs ::MyNum,   rhs ::Float64) = MyNum(lhs.v / rhs)</code></pre>
+<p>There is complete symmetry between the left-hand side (<code>lhs</code>) and the right-hand side (<code>rhs</code>) arguments: neither one has “ownership” of <code>/</code>. However, to make all these different overloads co-exist and do slightly different things it is necessary to dispatch on the runtime type of <em>both</em> arguments.</p>
+
+  </div>
+</div>
+</p>
 <p>This design choice begs for some automatic code generation and indeed I think it can be made viable through Julia’s <em>metaprogramming</em> facilities, specifically <a href="https://docs.julialang.org/en/v1/manual/metaprogramming/#man-macros-1">macros</a>. But because I haven’t covered metaprogramming yet, I will instead go another, easier for the time being, route.</p>
 </div>
 <div id="promotion-fix-2-promote_rule" class="section level3">
@@ -635,14 +646,14 @@ Base.:(-)(x ::Context) = Context(- x.v, - x.∂)</code></pre>
 \]</span>
 the <code>Context</code> rule for <code>+</code> must be
 <span class="math display">\[
-+\big( \langle lhs.v, lhs.\partial \rangle, \langle rhs.v, rhs.\partial \rangle \big) = \big\langle (lhs.v + rhs.v), (lhs.\partial + rhs.\partial) \big\rangle.
++\big( \langle lhs.v, lhs.\partial \rangle, \langle rhs.v, rhs.\partial \rangle \big) = \big\langle lhs.v + rhs.v, lhs.\partial + rhs.\partial \big\rangle.
 \]</span>
 The rule for <code>sin</code>, should it be needed, would be
 <span class="math display">\[
 \sin \big(\langle x.v, x.\partial \rangle \big) = \big\langle \sin(x.v), \cos(x.v) \partial \big\rangle,
 \]</span>
 and so on.</p>
-<p>What <code>Context</code> value should be fed as the initial input? It’s <span class="math inline">\(v\)</span>-field is <tt>x</tt>. The derivative of that with respect to <tt>x</tt> is 1.0, so to establish derivative propagation correctly it needs to be seeded with <code>Context(x, 1.0)</code>.</p>
+<p>What <code>Context</code> value should be fed as the initial input? Its <span class="math inline">\(v\)</span>-field is <tt>x</tt>. The derivative of that with respect to <tt>x</tt> is 1.0, so to establish derivative propagation correctly it needs to be seeded with <code>Context(x, 1.0)</code>.</p>
 <p>And that’s pretty much it. Does it work? Let’s give it a try:</p>
 <pre class="julia"><code>function derivative(f ::Function)
     return x ::Number -&gt; f(Context(x, 1.0)).∂ # discard value, return derivative

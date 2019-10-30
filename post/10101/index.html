@@ -1,0 +1,97 @@
+
+
+<p>Ever since my <a href="../../../tutorials/study_julia_with_me/knapsack_benchmark/">knapsack benchmark</a> I’ve been curious why Julia was still <span class="math inline">\(\approx 50\%\)</span> slower than either Java or C++ on what essentially were a couple of nested <tt>for</tt>-loops over a pair of arrays. I’ve done some exploring and now believe that my first guess was correct: much of the remaining Julia overhead is due to its <em>bounds checking</em>.</p>
+<div id="eliding-bounds-checking-unconditionally-with-inbounds" class="section level2">
+<h2>Eliding bounds checking unconditionally with <strong><span class="citation">@inbounds</span></strong></h2>
+<p>My first test was to isolate all <code>opt_value()</code> lines with array access into a <code>begin...end</code> block and annotate it with <a href="https://docs.julialang.org/en/v1/devdocs/boundscheck/#Eliding-bounds-checks-1">@inbounds</a>:</p>
+<pre class="julia"><code>    function opt_value(W ::Int64, items ::Array{Item}) ::Int64
+    ...
+    @inbounds(
+      begin
+          V[items[1].weight:end] .= items[1].value
+          ...
+          for j in 2 : n
+              V, V_prev = V_prev, V
+              itemⱼ = items[j]
+              for w in 1 : W
+                  V_without_itemⱼ = V_prev[w]
+              ...
+              end
+          end
+      end
+    )
+    ...</code></pre>
+Here is the data from the original benchmark with added new timing measurements of the above version, labeled <code>julia.ib</code>:
+<div class="figure" style="text-align: center"><span id="fig:fraction"></span>
+<img src="checking-bounds-checking-in-julia_files/figure-html/fraction-1.png" alt="Calculation time as a function of problem size. **julia.ib** labels data obtained from an @inbounds-annotated Julia implementation." width="80%" />
+<p class="caption">
+Figure 1: Calculation time as a function of problem size. <strong>julia.ib</strong> labels data obtained from an <span class="citation">@inbounds-annotated</span> Julia implementation.
+</p>
+</div>
+<p>Nice! With bounds checks elided Julia performance is now in line with Java and C++: its underperformance has decreased to a maximum of <span class="math inline">\(\approx 15\%\)</span>. And Julia is now even the champion for small problem sizes.</p>
+</div>
+<div id="peeking-at-differences-in-generated-code-via-code_native" class="section level2">
+<h2>Peeking at differences in generated code via <strong><span class="citation">@code_native</span></strong></h2>
+<p>Another neat facility of Julia allows me to examine JIT-compiled code very easily and right from my REPL session:</p>
+<pre class="julia-repl"><code>julia&gt; d = Knapsack.make_random_data(5_000, 12345)
+(5000, Main.Knapsack.Item[Main.Knapsack.Item(609, 6198), ...
+
+julia&gt; @code_native debuginfo=:none Knapsack.opt_value(d[1],d[2])
+    .text
+    pushq   %rbp
+    movq    %rsp, %rbp
+    ...
+L1165:
+    movl    $2, %edx
+    jmp L825
+    nopw    (%rax,%rax)</code></pre>
+<p>I don’t show the full asm listing because that’s not particularly useful unless you’re a low-level programmer. Comparing it with and without <code>@inbounds</code> does confirm, however, that the former version is shorter: about 200 instructions instead of 320.</p>
+<p>It is more instructive to look at the compiled version(s) of a simpler function that simply extracts a single slot from an input array:</p>
+<pre class="julia"><code>function getit(a ::Array{Int64})
+    return a[123]
+end</code></pre>
+<pre class="julia-repl"><code>julia&gt; @code_native getit(rand(Int64, 1000))
+    .text
+; ┌ @ work.jl:185 within `getit&#39;
+; │┌ @ work.jl:185 within `getindex&#39;
+    cmpq    $122, 8(%rdi)
+    jbe L18
+    movq    (%rdi), %rax
+    movq    976(%rax), %rax
+; │└
+    retq
+L18:
+    pushq   %rbp
+    movq    %rsp, %rbp
+; │ @ work.jl:185 within `getit&#39;
+; │┌ @ array.jl:728 within `getindex&#39;
+    movq    %rsp, %rax
+    leaq    -16(%rax), %rsi
+    movq    %rsi, %rsp
+    movq    $123, -16(%rax)
+    movabsq $jl_bounds_error_ints, %rax
+    movl    $1, %edx
+    callq   *%rax
+    nopl    (%rax)
+; └└</code></pre>
+<p>Note the instructions to check the fixed (and 0-based) index against the array input length (<tt>cmpq $122, 8(%rdi)</tt>) followed by a conditional jump to native C routine <a href="https://github.com/JuliaLang/julia/blob/master/src/rtutils.c">jl_bounds_error_ints()</a> that creates and throws a <code>BoundsError</code> exception object. The following version of <code>getit()</code>, with the only array indexing expression annotated with <code>@inbounds</code>, is much shorter:</p>
+<pre class="julia"><code>function getit(a ::Array{Int64})
+    return @inbounds a[123]
+end</code></pre>
+<pre class="julia-repl"><code>julia&gt; @code_native getit(rand(Int64, 1000))
+    .text
+; ┌ @ work.jl:185 within `getit&#39;
+; │┌ @ work.jl:185 within `getindex&#39;
+    movq    (%rdi), %rax
+    movq    976(%rax), %rax
+; │└
+    retq
+    nopl    (%rax,%rax)
+; └</code></pre>
+</div>
+<div id="disabling-bounds-checking-from-command-line" class="section level2">
+<h2>Disabling bounds checking from command line</h2>
+<p>It seems that I can get disable bounds checking summarily using <tt>–check-bounds=no</tt> option:</p>
+<pre class="bash"><code>&gt;julia --check-bounds=no Knapsack.jl</code></pre>
+<p>The documentation is somewhat sparse, but it appears that when this option is used it will completely override all <code>@inbounds</code> annotations in the source code, i.e. either all checks are done in a mandatory fashion (“yes”) or none are (“no”). This could be used for “debug” vs “release” calculation runs. However, since bounds checking affects code as it’s being generated, some more documentation is needed to understand how this option works with “pre-compiled” packages and Julia “system” code. I also would like to understand the functionality and use cases for the <a href="https://docs.julialang.org/en/v1/devdocs/boundscheck/#Propagating-inbounds-1">@propagate_inbounds macro</a>.</p>
+</div>
