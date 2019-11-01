@@ -1195,8 +1195,8 @@ Base.:(/)(lhs ::MyNum,   rhs ::Float64) = MyNum(lhs.v / rhs)&lt;/code&gt;&lt;/pr
 &lt;p&gt;Just one more step remaining. Why did I bother replicating standard arithmetic with &lt;code&gt;MyNum&lt;/code&gt;? Sure, it was to understand better how some aspects of Julia worked. But note this: computing the derivative of a function is also a &lt;em&gt;composable&lt;/em&gt; calculation and &lt;em&gt;it can be done in parallel with computing the function value&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;So… if I extend &lt;code&gt;MyNum&lt;/code&gt; with another field to hold the current expression’s &lt;em&gt;derivative&lt;/em&gt;, I can forward-propagate it in the same pass as the main&#34; value:&lt;/p&gt;
 &lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;struct Context &amp;lt;: Number
-    v   ::Float64
-    ∂   ::Float64
+    v   ::Number
+    ∂   ::Number
 end&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;julia&#34;&gt;&lt;code&gt;# binary ops:
 
