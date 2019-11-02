@@ -1292,6 +1292,15 @@ julia&amp;gt; π/4
 &lt;p&gt;For an industrial-strength implementation of this approach to AD, check out &lt;a href=&#34;https://github.com/JuliaDiff/ForwardDiff.jl&#34;&gt;ForwardDiff.jl&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
+&lt;div id=&#34;summary&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Summary&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Almost all Julia operators are actually functions. Working in Julia often means being &lt;em&gt;function-oriented&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;It is possible to &lt;em&gt;intercept&lt;/em&gt; Julia functions with custom types and methods. As an example, this approach is one easy way to implement forward mode of automatic differentiation essentially from scratch.&lt;/li&gt;
+&lt;li&gt;Being able to route execution to the right method based on the runtime types of &lt;em&gt;all&lt;/em&gt; function arguments is &lt;em&gt;multiple dispatch&lt;/em&gt;. Such routing is exponentially more expressive that single dispatch typical of the “classic” OOP.&lt;/li&gt;
+&lt;li&gt;Sometimes multiple dispatch can get a little out of hand due to proliferation of methods that differ only in small details. Julia has some support for typical tasks like common type conversions and promotions needed for practical implementions of arithmetic operations over custom types.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
 &lt;div class=&#34;footnotes&#34;&gt;
 &lt;hr /&gt;
 &lt;ol&gt;
