@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.4.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Vlad Roubtsov">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Whenever picking up a new programming language with any kinds of &ldquo;objects&rdquo; I typically want to know quickly how it deals with notions of &ldquo;object equality&rdquo;. If the language also has &ldquo;dictionaries&rdquo; then there could be related subtleties in using objects as safe hash keys. These aspects of a language can lead to rare but hard-to-debug problems if not understood properly. It turns out that in Julia there are some slightly novel twists on this classic topic.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/tutorials/study_julia_with_me/equality_vs_identity/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#3f51b5">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.927aeb2a835eaf9005c1499820562316.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.c95fc539390309404839f86767b13568.css">
+  
+
+  
+  
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', 'UA-148582714-1', 'auto');
+      
+      ga('require', 'eventTracker');
+      ga('require', 'outboundLinkTracker');
+      ga('require', 'urlChangeTracker');
+      ga('send', 'pageview');
+    </script>
+    <script async src="https://www.google-analytics.com/analytics.js"></script>
+    
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/autotrack/2.4.1/autotrack.js" integrity="sha512-HUmooslVKj4m6OBu0OgzjXXr+QuFYy/k7eLI5jdeEy/F4RSgMn6XRWRGkFi5IFaFgy7uFTkegp3Z0XnJf3Jq+g==" crossorigin="anonymous"></script>
+    
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/tutorials/study_julia_with_me/equality_vs_identity/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="vladium">
+  <meta property="og:url" content="/tutorials/study_julia_with_me/equality_vs_identity/">
+  <meta property="og:title" content="Navigating through Julia&#39;s ==, ===, and isequal(). | vladium">
+  <meta property="og:description" content="Whenever picking up a new programming language with any kinds of &ldquo;objects&rdquo; I typically want to know quickly how it deals with notions of &ldquo;object equality&rdquo;. If the language also has &ldquo;dictionaries&rdquo; then there could be related subtleties in using objects as safe hash keys. These aspects of a language can lead to rare but hard-to-debug problems if not understood properly. It turns out that in Julia there are some slightly novel twists on this classic topic."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2019-11-07T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2019-11-07T00:00:00&#43;00:00">
+  
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Navigating through Julia&#39;s ==, ===, and isequal(). | vladium</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">vladium</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/post/"><span>posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link  active" href="/tutorials/"><span>tutorials</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  
+
+<div class="container-fluid docs">
+  <div class="row flex-xl-nowrap">
+    <div class="col-12 col-md-3 col-xl-2 docs-sidebar">
+      
+
+
+
+
+
+<form class="docs-search d-flex align-items-center">
+  <button class="btn docs-toggle d-md-none p-0 mr-3" type="button" data-toggle="collapse" data-target="#docs-nav" aria-controls="docs-nav" aria-expanded="false" aria-label="Toggle section navigation">
+    <span><i class="fas fa-bars"></i></span>
+  </button>
+
+  
+  <input name="q" type="search" class="form-control" placeholder="Search..." autocomplete="off">
+  
+</form>
+
+<nav class="collapse docs-links" id="docs-nav">
+  
+  
+  <div class="docs-toc-item">
+    <a class="docs-toc-link" href="/tutorials/study_julia_with_me/">About</a>
+    <ul class="nav docs-sidenav">
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/structure/">Setup, FAQ, resources</a>
+      </li>
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/knapsack_benchmark/">Benchmark 1: iterative algorithm</a>
+      </li>
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/type_annotations/">Types 1: annotations, reflection, OOP</a>
+      </li>
+      
+      <li >
+        <a href="/tutorials/study_julia_with_me/multiple_dispatch/">Types 2: type promotion, multiple dispatch</a>
+      </li>
+      
+      <li class="active">
+        <a href="/tutorials/study_julia_with_me/equality_vs_identity/">Equality vs identity</a>
+      </li>
+      
+    </ul>
+    
+
+  </div>
+  
+  
+</nav>
+
+    </div>
+
+    
+    <div class="d-none d-xl-block col-xl-2 docs-toc">
+      <ul class="nav toc-top">
+        <li><a href="#" id="back_to_top" class="docs-toc-title">Contents</a></li>
+      </ul>
+
+      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#preview">Preview</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#some-structs-are-more-equal-than-others">Some structs are more equal than others</a></li>
+<li><a href="#object-identity-or-value-equality">Object identity or value equality?</a></li>
+<li><a href="#is-non-overloadble-egal"><code>===</code> is (non-overloadble) &ldquo;egal&rdquo;</a></li>
+<li><a href="#is-overloadable-value-equality"><code>==</code> is (overloadable) &ldquo;value equality&rdquo;</a></li>
+<li><a href="#oh-no-what-is-isequal">Oh, no! What is <code>isequal()</code>?</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul></li>
+</ul>
+</nav>
+
+      
+    </div>
+    
+
+    <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 docs-content" role="main">
+
+      <article class="article" itemscope itemtype="http://schema.org/Article">
+
+        <div class="docs-article-container">
+          <h1 itemprop="name">Navigating through Julia&#39;s ==, ===, and isequal().</h1>
+
+          <div class="article-style" itemprop="articleBody">
+            
+
+<p>Whenever picking up a new programming language with any kinds of &ldquo;objects&rdquo; I typically want to know quickly how it deals with notions of &ldquo;object equality&rdquo;. If the language also has &ldquo;dictionaries&rdquo; then there could be related subtleties in using objects as <em>safe</em> hash keys. These aspects of a language can lead to rare but hard-to-debug problems if not understood properly. It turns out that in Julia there are some slightly novel twists on this classic topic.</p>
+
+<h4 id="preview">Preview</h4>
+
+<ul>
+<li>Replay a puzzling object comparison example from an earlier tutorial.</li>
+<li>Meet and understand three different &ldquo;comparators&rdquo; in Julia, including <strong><em>egal</em></strong>.</li>
+</ul>
+
+<h2 id="some-structs-are-more-equal-than-others">Some structs are more equal than others</h2>
+
+<p>In <a href="../type_annotations#mutable">an earlier Julia typing tutorial</a> I had the following example, repeated here with minor edits:</p>
+
+<p>Compare</p>
+
+<pre><code class="language-julia-repl">julia&gt; struct Item a::Int; b::Int end
+
+julia&gt; i1 = Item(1, 2)
+Item(1, 2)
+
+julia&gt; i2 = Item(1, 2)
+Item(1, 2)
+
+julia&gt; i1 === i2 # identical
+true
+
+julia&gt; i1 == i2  # equal
+true
+</code></pre>
+
+<p>with</p>
+
+<pre><code class="language-julia-repl">julia&gt; mutable struct MutableItem a::Int; b::Int end # mutable version of 'Item'
+
+julia&gt; mi1 = MutableItem(1, 2)
+MutableItem(1, 2)
+
+julia&gt; mi2 = MutableItem(1, 2)
+MutableItem(1, 2)
+
+julia&gt; mi1 === mi2 # ok, not idential...
+false
+
+julia&gt; mi1 == mi2  # also not equal???
+false
+</code></pre>
+
+<p>The only difference between <code>Item</code> and <code>MutableItem</code> is the latter is a mutable variant of the former and yet that appears to change the results of both identity (<code>===</code>) and equality (<code>==</code>) queries. I don&rsquo;t know about you, but the latter case, equality, was more surprising to me: why wouldn&rsquo;t <tt>mi1</tt> and <tt>mi2</tt> be equal if <tt>i1</tt> and <tt>i2</tt> are &ndash; after all, the &ldquo;object content&rdquo; is the same in each case?</p>
+
+<p>To get a better idea of what&rsquo;s going on I needed to look carefully at Julia&rsquo;s definitions of &ldquo;identity&rdquo; and &ldquo;equality&rdquo;.</p>
+
+<h2 id="object-identity-or-value-equality">Object identity or value equality?</h2>
+
+<p>Many languages with &ldquo;objects&rdquo; allow me to take memory addresses of objects and essentially consider such addresses as permanent &ldquo;identities&rdquo; of the said objects. Think of <code>id()</code> in Python or <code>&amp;</code> in C++. In languages that have reasons to make it difficult to obtain objects&rsquo; addresses<sup class="footnote-ref" id="fnref:For-example-beca"><a href="#fn:For-example-beca">1</a></sup>, one could think of variables/struct fields as opaque &ldquo;pointers&rdquo; to objects. If I haven&rsquo;t provided my own &ldquo;oid&rdquo; field for a struct, there really isn&rsquo;t much else that can be done. Basically, such languages concede that &ldquo;objects&rdquo; must live somewhere in computer memory and don&rsquo;t mind exposing addresses or other handles to their memory locations. Importantly, a replica of an object would necessarily have to live at a different address and hence would be &ldquo;distinguishable&rdquo; from the original. Many of us are so accustomed to this that we take it for granted.</p>
+
+<p>Julia designers saw an opportunity to re-examine the entire concept of &ldquo;equality&rdquo; and they took it. Julia has (at least) two comparison operators, <code>===</code> and <code>==</code>. (They are <a href="../multiple_dispatch/#julia-operators-are-functions-1">also functions</a>.)</p>
+
+<h2 id="is-non-overloadble-egal"><code>===</code> is (non-overloadble) &ldquo;egal&rdquo;</h2>
+
+<p>Operator <code>===</code> implements the <strong><em>egal</em></strong> notion of equality described in Henry Baker&rsquo;s seminal paper <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.23.9999" target="_blank">&ldquo;Equal Rights for Functional Objects or, The More Things Change, The More They Are the Same&rdquo;</a>: <code>x === y</code> is true if <code>x</code> and <code>y</code> are programmatically indistiguishable, i.e. it is impossible to write a program that demonstrates any differences between <code>x</code> and <code>y</code>. This operator is a practical implementation of <em>equivalence relation</em> in Julia, as emphasized by Unicode <code>≡</code> being a synonym for <code>===</code>:</p>
+
+<pre><code class="language-julia-repl">julia&gt; i1 ≡ i2 # equivalent
+true
+</code></pre>
+
+<p>The reason object&rsquo;s mutability becomes enmeshed in the concept of equality is because mutation is one option for telling objects apart: a program could try to mutate the value it sees via the <code>x</code> &ldquo;handle&rdquo; and look for the same change as seen via <code>y</code>: if the change is visible then <code>x</code> and <code>y</code> are really &ldquo;the same thing&rdquo;. Thus, <em>mutable</em> <code>x</code> and <code>y</code> would only be considered &ldquo;egal&rdquo; if they are truly pointers to the same address. On the other hand, if <code>x</code> and <code>y</code> are <em>immutable</em> and happen to point to <em>the same data</em> they are considered indistinguishable irrespective of whether they point to the same address under the covers<sup class="footnote-ref" id="fnref:Assuming-of-cour"><a href="#fn:Assuming-of-cour">2</a></sup>.</p>
+
+<div class="alert alert-note">
+  <div>
+    In Julia, object mutability and equality/equivalence are closely intertwined.
+  </div>
+</div>
+
+<p><code>===</code> is a built-in operator that cannot be user-defined, therefore it must work for all possible types, built-in and custom. What should it do for composite types? As already discussed, if the objects being compared are immutable, their contents need to be compared and if the objects&rsquo; type is composite there may be a need to recurse into individual fields for a &ldquo;deep&rdquo; content comparison. The <a href="https://docs.julialang.org/en/v1/base/base/#Core.:===" target="_blank">rules that cover all situations correctly</a> are:</p>
+
+<ul>
+<li>for &ldquo;plain data&rdquo; types like <code>Int64</code> or <code>Float64</code>, compare them in a <em>bitwise</em> fashion;</li>
+<li>for composite <em>mutable</em> <code>x</code> and <code>y</code>, compare their <em>memory addresses</em>;</li>
+<li>for composite <em>immutable</em> <code>x</code> and <code>y</code>, compare their types first and if those are the same, apply <code>===</code> <em>recursively</em> on their component fields.</li>
+</ul>
+
+<p>This explains the difference between <code>i1 === i2</code> and <code>mi1 === mi2</code> above: it is all indeed due to the type mutability and is by design. And I think this also helps explain why in Julia type mutability is escalated to the level of type definitions.</p>
+
+<p>In addition to higher conceptual clarity, Baker&rsquo;s definition of equality enables potentially higher runtime performance: indistinguishable objects can be freely copied or shared across different expressions,  different threads, etc, allowing compiler optimizations that otherwise would be inhibited by <a href="https://en.wikipedia.org/wiki/Aliasing_(computing)#Conflicts_with_optimization" target="_blank">&ldquo;aliasing&rdquo;</a>. To quote Baker:</p>
+
+<blockquote>
+<p>If programming languages distinguish functional/immutable objects from non-functional/mutable objects, and if programs utilize a &ldquo;mostly functional&rdquo; style, then such programs will be efficient even in a non-shared-memory (&ldquo;message-passing&rdquo;) implementation.</p>
+</blockquote>
+
+<p>This seems to be well in keeping with Julia&rsquo;s somewhat-functional nature combined with lofty performance goals.</p>
+
+<h2 id="is-overloadable-value-equality"><code>==</code> is (overloadable) &ldquo;value equality&rdquo;</h2>
+
+<p>Operator <code>==</code>, on the other hand, provides potentially user-customized notion of &ldquo;intuitive equality&rdquo;. For example, integer <code>1</code> and floating point <code>1.0</code> are perceived as numerically equal in many user contexts even though they are of different types:</p>
+
+<pre><code class="language-julia-repl">julia&gt; typeof(1), typeof(1.0)
+(Int64, Float64)
+
+julia&gt; 1 == 1.0
+true
+</code></pre>
+
+<p>In Julia this intuition extends to rational, complex, and other numbers:</p>
+
+<pre><code class="language-julia-repl">julia&gt; map(typeof, (1 + 0im, 1//1, BigInt(1)))
+(Complex{Int64}, Rational{Int64}, BigInt)
+
+julia&gt; 1 == 1 + 0im == 1//1 == BigInt(1)
+true
+</code></pre>
+
+<p>Such &ldquo;across-types&rdquo; equality is only allowed when it is mathematically exact, however:</p>
+
+<pre><code class="language-julia-repl">julia&gt; 1/3 == 1//3   # 0.3333... can never be exactly equal to &quot;one third&quot;
+false
+
+julia&gt; 1/2 == 1//2   # 0.5 can be represented exactly in 64 bits of IEEE 754 format,
+true
+
+julia&gt; 1/10 == 1//10 # ...but 0.1 can't be (since mantissa is not a sum of powers of 2)
+false
+</code></pre>
+
+<p>Furthermore, numerical equality brings with it the usual IEEE 754 floating point complications:</p>
+
+<pre><code class="language-julia-repl">julia&gt; NaN === NaN  # one NaN is like any other NaN,
+true
+
+julia&gt; NaN == NaN   # ... but NaNs don't equal to anything, even themselves
+false
+
+julia&gt; 0.0 === -0.0 # positive and negative 0.0 are distinguishable in IEEE 754,
+false
+
+julia&gt; 0.0 == -0.0  # ...but they are '=='-equal
+true
+</code></pre>
+
+<p>Also unlike <code>==</code>, value equality isn&rsquo;t guaranteed to always return <code>Bool</code>. For example, if there is no &ldquo;value&rdquo; to compare to begin with:</p>
+
+<pre><code class="language-julia-repl">julia&gt; 1 == missing
+missing
+
+julia&gt; missing == missing
+missing
+</code></pre>
+
+<p>(for <code>missing</code> operands, <code>==</code> implements <a href="https://en.wikipedia.org/wiki/Three-valued_logic" target="_blank">three-valued logic</a>, similar to <a href="https://modern-sql.com/concept/three-valued-logic" target="_blank">NULL in SQL</a>.)</p>
+
+<p>Because &ldquo;value equality&rdquo; is inherently highly type-dependent, <code>==</code> may need to be customized (overloaded). It is not something that Julia can do automatically for every possible user type. What it does do, though, is provide default behavior that is very conservative and safe:</p>
+
+<ul>
+<li><p>if not overloaded, default to <code>===</code> (see <a href="https://github.com/JuliaLang/julia/blob/master/base/operators.jl" target="_blank">the definition in operators.jl</a>):</p>
+
+<pre><code class="language-julia">==(x, y) = x === y
+</code></pre></li>
+
+<li><p>for base types like <code>Int64</code>, <code>Float64</code>, <code>String</code>, etc provide overloads that support &ldquo;intuitive&rdquo; value equality as we are used to from other langauges: based on numerics, string content, etc.</p></li>
+</ul>
+
+<p>And now the rest of the <code>Item</code>/<code>MutableItem</code> puzzle is clear: because <code>==</code> falls back to <code>===</code> it will do whatever &ldquo;egal&rdquo; concept must do, which in turn depends on whether the type is mutable. For <code>Item</code> it happens to be what we would expect: recurse into and compare fields <code>a</code> and <code>b</code>. To make <code>MutableItem</code> compare the same way I would need to add an explicit <code>==</code> overload myself<sup class="footnote-ref" id="fnref:There-is-ongoing"><a href="#fn:There-is-ongoing">3</a></sup>:</p>
+
+<pre><code class="language-julia-repl">julia&gt; import Base
+julia&gt; Base.:(==)(lhs ::MutableItem, rhs ::MutableItem) = (lhs.a == rhs.a) &amp;&amp; (lhs.b == rhs.b)
+
+julia&gt; mi1 == mi2  # now equal
+true
+</code></pre>
+
+<h2 id="oh-no-what-is-isequal">Oh, no! What is <code>isequal()</code>?</h2>
+
+<p>An eagle-eyed reader of <a href="https://docs.julialang.org/en/v1/base/math/#Base.:==" target="_blank">Julia documentation for <code>==</code></a> would have noticed mentions of something called <code>isequal()</code>:</p>
+
+<blockquote>
+<p>Use isequal or === to always get a Bool result.</p>
+</blockquote>
+
+<p>It is not a &ldquo;functionally named&rdquo; equivalent of <code>==</code> as you might have thought (and I did at first, reacting to some subconscious stylistic similarities to the likes of <a href="https://en.cppreference.com/w/cpp/numeric/math/isless" target="_blank">isless() in C++</a>). No, it is <code>==</code> &ldquo;fixed&rdquo; to deal with idiosyncrasies in <code>==</code>-comparison applied to floating point values (-0.0, NaN) and <code>missing</code>:</p>
+
+<blockquote>
+<p>Similar to ==, except for the treatment of <strong>floating point numbers</strong> and of <strong>missing values</strong>. isequal treats all floating-point NaN values as equal to each other, treats -0.0 as unequal to 0.0, and missing as equal to missing. Always returns a Bool value.</p>
+</blockquote>
+
+<p>Why is this necessary? Primarily to be able to use types with floating point/<code>missing</code> content as <code>Dict</code> keys:</p>
+
+<blockquote>
+<p>isequal is the comparison function used by hash tables (Dict). isequal(x,y) must imply that hash(x) == hash(y).</p>
+
+<p>This typically means that types for which a custom == or isequal method exists must implement a corresponding hash method (and vice versa).</p>
+</blockquote>
+
+<p>Dictionaries are ubiquituous in Julia and the language is designed so that <em>anything</em><sup class="footnote-ref" id="fnref:Normally-I-would"><a href="#fn:Normally-I-would">4</a></sup> could be used as a dictionary key. Having a hashtable comparator that might return <code>missing</code> is unacceptable. Likewise unacceptable is a value that can never be equal to itself (NaN).</p>
+
+<p>Unsurprisingly enough, <code>isequal()</code> defaults to <code>==</code> except when encountering floating point/<code>missing</code> values and in fact does not need to be overloaded unless the latter is a runtime possibility. The situation is exactly parallel to, say how <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Double.html#equals(java.lang.Object)" target="_blank">Java needs to customize <tt>Object.equals()</tt> for <tt>Double</tt>s</a> &ndash; a practical, if not overly elegant, solution.</p>
+
+<div class="alert alert-note">
+  <div>
+    I&rsquo;ve found the following delegation chain helpful to remember: the default implementation of <code>isequal()</code> calls <code>==</code> which in turn (if not overloaded) defaults to <code>===</code>.
+  </div>
+</div>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Let me put behavioral traits for the three (so far) comparison operations in Julia together for easy comparison:</p>
+
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Overridable?</th>
+<th>Synonyms</th>
+<th>Return type</th>
+<th>Fallback</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><code>isequal()</code></td>
+<td>yes</td>
+<td></td>
+<td><code>Bool</code></td>
+<td><code>==</code></td>
+</tr>
+
+<tr>
+<td><code>==</code></td>
+<td>yes</td>
+<td></td>
+<td><code>Bool</code> or <code>Missing</code></td>
+<td><code>===</code></td>
+</tr>
+
+<tr>
+<td><code>===</code></td>
+<td>no</td>
+<td><code>≡</code></td>
+<td><code>Bool</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+<p>And of course, it is always important to remember the role played by type immutability.</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:For-example-beca">For example, because pointer arithmetic is &ldquo;bad&rdquo; or because something like a garbage collector needs to know when an object becomes unreferenced and eligible for destruction. <a class="footnote-return" href="#fnref:For-example-beca"><sup>^</sup></a></li>
+<li id="fn:Assuming-of-cour">Assuming, of course, that the language in question doesn&rsquo;t expose other means of distinguishing memory locations, e.g. by figuring out their addresses. <a class="footnote-return" href="#fnref:Assuming-of-cour"><sup>^</sup></a></li>
+<li id="fn:There-is-ongoing">There is <a href="https://github.com/JuliaLang/julia/issues/4648" target="_blank">ongoing debate</a> in the community whether Julia could provide such recursive overloads automatically in certain &ldquo;safe&rdquo; cases, but there is no universal agreement on what all such cases would be. <a class="footnote-return" href="#fnref:There-is-ongoing"><sup>^</sup></a></li>
+<li id="fn:Normally-I-would">Normally I would say that hashing floating point values is asking for trouble, but Julia thinks otherwise. <a class="footnote-return" href="#fnref:Normally-I-would"><sup>^</sup></a></li>
+</ol>
+</div>
+
+          </div>
+
+          
+
+
+
+          
+          <div class="article-widget">
+            
+<div class="post-nav">
+  
+  
+  
+  <div class="post-nav-item">
+    <div class="meta-nav">Previous</div>
+    <a href="/tutorials/study_julia_with_me/multiple_dispatch/" rel="next">Automatic differentiation from scratch, in 10 lines of Julia</a>
+  </div>
+  
+  
+</div>
+
+          </div>
+          
+        </div>
+
+        <div class="body-footer">
+          <p>Last updated on Nov 7, 2019</p>
+
+          
+
+
+          
+<section id="comments">
+  
+    <div id="commento"></div>
+<script src="https://cdn.commento.io/js/commento.js" defer></script>
+
+  
+</section>
+
+
+        </div>
+
+      </article>
+
+      <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    &copy; vladium 2019  
+
+    
+  </p>
+</footer>
+
+
+    </main>
+  </div>
+</div>
+
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/cpp.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/julia-repl.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.1/anchor.min.js" integrity="sha256-pB/deHc9CGfFpJRjC43imB29Rse8tak+5eXqntO94ck=" crossorigin="anonymous"></script>
+    <script>
+      anchors.add();
+    </script>
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.16bbb3750feb7244c9bc409a5a4fe678.js"></script>
+
+    
+
+
+
+
+
+
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

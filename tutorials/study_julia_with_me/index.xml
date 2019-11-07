@@ -1315,5 +1315,270 @@ julia&amp;gt; π/4
 </description>
     </item>
     
+    <item>
+      <title>Navigating through Julia&#39;s ==, ===, and isequal().</title>
+      <link>/tutorials/study_julia_with_me/equality_vs_identity/</link>
+      <pubDate>Thu, 07 Nov 2019 00:00:00 +0000</pubDate>
+      <guid>/tutorials/study_julia_with_me/equality_vs_identity/</guid>
+      <description>
+
+&lt;p&gt;Whenever picking up a new programming language with any kinds of &amp;ldquo;objects&amp;rdquo; I typically want to know quickly how it deals with notions of &amp;ldquo;object equality&amp;rdquo;. If the language also has &amp;ldquo;dictionaries&amp;rdquo; then there could be related subtleties in using objects as &lt;em&gt;safe&lt;/em&gt; hash keys. These aspects of a language can lead to rare but hard-to-debug problems if not understood properly. It turns out that in Julia there are some slightly novel twists on this classic topic.&lt;/p&gt;
+
+&lt;h4 id=&#34;preview&#34;&gt;Preview&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Replay a puzzling object comparison example from an earlier tutorial.&lt;/li&gt;
+&lt;li&gt;Meet and understand three different &amp;ldquo;comparators&amp;rdquo; in Julia, including &lt;strong&gt;&lt;em&gt;egal&lt;/em&gt;&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;some-structs-are-more-equal-than-others&#34;&gt;Some structs are more equal than others&lt;/h2&gt;
+
+&lt;p&gt;In &lt;a href=&#34;../type_annotations#mutable&#34;&gt;an earlier Julia typing tutorial&lt;/a&gt; I had the following example, repeated here with minor edits:&lt;/p&gt;
+
+&lt;p&gt;Compare&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; struct Item a::Int; b::Int end
+
+julia&amp;gt; i1 = Item(1, 2)
+Item(1, 2)
+
+julia&amp;gt; i2 = Item(1, 2)
+Item(1, 2)
+
+julia&amp;gt; i1 === i2 # identical
+true
+
+julia&amp;gt; i1 == i2  # equal
+true
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;with&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; mutable struct MutableItem a::Int; b::Int end # mutable version of &#39;Item&#39;
+
+julia&amp;gt; mi1 = MutableItem(1, 2)
+MutableItem(1, 2)
+
+julia&amp;gt; mi2 = MutableItem(1, 2)
+MutableItem(1, 2)
+
+julia&amp;gt; mi1 === mi2 # ok, not idential...
+false
+
+julia&amp;gt; mi1 == mi2  # also not equal???
+false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The only difference between &lt;code&gt;Item&lt;/code&gt; and &lt;code&gt;MutableItem&lt;/code&gt; is the latter is a mutable variant of the former and yet that appears to change the results of both identity (&lt;code&gt;===&lt;/code&gt;) and equality (&lt;code&gt;==&lt;/code&gt;) queries. I don&amp;rsquo;t know about you, but the latter case, equality, was more surprising to me: why wouldn&amp;rsquo;t &lt;tt&gt;mi1&lt;/tt&gt; and &lt;tt&gt;mi2&lt;/tt&gt; be equal if &lt;tt&gt;i1&lt;/tt&gt; and &lt;tt&gt;i2&lt;/tt&gt; are &amp;ndash; after all, the &amp;ldquo;object content&amp;rdquo; is the same in each case?&lt;/p&gt;
+
+&lt;p&gt;To get a better idea of what&amp;rsquo;s going on I needed to look carefully at Julia&amp;rsquo;s definitions of &amp;ldquo;identity&amp;rdquo; and &amp;ldquo;equality&amp;rdquo;.&lt;/p&gt;
+
+&lt;h2 id=&#34;object-identity-or-value-equality&#34;&gt;Object identity or value equality?&lt;/h2&gt;
+
+&lt;p&gt;Many languages with &amp;ldquo;objects&amp;rdquo; allow me to take memory addresses of objects and essentially consider such addresses as permanent &amp;ldquo;identities&amp;rdquo; of the said objects. Think of &lt;code&gt;id()&lt;/code&gt; in Python or &lt;code&gt;&amp;amp;&lt;/code&gt; in C++. In languages that have reasons to make it difficult to obtain objects&amp;rsquo; addresses&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:For-example-beca&#34;&gt;&lt;a href=&#34;#fn:For-example-beca&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;, one could think of variables/struct fields as opaque &amp;ldquo;pointers&amp;rdquo; to objects. If I haven&amp;rsquo;t provided my own &amp;ldquo;oid&amp;rdquo; field for a struct, there really isn&amp;rsquo;t much else that can be done. Basically, such languages concede that &amp;ldquo;objects&amp;rdquo; must live somewhere in computer memory and don&amp;rsquo;t mind exposing addresses or other handles to their memory locations. Importantly, a replica of an object would necessarily have to live at a different address and hence would be &amp;ldquo;distinguishable&amp;rdquo; from the original. Many of us are so accustomed to this that we take it for granted.&lt;/p&gt;
+
+&lt;p&gt;Julia designers saw an opportunity to re-examine the entire concept of &amp;ldquo;equality&amp;rdquo; and they took it. Julia has (at least) two comparison operators, &lt;code&gt;===&lt;/code&gt; and &lt;code&gt;==&lt;/code&gt;. (They are &lt;a href=&#34;../multiple_dispatch/#julia-operators-are-functions-1&#34;&gt;also functions&lt;/a&gt;.)&lt;/p&gt;
+
+&lt;h2 id=&#34;is-non-overloadble-egal&#34;&gt;&lt;code&gt;===&lt;/code&gt; is (non-overloadble) &amp;ldquo;egal&amp;rdquo;&lt;/h2&gt;
+
+&lt;p&gt;Operator &lt;code&gt;===&lt;/code&gt; implements the &lt;strong&gt;&lt;em&gt;egal&lt;/em&gt;&lt;/strong&gt; notion of equality described in Henry Baker&amp;rsquo;s seminal paper &lt;a href=&#34;http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.23.9999&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;Equal Rights for Functional Objects or, The More Things Change, The More They Are the Same&amp;rdquo;&lt;/a&gt;: &lt;code&gt;x === y&lt;/code&gt; is true if &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are programmatically indistiguishable, i.e. it is impossible to write a program that demonstrates any differences between &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;. This operator is a practical implementation of &lt;em&gt;equivalence relation&lt;/em&gt; in Julia, as emphasized by Unicode &lt;code&gt;≡&lt;/code&gt; being a synonym for &lt;code&gt;===&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; i1 ≡ i2 # equivalent
+true
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The reason object&amp;rsquo;s mutability becomes enmeshed in the concept of equality is because mutation is one option for telling objects apart: a program could try to mutate the value it sees via the &lt;code&gt;x&lt;/code&gt; &amp;ldquo;handle&amp;rdquo; and look for the same change as seen via &lt;code&gt;y&lt;/code&gt;: if the change is visible then &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are really &amp;ldquo;the same thing&amp;rdquo;. Thus, &lt;em&gt;mutable&lt;/em&gt; &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; would only be considered &amp;ldquo;egal&amp;rdquo; if they are truly pointers to the same address. On the other hand, if &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are &lt;em&gt;immutable&lt;/em&gt; and happen to point to &lt;em&gt;the same data&lt;/em&gt; they are considered indistinguishable irrespective of whether they point to the same address under the covers&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:Assuming-of-cour&#34;&gt;&lt;a href=&#34;#fn:Assuming-of-cour&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    In Julia, object mutability and equality/equivalence are closely intertwined.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;===&lt;/code&gt; is a built-in operator that cannot be user-defined, therefore it must work for all possible types, built-in and custom. What should it do for composite types? As already discussed, if the objects being compared are immutable, their contents need to be compared and if the objects&amp;rsquo; type is composite there may be a need to recurse into individual fields for a &amp;ldquo;deep&amp;rdquo; content comparison. The &lt;a href=&#34;https://docs.julialang.org/en/v1/base/base/#Core.:===&#34; target=&#34;_blank&#34;&gt;rules that cover all situations correctly&lt;/a&gt; are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;for &amp;ldquo;plain data&amp;rdquo; types like &lt;code&gt;Int64&lt;/code&gt; or &lt;code&gt;Float64&lt;/code&gt;, compare them in a &lt;em&gt;bitwise&lt;/em&gt; fashion;&lt;/li&gt;
+&lt;li&gt;for composite &lt;em&gt;mutable&lt;/em&gt; &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;, compare their &lt;em&gt;memory addresses&lt;/em&gt;;&lt;/li&gt;
+&lt;li&gt;for composite &lt;em&gt;immutable&lt;/em&gt; &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;, compare their types first and if those are the same, apply &lt;code&gt;===&lt;/code&gt; &lt;em&gt;recursively&lt;/em&gt; on their component fields.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This explains the difference between &lt;code&gt;i1 === i2&lt;/code&gt; and &lt;code&gt;mi1 === mi2&lt;/code&gt; above: it is all indeed due to the type mutability and is by design. And I think this also helps explain why in Julia type mutability is escalated to the level of type definitions.&lt;/p&gt;
+
+&lt;p&gt;In addition to higher conceptual clarity, Baker&amp;rsquo;s definition of equality enables potentially higher runtime performance: indistinguishable objects can be freely copied or shared across different expressions,  different threads, etc, allowing compiler optimizations that otherwise would be inhibited by &lt;a href=&#34;https://en.wikipedia.org/wiki/Aliasing_(computing)#Conflicts_with_optimization&#34; target=&#34;_blank&#34;&gt;&amp;ldquo;aliasing&amp;rdquo;&lt;/a&gt;. To quote Baker:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;If programming languages distinguish functional/immutable objects from non-functional/mutable objects, and if programs utilize a &amp;ldquo;mostly functional&amp;rdquo; style, then such programs will be efficient even in a non-shared-memory (&amp;ldquo;message-passing&amp;rdquo;) implementation.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This seems to be well in keeping with Julia&amp;rsquo;s somewhat-functional nature combined with lofty performance goals.&lt;/p&gt;
+
+&lt;h2 id=&#34;is-overloadable-value-equality&#34;&gt;&lt;code&gt;==&lt;/code&gt; is (overloadable) &amp;ldquo;value equality&amp;rdquo;&lt;/h2&gt;
+
+&lt;p&gt;Operator &lt;code&gt;==&lt;/code&gt;, on the other hand, provides potentially user-customized notion of &amp;ldquo;intuitive equality&amp;rdquo;. For example, integer &lt;code&gt;1&lt;/code&gt; and floating point &lt;code&gt;1.0&lt;/code&gt; are perceived as numerically equal in many user contexts even though they are of different types:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; typeof(1), typeof(1.0)
+(Int64, Float64)
+
+julia&amp;gt; 1 == 1.0
+true
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In Julia this intuition extends to rational, complex, and other numbers:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; map(typeof, (1 + 0im, 1//1, BigInt(1)))
+(Complex{Int64}, Rational{Int64}, BigInt)
+
+julia&amp;gt; 1 == 1 + 0im == 1//1 == BigInt(1)
+true
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Such &amp;ldquo;across-types&amp;rdquo; equality is only allowed when it is mathematically exact, however:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; 1/3 == 1//3   # 0.3333... can never be exactly equal to &amp;quot;one third&amp;quot;
+false
+
+julia&amp;gt; 1/2 == 1//2   # 0.5 can be represented exactly in 64 bits of IEEE 754 format,
+true
+
+julia&amp;gt; 1/10 == 1//10 # ...but 0.1 can&#39;t be (since mantissa is not a sum of powers of 2)
+false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Furthermore, numerical equality brings with it the usual IEEE 754 floating point complications:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; NaN === NaN  # one NaN is like any other NaN,
+true
+
+julia&amp;gt; NaN == NaN   # ... but NaNs don&#39;t equal to anything, even themselves
+false
+
+julia&amp;gt; 0.0 === -0.0 # positive and negative 0.0 are distinguishable in IEEE 754,
+false
+
+julia&amp;gt; 0.0 == -0.0  # ...but they are &#39;==&#39;-equal
+true
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Also unlike &lt;code&gt;==&lt;/code&gt;, value equality isn&amp;rsquo;t guaranteed to always return &lt;code&gt;Bool&lt;/code&gt;. For example, if there is no &amp;ldquo;value&amp;rdquo; to compare to begin with:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; 1 == missing
+missing
+
+julia&amp;gt; missing == missing
+missing
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;(for &lt;code&gt;missing&lt;/code&gt; operands, &lt;code&gt;==&lt;/code&gt; implements &lt;a href=&#34;https://en.wikipedia.org/wiki/Three-valued_logic&#34; target=&#34;_blank&#34;&gt;three-valued logic&lt;/a&gt;, similar to &lt;a href=&#34;https://modern-sql.com/concept/three-valued-logic&#34; target=&#34;_blank&#34;&gt;NULL in SQL&lt;/a&gt;.)&lt;/p&gt;
+
+&lt;p&gt;Because &amp;ldquo;value equality&amp;rdquo; is inherently highly type-dependent, &lt;code&gt;==&lt;/code&gt; may need to be customized (overloaded). It is not something that Julia can do automatically for every possible user type. What it does do, though, is provide default behavior that is very conservative and safe:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;if not overloaded, default to &lt;code&gt;===&lt;/code&gt; (see &lt;a href=&#34;https://github.com/JuliaLang/julia/blob/master/base/operators.jl&#34; target=&#34;_blank&#34;&gt;the definition in operators.jl&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia&#34;&gt;==(x, y) = x === y
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;for base types like &lt;code&gt;Int64&lt;/code&gt;, &lt;code&gt;Float64&lt;/code&gt;, &lt;code&gt;String&lt;/code&gt;, etc provide overloads that support &amp;ldquo;intuitive&amp;rdquo; value equality as we are used to from other langauges: based on numerics, string content, etc.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;And now the rest of the &lt;code&gt;Item&lt;/code&gt;/&lt;code&gt;MutableItem&lt;/code&gt; puzzle is clear: because &lt;code&gt;==&lt;/code&gt; falls back to &lt;code&gt;===&lt;/code&gt; it will do whatever &amp;ldquo;egal&amp;rdquo; concept must do, which in turn depends on whether the type is mutable. For &lt;code&gt;Item&lt;/code&gt; it happens to be what we would expect: recurse into and compare fields &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt;. To make &lt;code&gt;MutableItem&lt;/code&gt; compare the same way I would need to add an explicit &lt;code&gt;==&lt;/code&gt; overload myself&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:There-is-ongoing&#34;&gt;&lt;a href=&#34;#fn:There-is-ongoing&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-julia-repl&#34;&gt;julia&amp;gt; import Base
+julia&amp;gt; Base.:(==)(lhs ::MutableItem, rhs ::MutableItem) = (lhs.a == rhs.a) &amp;amp;&amp;amp; (lhs.b == rhs.b)
+
+julia&amp;gt; mi1 == mi2  # now equal
+true
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;oh-no-what-is-isequal&#34;&gt;Oh, no! What is &lt;code&gt;isequal()&lt;/code&gt;?&lt;/h2&gt;
+
+&lt;p&gt;An eagle-eyed reader of &lt;a href=&#34;https://docs.julialang.org/en/v1/base/math/#Base.:==&#34; target=&#34;_blank&#34;&gt;Julia documentation for &lt;code&gt;==&lt;/code&gt;&lt;/a&gt; would have noticed mentions of something called &lt;code&gt;isequal()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Use isequal or === to always get a Bool result.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;It is not a &amp;ldquo;functionally named&amp;rdquo; equivalent of &lt;code&gt;==&lt;/code&gt; as you might have thought (and I did at first, reacting to some subconscious stylistic similarities to the likes of &lt;a href=&#34;https://en.cppreference.com/w/cpp/numeric/math/isless&#34; target=&#34;_blank&#34;&gt;isless() in C++&lt;/a&gt;). No, it is &lt;code&gt;==&lt;/code&gt; &amp;ldquo;fixed&amp;rdquo; to deal with idiosyncrasies in &lt;code&gt;==&lt;/code&gt;-comparison applied to floating point values (-0.0, NaN) and &lt;code&gt;missing&lt;/code&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Similar to ==, except for the treatment of &lt;strong&gt;floating point numbers&lt;/strong&gt; and of &lt;strong&gt;missing values&lt;/strong&gt;. isequal treats all floating-point NaN values as equal to each other, treats -0.0 as unequal to 0.0, and missing as equal to missing. Always returns a Bool value.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Why is this necessary? Primarily to be able to use types with floating point/&lt;code&gt;missing&lt;/code&gt; content as &lt;code&gt;Dict&lt;/code&gt; keys:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;isequal is the comparison function used by hash tables (Dict). isequal(x,y) must imply that hash(x) == hash(y).&lt;/p&gt;
+
+&lt;p&gt;This typically means that types for which a custom == or isequal method exists must implement a corresponding hash method (and vice versa).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Dictionaries are ubiquituous in Julia and the language is designed so that &lt;em&gt;anything&lt;/em&gt;&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:Normally-I-would&#34;&gt;&lt;a href=&#34;#fn:Normally-I-would&#34;&gt;4&lt;/a&gt;&lt;/sup&gt; could be used as a dictionary key. Having a hashtable comparator that might return &lt;code&gt;missing&lt;/code&gt; is unacceptable. Likewise unacceptable is a value that can never be equal to itself (NaN).&lt;/p&gt;
+
+&lt;p&gt;Unsurprisingly enough, &lt;code&gt;isequal()&lt;/code&gt; defaults to &lt;code&gt;==&lt;/code&gt; except when encountering floating point/&lt;code&gt;missing&lt;/code&gt; values and in fact does not need to be overloaded unless the latter is a runtime possibility. The situation is exactly parallel to, say how &lt;a href=&#34;https://docs.oracle.com/javase/7/docs/api/java/lang/Double.html#equals(java.lang.Object)&#34; target=&#34;_blank&#34;&gt;Java needs to customize &lt;tt&gt;Object.equals()&lt;/tt&gt; for &lt;tt&gt;Double&lt;/tt&gt;s&lt;/a&gt; &amp;ndash; a practical, if not overly elegant, solution.&lt;/p&gt;
+
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    I&amp;rsquo;ve found the following delegation chain helpful to remember: the default implementation of &lt;code&gt;isequal()&lt;/code&gt; calls &lt;code&gt;==&lt;/code&gt; which in turn (if not overloaded) defaults to &lt;code&gt;===&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Let me put behavioral traits for the three (so far) comparison operations in Julia together for easy comparison:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Operation&lt;/th&gt;
+&lt;th&gt;Overridable?&lt;/th&gt;
+&lt;th&gt;Synonyms&lt;/th&gt;
+&lt;th&gt;Return type&lt;/th&gt;
+&lt;th&gt;Fallback&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isequal()&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Bool&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;==&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;==&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Bool&lt;/code&gt; or &lt;code&gt;Missing&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;===&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;===&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;≡&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Bool&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;And of course, it is always important to remember the role played by type immutability.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+
+&lt;hr /&gt;
+
+&lt;ol&gt;
+&lt;li id=&#34;fn:For-example-beca&#34;&gt;For example, because pointer arithmetic is &amp;ldquo;bad&amp;rdquo; or because something like a garbage collector needs to know when an object becomes unreferenced and eligible for destruction. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:For-example-beca&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:Assuming-of-cour&#34;&gt;Assuming, of course, that the language in question doesn&amp;rsquo;t expose other means of distinguishing memory locations, e.g. by figuring out their addresses. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:Assuming-of-cour&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:There-is-ongoing&#34;&gt;There is &lt;a href=&#34;https://github.com/JuliaLang/julia/issues/4648&#34; target=&#34;_blank&#34;&gt;ongoing debate&lt;/a&gt; in the community whether Julia could provide such recursive overloads automatically in certain &amp;ldquo;safe&amp;rdquo; cases, but there is no universal agreement on what all such cases would be. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:There-is-ongoing&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:Normally-I-would&#34;&gt;Normally I would say that hashing floating point values is asking for trouble, but Julia thinks otherwise. &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:Normally-I-would&#34;&gt;&lt;sup&gt;^&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
   </channel>
 </rss>
